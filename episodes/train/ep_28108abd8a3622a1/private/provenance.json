@@ -1,0 +1,220 @@
+{
+  "clean_tables_sha256": "7854ef5c4dbf8dba01e71f9bc407052f1f96574bd3d65941d7b908a8aaa3953e",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_28108abd8a3622a1",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "doc_id": "DOC-X2-5173",
+        "due_at": "2026-03-10T17:42:00+05:00",
+        "entity_id": "CUST-X2-662",
+        "invoice_id": "BILL-X2-2129",
+        "issued_at": "2026-02-08T17:42:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 585000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 857000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 274000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "total_minor": 1716000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 10 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "customer": "Pinecrest Polymers Co",
+        "date": "2026-02-08",
+        "doc_id": "DOC-X2-5173",
+        "entity_id": "CUST-X2-662",
+        "invoice_id": "BILL-X2-2129",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 585000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 857000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 274000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 1716000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 842674404,
+        "entity_id": "CUST-X2-662",
+        "invoice_id": "BILL-X2-2129",
+        "payment_id": null,
+        "row_id": "L-X2-22933",
+        "timestamp": "2026-02-08T17:42:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 842674404,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-X2-662",
+        "invoice_id": "BILL-X2-2129",
+        "payment_id": null,
+        "row_id": "L-X2-22932",
+        "timestamp": "2026-02-08T17:42:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 521932405,
+      "before": 756423774,
+      "field": "credit_minor",
+      "key": "L-X2-22864",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 234491369,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-X2-716",
+        "invoice_id": null,
+        "payment_id": "RCPT-X2-3832",
+        "row_id": "L-X2-22863",
+        "timestamp": "2026-01-27T11:12:00+05:00"
+      },
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "after": 92391838,
+      "before": 91705174,
+      "field": "debit_minor",
+      "key": "L-X2-22858",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-01-23 used instead of 2026-01-27"
+    },
+    {
+      "after": 92391838,
+      "before": 91705174,
+      "field": "credit_minor",
+      "key": "L-X2-22857",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-01-23 used instead of 2026-01-27"
+    },
+    {
+      "after": "2026-04-04T11:10:00+05:00",
+      "before": "2026-03-30T11:10:00+05:00",
+      "field": "timestamp",
+      "key": "L-X2-23192",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-30)"
+    },
+    {
+      "after": "2026-04-04T11:10:00+05:00",
+      "before": "2026-03-30T11:10:00+05:00",
+      "field": "timestamp",
+      "key": "L-X2-23193",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-30)"
+    }
+  ],
+  "seed": 1003
+}

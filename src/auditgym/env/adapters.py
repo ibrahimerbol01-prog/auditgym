@@ -21,7 +21,17 @@ FONT_EXT = {".woff2": "font/woff2"}
 CTYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8"}
 
 
+BAD = {"ok": False, "error": {"code": "bad_arguments", "message": "invalid request"}}
+
+
 def handle_request(env: AuditEnv, req: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        return _handle(env, req)
+    except Exception:  # noqa: BLE001 - a front door answers every request with a bounded error
+        return dict(BAD)
+
+
+def _handle(env: AuditEnv, req: Dict[str, Any]) -> Dict[str, Any]:
     op = req.get("op") if isinstance(req, dict) else None
     if op == "reset":
         obs, info = env.reset(req.get("seed"), req.get("config"))
@@ -41,11 +51,15 @@ def serve_stdio(mode: str = "open") -> None:
             continue
         try:
             req = json.loads(line)
-        except json.JSONDecodeError:
+        except (ValueError, RecursionError):  # bad JSON, >4300-digit ints, absurd nesting
             resp: Dict[str, Any] = {"ok": False, "error": {"code": "bad_arguments", "message": "invalid JSON"}}
         else:
             resp = handle_request(env, req)
-        sys.stdout.write(json.dumps(resp) + "\n")
+        try:
+            out = json.dumps(resp)
+        except (TypeError, ValueError, RecursionError):
+            out = json.dumps(BAD)
+        sys.stdout.write(out + "\n")
         sys.stdout.flush()
     env.close()
 
@@ -72,10 +86,16 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
             self.wfile.write(body)
 
         def _json(self, obj: Any, code: int = 200) -> None:
-            self._send(code, json.dumps(obj).encode(), "application/json")
+            try:
+                data = json.dumps(obj).encode()
+            except (TypeError, ValueError, RecursionError):
+                data, code = json.dumps(BAD).encode(), 500
+            self._send(code, data, "application/json")
 
         def do_GET(self):  # noqa: N802
             path = self.path.split("?", 1)[0]
+            if not self._host_ok():
+                return self._json({"ok": False, "error": {"code": "forbidden", "message": "bad host"}}, 403)
             if path == "/state":
                 with lock:
                     return self._json(env.state())
@@ -93,14 +113,34 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
                         return self._send(200, fh.read(), FONT_EXT[".woff2"])
             return self._json({"ok": False, "error": {"code": "not_found", "message": "not found"}}, 404)
 
+        def _host_ok(self) -> bool:
+            port = self.server.server_address[1]
+            allowed = {f"127.0.0.1:{port}", f"localhost:{port}"}
+            if host != "127.0.0.1":
+                return True  # inside Docker (0.0.0.0) the published host name is not known in advance
+            return self.headers.get("Host", "") in allowed
+
         def do_POST(self):  # noqa: N802
             path = self.path.split("?", 1)[0]
-            n = int(self.headers.get("Content-Length") or 0)
+            if not self._host_ok():
+                return self._json({"ok": False, "error": {"code": "forbidden", "message": "bad host"}}, 403)
+            origin = self.headers.get("Origin")
+            if origin and origin.rstrip("/") not in (f"http://127.0.0.1:{self.server.server_address[1]}",
+                                                     f"http://localhost:{self.server.server_address[1]}"):
+                return self._json({"ok": False, "error": {"code": "forbidden", "message": "cross-origin request"}}, 403)
+            if not (self.headers.get("Content-Type") or "").lower().startswith("application/json"):
+                return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "Content-Type must be application/json"}}, 415)
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                n = -1
+            if n < 0:
+                return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "bad Content-Length"}}, 400)
             if n > 1_000_000:
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "body too large"}}, 413)
             try:
-                body = json.loads(self.rfile.read(n) or b"{}")
-            except json.JSONDecodeError:
+                body = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+            except (ValueError, RecursionError, UnicodeDecodeError):
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "invalid JSON"}}, 400)
             with lock:
                 if path == "/reset":

@@ -1,0 +1,44 @@
+{
+  "episode_id": "ep_f8c5bfd0e3552a6f",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-U6-2715",
+          "IN-U6-2722"
+        ]
+      ],
+      "affected_ids": [
+        "IN-U6-2715",
+        "IN-U6-2722"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 527904000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "GL-U6-28802",
+          "IN-U6-2725",
+          "PMT-U6-2608"
+        ]
+      ],
+      "affected_ids": [
+        "IN-U6-2725",
+        "PMT-U6-2608"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 629756000,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "payment_allocation"
+    }
+  ]
+}

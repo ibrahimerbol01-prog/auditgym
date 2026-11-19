@@ -202,19 +202,19 @@ def build_world(seed: int, cfg: EpisodeConfig) -> World:
     # Reserved hosts so every configured issue has an unambiguous place (plan §5.3a).
     e = dict(cfg.errors) if not cfg.clean else {k: 0 for k in cfg.errors}
     inter = [] if cfg.clean else list(cfg.interactions)
-    mid_lo, mid_hi = start + timedelta(days=4), end - timedelta(days=14)
-    if mid_hi < mid_lo:
-        mid_hi = mid_lo
+    # Host dates follow (almost) the same distribution as ordinary invoices, so the date of a
+    # record does not tell whether it hosts an error (red-team finding, plan §5.8 anti-tell).
+    lo_all, hi_all = start - timedelta(days=4), end + timedelta(days=4)
     hosts: Dict[str, List[str]] = {"duplicate_invoice": [], "payment_allocation": [], "date_or_fx": [],
                                    "period_classification": [], "A": [], "B": []}
-    for _ in range(e.get("duplicate_invoice", 0)):
-        hosts["duplicate_invoice"].append(_invoice(w, gen_rng, rng.choice(customers), cust_ccy, _rand_day(gen_rng, mid_lo, mid_hi), unique=True))
+    for _ in range(e.get("duplicate_invoice", 0)):  # the copy must still fall inside the period
+        hosts["duplicate_invoice"].append(_invoice(w, gen_rng, rng.choice(customers), cust_ccy, _rand_day(gen_rng, start, end - timedelta(days=1)), unique=True))
     for _ in range(e.get("payment_allocation", 0)):
-        inv = _invoice(w, gen_rng, rng.choice(customers), cust_ccy, _rand_day(gen_rng, mid_lo, mid_hi - timedelta(days=4)))
+        inv = _invoice(w, gen_rng, rng.choice(customers), cust_ccy, _rand_day(gen_rng, lo_all, hi_all))
         p = _payment(w, pay_rng, [inv], w.meta[inv]["date"] + timedelta(days=pay_rng.rand_int(2, 8)), kind="full")
         hosts["payment_allocation"].append(p)
-    for _ in range(e.get("date_or_fx", 0)):
-        hosts["date_or_fx"].append(_invoice(w, gen_rng, rng.choice(foreign_customers), cust_ccy, _rand_day(gen_rng, mid_lo, mid_hi)))
+    for _ in range(e.get("date_or_fx", 0)):  # the wrong day must stay inside the period
+        hosts["date_or_fx"].append(_invoice(w, gen_rng, rng.choice(foreign_customers), cust_ccy, _rand_day(gen_rng, start + timedelta(days=1), end - timedelta(days=1))))
     for i in range(e.get("period_classification", 0)):
         if i % 2 == 0:  # issued in the last days of the period
             d = end - timedelta(days=gen_rng.rand_int(0, 3))

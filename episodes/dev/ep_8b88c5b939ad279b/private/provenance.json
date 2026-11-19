@@ -1,0 +1,429 @@
+{
+  "clean_tables_sha256": "9475a4607af79b058953ee9efa99863b11069fea82d3731b546ca7e3dda6ce80",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [
+      "A",
+      "B"
+    ],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 60,
+    "period_months": 3,
+    "period_start_month": 4,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_8b88c5b939ad279b",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "ATT-Z6-9365",
+        "due_at": "2026-07-19T13:09:00+05:00",
+        "entity_id": "CUST-Z6-321",
+        "invoice_id": "BILL-Z6-2035",
+        "issued_at": "2026-06-19T13:09:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 18253000,
+            "description": "Training workshop",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 426585000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 243415000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "total_minor": 688253000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 7 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Nordvik Studio Co",
+        "date": "2026-06-19",
+        "doc_id": "ATT-Z6-9365",
+        "entity_id": "CUST-Z6-321",
+        "invoice_id": "BILL-Z6-2035",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 18253000,
+            "description": "Training workshop",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 426585000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 243415000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 688253000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 688253000,
+        "entity_id": "CUST-Z6-321",
+        "invoice_id": "BILL-Z6-2035",
+        "payment_id": null,
+        "row_id": "GL-Z6-20900",
+        "timestamp": "2026-06-19T13:09:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 688253000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z6-321",
+        "invoice_id": "BILL-Z6-2035",
+        "payment_id": null,
+        "row_id": "GL-Z6-20901",
+        "timestamp": "2026-06-19T13:09:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 231493040,
+      "before": 345512000,
+      "field": "credit_minor",
+      "key": "GL-Z6-20614",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 114018960,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z6-646",
+        "invoice_id": null,
+        "payment_id": "PMT-Z6-2607",
+        "row_id": "GL-Z6-20615",
+        "timestamp": "2026-05-04T11:56:00+05:00"
+      },
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "after": 399714939,
+      "before": 403418561,
+      "field": "debit_minor",
+      "key": "GL-Z6-20637",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-05-11 used instead of 2026-05-06"
+    },
+    {
+      "after": 399714939,
+      "before": 403418561,
+      "field": "credit_minor",
+      "key": "GL-Z6-20638",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-05-11 used instead of 2026-05-06"
+    },
+    {
+      "after": "2026-07-01T14:41:00+05:00",
+      "before": "2026-06-27T14:41:00+05:00",
+      "field": "timestamp",
+      "key": "GL-Z6-20966",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-01 instead of 2026-06-27)"
+    },
+    {
+      "after": "2026-07-01T14:41:00+05:00",
+      "before": "2026-06-27T14:41:00+05:00",
+      "field": "timestamp",
+      "key": "GL-Z6-20967",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-01 instead of 2026-06-27)"
+    },
+    {
+      "after": 150555549,
+      "before": 151057014,
+      "field": "debit_minor",
+      "key": "GL-Z6-20980",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-06-24 used instead of 2026-06-27"
+    },
+    {
+      "after": 150555549,
+      "before": 151057014,
+      "field": "credit_minor",
+      "key": "GL-Z6-20981",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-06-24 used instead of 2026-06-27"
+    },
+    {
+      "after": "2026-07-03T14:18:00+05:00",
+      "before": "2026-06-27T14:18:00+05:00",
+      "field": "timestamp",
+      "key": "GL-Z6-20980",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I5",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-03 instead of 2026-06-27)"
+    },
+    {
+      "after": "2026-07-03T14:18:00+05:00",
+      "before": "2026-06-27T14:18:00+05:00",
+      "field": "timestamp",
+      "key": "GL-Z6-20981",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I5",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-03 instead of 2026-06-27)"
+    },
+    {
+      "after": 19033184,
+      "before": 63443946,
+      "field": "credit_minor",
+      "key": "GL-Z6-20983",
+      "op": "set",
+      "rng_stream": "inject.A.alloc.§P2",
+      "table": "ledger",
+      "why": "receipt §P2 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 44410762,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z6-471",
+        "invoice_id": null,
+        "payment_id": "PMT-Z6-2634",
+        "row_id": "GL-Z6-20984",
+        "timestamp": "2026-07-03T16:10:00+05:00"
+      },
+      "rng_stream": "inject.A.alloc.§P2",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "doc_id": "ATT-Z6-8234",
+        "due_at": "2026-07-29T13:57:00+05:00",
+        "entity_id": "CUST-Z6-733",
+        "invoice_id": "BILL-Z6-2047",
+        "issued_at": "2026-06-29T13:57:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 583000,
+            "description": "Consulting hours",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 306000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 500000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "total_minor": 1389000
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "invoices",
+      "why": "duplicate of §I6 re-issued 7 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "customer": "Marlow Clinics GmbH",
+        "date": "2026-06-29",
+        "doc_id": "ATT-Z6-8234",
+        "entity_id": "CUST-Z6-733",
+        "invoice_id": "BILL-Z6-2047",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 583000,
+            "description": "Consulting hours",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 306000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 500000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 1389000
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 696832131,
+        "entity_id": "CUST-Z6-733",
+        "invoice_id": "BILL-Z6-2047",
+        "payment_id": null,
+        "row_id": "GL-Z6-20978",
+        "timestamp": "2026-06-29T13:57:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 696832131,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z6-733",
+        "invoice_id": "BILL-Z6-2047",
+        "payment_id": null,
+        "row_id": "GL-Z6-20979",
+        "timestamp": "2026-06-29T13:57:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2026-07-03T13:57:00+05:00",
+      "before": "2026-06-29T13:57:00+05:00",
+      "field": "timestamp",
+      "key": "GL-Z6-20978",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I68",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-03 instead of 2026-06-29)"
+    },
+    {
+      "after": "2026-07-03T13:57:00+05:00",
+      "before": "2026-06-29T13:57:00+05:00",
+      "field": "timestamp",
+      "key": "GL-Z6-20979",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I68",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-03 instead of 2026-06-29)"
+    }
+  ],
+  "seed": 2006
+}

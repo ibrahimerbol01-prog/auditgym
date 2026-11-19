@@ -1,0 +1,196 @@
+{
+  "episode_id": "ep_1a8a12696d981e09",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-Z2-1503",
+          "BILL-Z2-1506"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1503",
+        "BILL-Z2-1506"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 695421000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-Z2-1538",
+          "L-Z2-20319",
+          "PAY-Z2-1415"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1538",
+        "PAY-Z2-1415"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 284439000,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "payment_allocation"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-03-23|EUR|KZT",
+          "BILL-Z2-1535",
+          "L-Z2-20245"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1535"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 352743,
+      "interacts_with": [],
+      "issue_id": "I-03",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-Z2-1539",
+          "L-Z2-20317"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1539"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+invoices",
+      "expected_amount_minor": 761560000,
+      "interacts_with": [],
+      "issue_id": "I-04",
+      "type": "period_classification"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-03-29|USD|KZT",
+          "BILL-Z2-1540",
+          "L-Z2-20314"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1540"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 1376361,
+      "interacts_with": [
+        "I-06",
+        "I-07"
+      ],
+      "issue_id": "I-05",
+      "scenario": "A",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-03-29|USD|KZT",
+          "BILL-Z2-1540",
+          "L-Z2-20314"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1540"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 215230932,
+      "interacts_with": [
+        "I-05",
+        "I-07"
+      ],
+      "issue_id": "I-06",
+      "scenario": "A",
+      "type": "period_classification"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-Z2-1540",
+          "L-Z2-20333",
+          "PAY-Z2-1416"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1540",
+        "PAY-Z2-1416"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 48556098,
+      "interacts_with": [
+        "I-05",
+        "I-06"
+      ],
+      "issue_id": "I-07",
+      "scenario": "A",
+      "type": "payment_allocation"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-Z2-1536",
+          "BILL-Z2-1542"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1536",
+        "BILL-Z2-1542"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 612252000,
+      "interacts_with": [
+        "I-09"
+      ],
+      "issue_id": "I-08",
+      "scenario": "B",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-Z2-1542",
+          "L-Z2-20338"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-Z2-1542"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 612252000,
+      "interacts_with": [
+        "I-08"
+      ],
+      "issue_id": "I-09",
+      "scenario": "B",
+      "type": "period_classification"
+    }
+  ]
+}

@@ -22,8 +22,13 @@ from ..gen.build import generate
 from .scoring import StructureError, score, validate_structure
 
 
+ORGANIZER_COMMANDS = {"reference", "finalize"}
+ENV_COMMANDS = {"generate", "load", "score", "tick", "ping"}
+
+
 class EvaluatorCore:
-    def __init__(self, log_path: Optional[str] = None) -> None:
+    def __init__(self, log_path: Optional[str] = None, token: Optional[str] = None) -> None:
+        self.token = token
         self._eps: Dict[str, Dict[str, Any]] = {}
         self._results: Dict[str, List[Dict[str, Any]]] = {}
         self._n = 0
@@ -55,18 +60,30 @@ class EvaluatorCore:
         self._n += 1
         handle = f"h{self._n}"
         self._eps[handle] = {"private": ep["private"], "episode_id": ep["public"]["manifest"]["episode_id"],
-                             "mode": mode, "run_id": run_id, "scored": False}
+                             "mode": mode, "run_id": run_id, "scored": False, "ticks": 0}
         return {"ok": True, "handle": handle, "public": ep["public"]}
 
-    def score(self, handle: str, submission: Any, inspection_steps: int, truncated: bool = False) -> Dict[str, Any]:
+    def tick(self, handle: str) -> Dict[str, Any]:
+        """The environment reports every inspection step, so a score can never be cheaper than the steps taken."""
         ep = self._eps.get(handle)
         if ep is None or ep["scored"]:
             return {"ok": False, "error": {"code": "episode_over", "message": "unknown or already scored episode"}}
+        ep["ticks"] += 1
+        return {"ok": True}
+
+    def score(self, handle: str, submission: Any, inspection_steps: int, truncated: bool = False,
+              status: Optional[str] = None) -> Dict[str, Any]:
+        ep = self._eps.get(handle)
+        if ep is None or ep["scored"]:
+            return {"ok": False, "error": {"code": "episode_over", "message": "unknown or already scored episode"}}
+        if isinstance(inspection_steps, bool) or not isinstance(inspection_steps, int) or not 0 <= inspection_steps <= 100:
+            return {"ok": False, "error": {"code": "bad_arguments", "message": "inspection_steps must be in [0, 100]"}}
+        inspection_steps = max(inspection_steps, ep["ticks"])
         ep["scored"] = True
         issues = ep["private"]["truth"]["issues"]
         if truncated:
             res = score([], issues, inspection_steps)
-            res["status"] = "truncated"
+            res["status"] = status or "truncated"
         else:
             try:
                 validate_structure(submission, ep["episode_id"])
@@ -96,32 +113,41 @@ class EvaluatorCore:
 
     def dispatch(self, req: Dict[str, Any]) -> Dict[str, Any]:
         cmd = req.get("cmd")
+        if cmd in ORGANIZER_COMMANDS and (self.token is None or req.get("token") != self.token):
+            return {"ok": False, "error": {"code": "unknown_tool", "message": "organizer command not allowed on this channel"}}
         try:
             if cmd == "generate":
                 return self.generate(req.get("seed"), req.get("config"), req.get("mode", "open"), req.get("run_id", "default"))
             if cmd == "load":
                 return self.load(req["dir"], req.get("mode", "open"), req.get("run_id", "default"))
             if cmd == "score":
-                return self.score(req["handle"], req.get("submission"), int(req["inspection_steps"]), bool(req.get("truncated")))
+                return self.score(req["handle"], req.get("submission"), req["inspection_steps"], bool(req.get("truncated")),
+                                  req.get("status") if req.get("status") in ("truncated", "abandoned") else None)
+            if cmd == "tick":
+                return self.tick(req["handle"])
             if cmd == "reference":
                 return self.reference(req["handle"])
             if cmd == "finalize":
                 return self.finalize(req.get("run_id", "default"))
             if cmd == "ping":
                 return {"ok": True}
-        except (KeyError, TypeError, ValueError):
+        except Exception:  # noqa: BLE001 - any failure is a bounded error; the evaluator must never die
             return {"ok": False, "error": {"code": "bad_arguments", "message": "bad request"}}
         return {"ok": False, "error": {"code": "unknown_tool", "message": "unknown command"}}
 
 
 def _public_report(res: Dict[str, Any]) -> Dict[str, Any]:
     """What an open-mode player may see: metrics and their own findings' outcomes, never the reference."""
-    keep = ("status", "reward", "precision", "recall", "f1", "tp", "fp", "fn", "inspection_steps", "per_finding", "error")
-    return {k: res[k] for k in keep if k in res}
+    keep = ("status", "reward", "precision", "recall", "f1", "tp", "fp", "fn", "inspection_steps", "error")
+    out = {k: res[k] for k in keep if k in res}
+    # Only matched / not matched per finding: near-miss reasons would let an agent probe which
+    # (type, affected_ids) hypotheses are real, so they stay in the organizer results.
+    out["per_finding"] = [{"index": f["index"], "matched": f["matched"]} for f in res.get("per_finding", [])]
+    return out
 
 
 def serve_stdio() -> None:
-    core = EvaluatorCore(os.environ.get("AUDITGYM_EVAL_LOG"))
+    core = EvaluatorCore(os.environ.get("AUDITGYM_EVAL_LOG"), os.environ.get("AUDITGYM_ORGANIZER_TOKEN"))
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -129,23 +155,31 @@ def serve_stdio() -> None:
         try:
             req = json.loads(line)
             resp = core.dispatch(req) if isinstance(req, dict) else {"ok": False, "error": {"code": "bad_arguments", "message": "bad request"}}
-        except json.JSONDecodeError:
+        except Exception:  # noqa: BLE001 - malformed input never stops the evaluator
             resp = {"ok": False, "error": {"code": "bad_arguments", "message": "bad request"}}
         sys.stdout.write(json.dumps(resp) + "\n")
         sys.stdout.flush()
 
 
 class ServiceClient:
-    """Talks to an evaluator service subprocess (default) or an in-process core (tests)."""
+    """ORGANIZER client: talks to an evaluator service subprocess (default) or an in-process core.
+
+    It holds the organizer token, so it may call ``reference`` and ``finalize``. The environment
+    never hands this object to agents: it talks through ``EnvChannel``, which can only generate,
+    load, tick and score.
+    """
 
     def __init__(self, in_process: bool = False, log_path: Optional[str] = None) -> None:
+        import secrets
         self._lock = threading.Lock()
+        self._token = secrets.token_hex(16)
         self.core: Optional[EvaluatorCore] = None
         self.proc = None
         if in_process:
-            self.core = EvaluatorCore(log_path)
+            self.core = EvaluatorCore(log_path, self._token)
         else:
             env = dict(os.environ)
+            env["AUDITGYM_ORGANIZER_TOKEN"] = self._token
             if log_path:
                 env["AUDITGYM_EVAL_LOG"] = log_path
             src_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -154,6 +188,10 @@ class ServiceClient:
                                          stdout=subprocess.PIPE, text=True, env=env, bufsize=1)
 
     def call(self, req: Dict[str, Any]) -> Dict[str, Any]:
+        """Organizer call (carries the token)."""
+        return self._send({**req, "token": self._token})
+
+    def _send(self, req: Dict[str, Any]) -> Dict[str, Any]:
         if self.core is not None:
             return json.loads(json.dumps(self.core.dispatch(json.loads(json.dumps(req)))))
         with self._lock:
@@ -179,6 +217,19 @@ class ServiceClient:
             self.close()
         except Exception:  # noqa: BLE001
             pass
+
+
+class EnvChannel:
+    """What the environment (and anything holding it) may say to the evaluator."""
+
+    def __init__(self, client: ServiceClient) -> None:
+        self._client = client
+
+    def call(self, req: Dict[str, Any]) -> Dict[str, Any]:
+        if not isinstance(req, dict) or req.get("cmd") not in ENV_COMMANDS:
+            return {"ok": False, "error": {"code": "unknown_tool", "message": "command not allowed on the environment channel"}}
+        clean = {k: v for k, v in req.items() if k != "token"}
+        return self._client._send(clean)
 
 
 if __name__ == "__main__":

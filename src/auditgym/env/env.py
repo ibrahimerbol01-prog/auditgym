@@ -11,7 +11,7 @@ import hashlib
 import time
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from ..eval.service import ServiceClient
+from ..eval.service import EnvChannel, ServiceClient
 from .calculator import CalcError, evaluate
 
 MAX_STEPS, MAX_SECONDS, PAGE = 100, 60.0, 50
@@ -72,7 +72,8 @@ class AuditEnv:
             raise ValueError("mode must be 'open' or 'closed'")
         self.mode = mode
         self._own_service = service is None
-        self.service = service or ServiceClient()
+        self._svc = service or ServiceClient()          # organizer client: never handed to agents
+        self.service = EnvChannel(self._svc)            # restricted: generate / load / tick / score
         self.clock = clock
         self.run_id = run_id
         self.time_limit = time_limit
@@ -81,12 +82,20 @@ class AuditEnv:
 
     # ---------- lifecycle ----------
     def reset(self, seed: Any = None, config: Any = None, options: Optional[Dict[str, Any]] = None) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        if self._ep is not None and not self._done:
+            # An abandoned episode is scored as an empty submission with every step charged, so a
+            # reset can never be used to read for free and replay.
+            self.service.call({"cmd": "score", "handle": self._ep["handle"], "submission": None,
+                               "inspection_steps": min(self._ep["steps"], MAX_STEPS), "truncated": True, "status": "abandoned"})
         self._ep, self._done = None, True
-        options = options or {}
-        if "episode_dir" in options:
-            resp = self.service.call({"cmd": "load", "dir": options["episode_dir"], "mode": self.mode, "run_id": self.run_id})
-        else:
-            resp = self.service.call({"cmd": "generate", "seed": seed, "config": config, "mode": self.mode, "run_id": self.run_id})
+        options = options if isinstance(options, dict) else {}
+        try:
+            if "episode_dir" in options:
+                resp = self.service.call({"cmd": "load", "dir": options["episode_dir"], "mode": self.mode, "run_id": self.run_id})
+            else:
+                resp = self.service.call({"cmd": "generate", "seed": seed, "config": config, "mode": self.mode, "run_id": self.run_id})
+        except (TypeError, ValueError, RecursionError):
+            resp = {"ok": False, "error": {"message": ERR["bad_config"]}}
         if not resp.get("ok"):
             return {"ok": False, "error": {"code": "bad_config", "message": resp.get("error", {}).get("message", ERR["bad_config"])[:200]}}, {}
         pub = resp["public"]
@@ -110,6 +119,13 @@ class AuditEnv:
         return copy.deepcopy(obs), {}
 
     def step(self, action: Any) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
+        try:
+            return self._step(action)
+        except RecursionError:
+            # Pathologically nested input: count the step and answer with a bounded error.
+            return self._err("bad_arguments", MAX_STEPS - (self._ep["steps"] if self._ep else 0)), 0.0, False, False, {}
+
+    def _step(self, action: Any) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
         ep = self._ep
         if ep is None or self._done:
             return self._err("episode_over", 0), 0.0, ep is not None, False, {}
@@ -122,6 +138,7 @@ class AuditEnv:
             return self._submit(args.get("findings"), remaining)
         if timed_out or remaining <= 0:
             return self._truncate()
+        self.service.call({"cmd": "tick", "handle": ep["handle"]})
         if not isinstance(action, dict) or not isinstance(tool, str):
             return self._err("bad_arguments", remaining), 0.0, False, False, {}
         if tool not in TOOLS or tool == "submit":
@@ -145,7 +162,7 @@ class AuditEnv:
 
     def close(self) -> None:
         if self._own_service:
-            self.service.close()
+            self._svc.close()
 
     # ---------- internals ----------
     def _err(self, code: str, remaining: int) -> Dict[str, Any]:
@@ -161,6 +178,11 @@ class AuditEnv:
 
     def _submit(self, findings: Any, remaining: int):
         ep = self._ep
+        try:  # anything that is not plain, shallow JSON is an invalid structure (-1), never an exception
+            import json as _json
+            findings = _json.loads(_json.dumps(findings, allow_nan=False)) if _depth_ok(findings) else None
+        except (TypeError, ValueError, RecursionError):
+            findings = None
         self._done = True
         resp = self.service.call({"cmd": "score", "handle": ep["handle"], "submission": findings,
                                   "inspection_steps": ep["steps"] - 1})
@@ -227,6 +249,20 @@ class AuditEnv:
             return {"value": evaluate(expression)}
         except CalcError:
             raise _ToolError("calc_error")
+
+
+def _depth_ok(obj: Any, limit: int = 32) -> bool:
+    """Iterative nesting check (a valid submission is at most 4 levels deep)."""
+    stack = [(obj, 1)]
+    while stack:
+        cur, d = stack.pop()
+        if d > limit:
+            return False
+        if isinstance(cur, dict):
+            stack.extend((v, d + 1) for v in cur.values())
+        elif isinstance(cur, (list, tuple)):
+            stack.extend((v, d + 1) for v in cur)
+    return True
 
 
 class _ToolError(Exception):

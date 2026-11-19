@@ -1,0 +1,345 @@
+{
+  "clean_tables_sha256": "3e30c1de1162431c4d7a495dd9f2fcfc63825d1d6810224e410b9779f16fa7c9",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 2,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [
+      "B"
+    ],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_56ca49d0cef8cff4",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "doc_id": "SCAN-N5-6210",
+        "due_at": "2026-02-06T14:00:00+05:00",
+        "entity_id": "PRT-N5-857",
+        "invoice_id": "INV-N5-1050",
+        "issued_at": "2026-01-07T14:00:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 642000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 348000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 238000,
+            "description": "Maintenance contract",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "total_minor": 1228000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 4 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "customer": "Yarrow Farms SA",
+        "date": "2026-01-07",
+        "doc_id": "SCAN-N5-6210",
+        "entity_id": "PRT-N5-857",
+        "invoice_id": "INV-N5-1050",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 642000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 348000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 238000,
+            "description": "Maintenance contract",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 1228000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 596822736,
+        "entity_id": "PRT-N5-857",
+        "invoice_id": "INV-N5-1050",
+        "payment_id": null,
+        "row_id": "GL-N5-32967",
+        "timestamp": "2026-01-07T14:00:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 596822736,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "PRT-N5-857",
+        "invoice_id": "INV-N5-1050",
+        "payment_id": null,
+        "row_id": "GL-N5-32968",
+        "timestamp": "2026-01-07T14:00:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 161532940,
+      "before": 260537000,
+      "field": "credit_minor",
+      "key": "GL-N5-33138",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 99004060,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "PRT-N5-531",
+        "invoice_id": null,
+        "payment_id": "RCPT-N5-3523",
+        "row_id": "GL-N5-33137",
+        "timestamp": "2026-02-09T09:22:00+05:00"
+      },
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "after": 263875948,
+      "before": 264284464,
+      "field": "debit_minor",
+      "key": "GL-N5-33256",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-03-03 used instead of 2026-03-05"
+    },
+    {
+      "after": 263875948,
+      "before": 264284464,
+      "field": "credit_minor",
+      "key": "GL-N5-33255",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-03-03 used instead of 2026-03-05"
+    },
+    {
+      "after": "2026-04-02T15:49:00+05:00",
+      "before": "2026-03-31T15:49:00+05:00",
+      "field": "timestamp",
+      "key": "GL-N5-33409",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-02 instead of 2026-03-31)"
+    },
+    {
+      "after": "2026-04-02T15:49:00+05:00",
+      "before": "2026-03-31T15:49:00+05:00",
+      "field": "timestamp",
+      "key": "GL-N5-33410",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-02 instead of 2026-03-31)"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "SCAN-N5-4235",
+        "due_at": "2026-04-29T13:54:00+05:00",
+        "entity_id": "PRT-N5-531",
+        "invoice_id": "INV-N5-1099",
+        "issued_at": "2026-03-30T13:54:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 271661000,
+            "description": "Equipment rental",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          },
+          {
+            "amount_minor": 255561000,
+            "description": "Consulting hours",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          }
+        ],
+        "total_minor": 527222000
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "invoices",
+      "why": "duplicate of §I5 re-issued 6 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Cobalt Clinics Ltd",
+        "date": "2026-03-30",
+        "doc_id": "SCAN-N5-4235",
+        "entity_id": "PRT-N5-531",
+        "invoice_id": "INV-N5-1099",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 271661000,
+            "description": "Equipment rental",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          },
+          {
+            "amount_minor": 255561000,
+            "description": "Consulting hours",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 527222000
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 527222000,
+        "entity_id": "PRT-N5-531",
+        "invoice_id": "INV-N5-1099",
+        "payment_id": null,
+        "row_id": "GL-N5-33417",
+        "timestamp": "2026-03-30T13:54:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 527222000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "PRT-N5-531",
+        "invoice_id": "INV-N5-1099",
+        "payment_id": null,
+        "row_id": "GL-N5-33418",
+        "timestamp": "2026-03-30T13:54:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2026-04-04T13:54:00+05:00",
+      "before": "2026-03-30T13:54:00+05:00",
+      "field": "timestamp",
+      "key": "GL-N5-33417",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I61",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-30)"
+    },
+    {
+      "after": "2026-04-04T13:54:00+05:00",
+      "before": "2026-03-30T13:54:00+05:00",
+      "field": "timestamp",
+      "key": "GL-N5-33418",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I61",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-30)"
+    }
+  ],
+  "seed": 1005
+}

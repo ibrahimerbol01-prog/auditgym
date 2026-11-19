@@ -1,0 +1,148 @@
+{
+  "clean_tables_sha256": "18ac0e29acff44a05a7d8999c28c1cae501b23ac577a48348d5b72c4283cc816",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 0,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 0
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 4,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_eacc0f8d77a8ecde",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "SCAN-D2-4529",
+        "due_at": "2026-06-04T12:12:00+05:00",
+        "entity_id": "PRT-D2-290",
+        "invoice_id": "BILL-D2-3472",
+        "issued_at": "2026-05-05T12:12:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 211172000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-05-31",
+              "start": "2026-05-01"
+            }
+          }
+        ],
+        "total_minor": 211172000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 3 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Redstone Optics SA",
+        "date": "2026-05-05",
+        "doc_id": "SCAN-D2-4529",
+        "entity_id": "PRT-D2-290",
+        "invoice_id": "BILL-D2-3472",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 211172000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-05-31",
+              "start": "2026-05-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 211172000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 211172000,
+        "entity_id": "PRT-D2-290",
+        "invoice_id": "BILL-D2-3472",
+        "payment_id": null,
+        "row_id": "GL-D2-23363",
+        "timestamp": "2026-05-05T12:12:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 211172000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "PRT-D2-290",
+        "invoice_id": "BILL-D2-3472",
+        "payment_id": null,
+        "row_id": "GL-D2-23362",
+        "timestamp": "2026-05-05T12:12:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 78130113,
+      "before": 181697936,
+      "field": "credit_minor",
+      "key": "GL-D2-23530",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 103567823,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "PRT-D2-518",
+        "invoice_id": null,
+        "payment_id": "PAY-D2-1814",
+        "row_id": "GL-D2-23531",
+        "timestamp": "2026-06-06T10:33:00+05:00"
+      },
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    }
+  ],
+  "seed": 2001
+}

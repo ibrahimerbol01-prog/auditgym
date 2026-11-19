@@ -1,0 +1,68 @@
+{"doc_id": "ATT-H9-6664", "payment_id": "PMT-H9-1307", "timestamp": "2026-01-07T09:17:00+05:00", "currency": "KZT", "amount_minor": 247219000, "invoice_refs": ["BILL-H9-2512"]}
+{"doc_id": "ATT-H9-4058", "payment_id": "PMT-H9-1308", "timestamp": "2026-01-07T12:31:00+05:00", "currency": "KZT", "amount_minor": 856048000, "invoice_refs": ["BILL-H9-2510"]}
+{"doc_id": "ATT-H9-1183", "payment_id": "PMT-H9-1309", "timestamp": "2026-01-09T10:03:00+05:00", "currency": "KZT", "amount_minor": 333862000, "invoice_refs": ["BILL-H9-2511"]}
+{"doc_id": "ATT-H9-8479", "payment_id": "PMT-H9-1310", "timestamp": "2026-01-15T16:17:00+05:00", "currency": "KZT", "amount_minor": 548878000, "invoice_refs": ["BILL-H9-2508"]}
+{"doc_id": "ATT-H9-2953", "payment_id": "PMT-H9-1311", "timestamp": "2026-01-16T14:51:00+05:00", "currency": "KZT", "amount_minor": 164390000, "invoice_refs": ["BILL-H9-2514"]}
+{"doc_id": "ATT-H9-1727", "payment_id": "PMT-H9-1312", "timestamp": "2026-01-18T15:39:00+05:00", "currency": "EUR", "amount_minor": 1538000, "invoice_refs": ["BILL-H9-2515"]}
+{"doc_id": "ATT-H9-7186", "payment_id": "PMT-H9-1313", "timestamp": "2026-01-19T16:15:00+05:00", "currency": "KZT", "amount_minor": 919171000, "invoice_refs": ["BILL-H9-2517"]}
+{"doc_id": "ATT-H9-4249", "payment_id": "PMT-H9-1314", "timestamp": "2026-01-23T14:48:00+05:00", "currency": "KZT", "amount_minor": 413561000, "invoice_refs": ["BILL-H9-2513"]}
+{"doc_id": "ATT-H9-2767", "payment_id": "PMT-H9-1315", "timestamp": "2026-01-23T16:49:00+05:00", "currency": "KZT", "amount_minor": 26390000, "invoice_refs": ["BILL-H9-2519"]}
+{"doc_id": "ATT-H9-1346", "payment_id": "PMT-H9-1316", "timestamp": "2026-01-26T09:35:00+05:00", "currency": "KZT", "amount_minor": 429951000, "invoice_refs": ["BILL-H9-2523"]}
+{"doc_id": "ATT-H9-6092", "payment_id": "PMT-H9-1317", "timestamp": "2026-01-29T17:41:00+05:00", "currency": "KZT", "amount_minor": 176634000, "invoice_refs": ["BILL-H9-2529"]}
+{"doc_id": "ATT-H9-8411", "payment_id": "PMT-H9-1318", "timestamp": "2026-02-02T11:30:00+05:00", "currency": "KZT", "amount_minor": 379230210, "invoice_refs": ["BILL-H9-2525"]}
+{"doc_id": "ATT-H9-8305", "payment_id": "PMT-H9-1319", "timestamp": "2026-02-02T13:10:00+05:00", "currency": "EUR", "amount_minor": 410190, "invoice_refs": ["BILL-H9-2518"]}
+{"doc_id": "ATT-H9-7219", "payment_id": "PMT-H9-1320", "timestamp": "2026-02-04T10:03:00+05:00", "currency": "KZT", "amount_minor": 170378790, "invoice_refs": ["BILL-H9-2525"]}
+{"doc_id": "ATT-H9-4292", "payment_id": "PMT-H9-1321", "timestamp": "2026-02-05T13:36:00+05:00", "currency": "KZT", "amount_minor": 81415000, "invoice_refs": ["BILL-H9-2526"]}
+{"doc_id": "ATT-H9-7752", "payment_id": "PMT-H9-1322", "timestamp": "2026-02-07T12:47:00+05:00", "currency": "EUR", "amount_minor": 832810, "invoice_refs": ["BILL-H9-2518"]}
+{"doc_id": "ATT-H9-5504", "payment_id": "PMT-H9-1323", "timestamp": "2026-02-09T10:37:00+05:00", "currency": "KZT", "amount_minor": 467073000, "invoice_refs": ["BILL-H9-2528"]}
+{"doc_id": "ATT-H9-3723", "payment_id": "PMT-H9-1324", "timestamp": "2026-02-09T12:31:00+05:00", "currency": "KZT", "amount_minor": 203871360, "invoice_refs": ["BILL-H9-2521"]}
+{"doc_id": "ATT-H9-4628", "payment_id": "PMT-H9-1325", "timestamp": "2026-02-09T12:36:00+05:00", "currency": "KZT", "amount_minor": 381220000, "invoice_refs": ["BILL-H9-2535"]}
+{"doc_id": "ATT-H9-6711", "payment_id": "PMT-H9-1326", "timestamp": "2026-02-10T10:59:00+05:00", "currency": "EUR", "amount_minor": 282000, "invoice_refs": ["BILL-H9-2540"]}
+{"doc_id": "ATT-H9-4433", "payment_id": "PMT-H9-1327", "timestamp": "2026-02-12T17:13:00+05:00", "currency": "KZT", "amount_minor": 333906800, "invoice_refs": ["BILL-H9-2522"]}
+{"doc_id": "ATT-H9-4382", "payment_id": "PMT-H9-1328", "timestamp": "2026-02-13T10:31:00+05:00", "currency": "EUR", "amount_minor": 2267000, "invoice_refs": ["BILL-H9-2524", "BILL-H9-2532"]}
+{"doc_id": "ATT-H9-3085", "payment_id": "PMT-H9-1329", "timestamp": "2026-02-13T13:54:00+05:00", "currency": "KZT", "amount_minor": 220860640, "invoice_refs": ["BILL-H9-2521"]}
+{"doc_id": "ATT-H9-8961", "payment_id": "PMT-H9-1330", "timestamp": "2026-02-15T11:10:00+05:00", "currency": "KZT", "amount_minor": 333610000, "invoice_refs": ["BILL-H9-2539"]}
+{"doc_id": "ATT-H9-8155", "payment_id": "PMT-H9-1331", "timestamp": "2026-02-16T11:01:00+05:00", "currency": "KZT", "amount_minor": 839220000, "invoice_refs": ["BILL-H9-2543"]}
+{"doc_id": "ATT-H9-3984", "payment_id": "PMT-H9-1332", "timestamp": "2026-02-16T11:24:00+05:00", "currency": "KZT", "amount_minor": 765707000, "invoice_refs": ["BILL-H9-2538"]}
+{"doc_id": "ATT-H9-4834", "payment_id": "PMT-H9-1333", "timestamp": "2026-02-16T11:52:00+05:00", "currency": "KZT", "amount_minor": 76191040, "invoice_refs": ["BILL-H9-2542"]}
+{"doc_id": "ATT-H9-2231", "payment_id": "PMT-H9-1334", "timestamp": "2026-02-17T16:48:00+05:00", "currency": "KZT", "amount_minor": 387610000, "invoice_refs": ["BILL-H9-2530"]}
+{"doc_id": "ATT-H9-6068", "payment_id": "PMT-H9-1335", "timestamp": "2026-02-19T14:58:00+05:00", "currency": "KZT", "amount_minor": 161905960, "invoice_refs": ["BILL-H9-2542"]}
+{"doc_id": "ATT-H9-9096", "payment_id": "PMT-H9-1336", "timestamp": "2026-02-21T12:17:00+05:00", "currency": "KZT", "amount_minor": 858829000, "invoice_refs": ["BILL-H9-2552"]}
+{"doc_id": "ATT-H9-7528", "payment_id": "PMT-H9-1337", "timestamp": "2026-02-22T11:41:00+05:00", "currency": "USD", "amount_minor": 314000, "invoice_refs": ["BILL-H9-2549"]}
+{"doc_id": "ATT-H9-5431", "payment_id": "PMT-H9-1338", "timestamp": "2026-02-22T11:49:00+05:00", "currency": "KZT", "amount_minor": 134654520, "invoice_refs": ["BILL-H9-2555"]}
+{"doc_id": "ATT-H9-3171", "payment_id": "PMT-H9-1339", "timestamp": "2026-02-25T13:06:00+05:00", "currency": "KZT", "amount_minor": 476731000, "invoice_refs": ["BILL-H9-2541"]}
+{"doc_id": "ATT-H9-4435", "payment_id": "PMT-H9-1340", "timestamp": "2026-02-25T14:21:00+05:00", "currency": "EUR", "amount_minor": 1428000, "invoice_refs": ["BILL-H9-2558"]}
+{"doc_id": "ATT-H9-6389", "payment_id": "PMT-H9-1341", "timestamp": "2026-02-28T15:04:00+05:00", "currency": "KZT", "amount_minor": 210613480, "invoice_refs": ["BILL-H9-2555"]}
+{"doc_id": "ATT-H9-5780", "payment_id": "PMT-H9-1342", "timestamp": "2026-03-01T17:00:00+05:00", "currency": "EUR", "amount_minor": 982610, "invoice_refs": ["BILL-H9-2551"]}
+{"doc_id": "ATT-H9-1887", "payment_id": "PMT-H9-1343", "timestamp": "2026-03-01T17:28:00+05:00", "currency": "KZT", "amount_minor": 188000000, "invoice_refs": null}
+{"doc_id": "ATT-H9-2143", "payment_id": "PMT-H9-1344", "timestamp": "2026-03-02T17:59:00+05:00", "currency": "KZT", "amount_minor": 593805000, "invoice_refs": ["BILL-H9-2560"]}
+{"doc_id": "ATT-H9-4052", "payment_id": "PMT-H9-1345", "timestamp": "2026-03-04T12:11:00+05:00", "currency": "KZT", "amount_minor": 407854000, "invoice_refs": ["BILL-H9-2564"]}
+{"doc_id": "ATT-H9-4148", "payment_id": "PMT-H9-1346", "timestamp": "2026-03-05T09:52:00+05:00", "currency": "KZT", "amount_minor": 117024000, "invoice_refs": ["BILL-H9-2554"]}
+{"doc_id": "ATT-H9-4736", "payment_id": "PMT-H9-1347", "timestamp": "2026-03-05T16:18:00+05:00", "currency": "KZT", "amount_minor": 167707000, "invoice_refs": ["BILL-H9-2545"]}
+{"doc_id": "ATT-H9-6953", "payment_id": "PMT-H9-1348", "timestamp": "2026-03-07T11:13:00+05:00", "currency": "KZT", "amount_minor": 919366000, "invoice_refs": ["BILL-H9-2550", "BILL-H9-2565"]}
+{"doc_id": "ATT-H9-9532", "payment_id": "PMT-H9-1349", "timestamp": "2026-03-07T11:15:00+05:00", "currency": "USD", "amount_minor": 894000, "invoice_refs": ["BILL-H9-2548"]}
+{"doc_id": "ATT-H9-8959", "payment_id": "PMT-H9-1350", "timestamp": "2026-03-08T17:42:00+05:00", "currency": "EUR", "amount_minor": 1913000, "invoice_refs": ["BILL-H9-2563", "BILL-H9-2544"]}
+{"doc_id": "ATT-H9-5830", "payment_id": "PMT-H9-1351", "timestamp": "2026-03-10T17:41:00+05:00", "currency": "KZT", "amount_minor": 426244000, "invoice_refs": ["BILL-H9-2557"]}
+{"doc_id": "ATT-H9-7654", "payment_id": "PMT-H9-1352", "timestamp": "2026-03-12T13:55:00+05:00", "currency": "USD", "amount_minor": 1283000, "invoice_refs": ["BILL-H9-2568"]}
+{"doc_id": "ATT-H9-3773", "payment_id": "PMT-H9-1353", "timestamp": "2026-03-13T11:29:00+05:00", "currency": "EUR", "amount_minor": 1512000, "invoice_refs": ["BILL-H9-2561"]}
+{"doc_id": "ATT-H9-8089", "payment_id": "PMT-H9-1354", "timestamp": "2026-03-13T15:18:00+05:00", "currency": "USD", "amount_minor": 1243000, "invoice_refs": ["BILL-H9-2553", "BILL-H9-2556"]}
+{"doc_id": "ATT-H9-5208", "payment_id": "PMT-H9-1355", "timestamp": "2026-03-14T13:41:00+05:00", "currency": "KZT", "amount_minor": 254109480, "invoice_refs": ["BILL-H9-2566"]}
+{"doc_id": "ATT-H9-1552", "payment_id": "PMT-H9-1356", "timestamp": "2026-03-15T11:00:00+05:00", "currency": "KZT", "amount_minor": 200979950, "invoice_refs": ["BILL-H9-2567"]}
+{"doc_id": "ATT-H9-8962", "payment_id": "PMT-H9-1357", "timestamp": "2026-03-16T13:48:00+05:00", "currency": "KZT", "amount_minor": 92686880, "invoice_refs": ["BILL-H9-2569"]}
+{"doc_id": "ATT-H9-6071", "payment_id": "PMT-H9-1358", "timestamp": "2026-03-17T16:32:00+05:00", "currency": "KZT", "amount_minor": 155744520, "invoice_refs": ["BILL-H9-2566"]}
+{"doc_id": "ATT-H9-5187", "payment_id": "PMT-H9-1359", "timestamp": "2026-03-19T12:37:00+05:00", "currency": "KZT", "amount_minor": 85557120, "invoice_refs": ["BILL-H9-2569"]}
+{"doc_id": "ATT-H9-7878", "payment_id": "PMT-H9-1360", "timestamp": "2026-03-19T13:39:00+05:00", "currency": "KZT", "amount_minor": 642488000, "invoice_refs": ["BILL-H9-2571"]}
+{"doc_id": "ATT-H9-8412", "payment_id": "PMT-H9-1361", "timestamp": "2026-03-21T09:27:00+05:00", "currency": "KZT", "amount_minor": 609609000, "invoice_refs": ["BILL-H9-2578"]}
+{"doc_id": "ATT-H9-7745", "payment_id": "PMT-H9-1362", "timestamp": "2026-03-21T10:07:00+05:00", "currency": "KZT", "amount_minor": 289215050, "invoice_refs": ["BILL-H9-2567"]}
+{"doc_id": "ATT-H9-3635", "payment_id": "PMT-H9-1363", "timestamp": "2026-03-21T15:05:00+05:00", "currency": "KZT", "amount_minor": 350390000, "invoice_refs": ["BILL-H9-2559"]}
+{"doc_id": "ATT-H9-3998", "payment_id": "PMT-H9-1364", "timestamp": "2026-03-22T09:47:00+05:00", "currency": "KZT", "amount_minor": 428292000, "invoice_refs": ["BILL-H9-2581"]}
+{"doc_id": "ATT-H9-9039", "payment_id": "PMT-H9-1365", "timestamp": "2026-03-22T17:54:00+05:00", "currency": "USD", "amount_minor": 626040, "invoice_refs": ["BILL-H9-2562"]}
+{"doc_id": "ATT-H9-4881", "payment_id": "PMT-H9-1366", "timestamp": "2026-03-24T10:22:00+05:00", "currency": "USD", "amount_minor": 1065960, "invoice_refs": ["BILL-H9-2562"]}
+{"doc_id": "ATT-H9-3876", "payment_id": "PMT-H9-1367", "timestamp": "2026-03-25T09:58:00+05:00", "currency": "KZT", "amount_minor": 147561000, "invoice_refs": ["BILL-H9-2574"]}
+{"doc_id": "ATT-H9-5163", "payment_id": "PMT-H9-1368", "timestamp": "2026-03-28T12:52:00+05:00", "currency": "KZT", "amount_minor": 761512000, "invoice_refs": ["BILL-H9-2582"]}
+{"doc_id": "ATT-H9-1379", "payment_id": "PMT-H9-1369", "timestamp": "2026-04-01T15:53:00+05:00", "currency": "KZT", "amount_minor": 895658000, "invoice_refs": ["BILL-H9-2580"]}
+{"doc_id": "ATT-H9-8584", "payment_id": "PMT-H9-1370", "timestamp": "2026-04-02T16:16:00+05:00", "currency": "USD", "amount_minor": 290000, "invoice_refs": ["BILL-H9-2577"]}
+{"doc_id": "ATT-H9-1897", "payment_id": "PMT-H9-1371", "timestamp": "2026-04-02T17:03:00+05:00", "currency": "USD", "amount_minor": 2079000, "invoice_refs": ["BILL-H9-2576", "BILL-H9-2587"]}
+{"doc_id": "ATT-H9-8254", "payment_id": "PMT-H9-1372", "timestamp": "2026-04-04T15:47:00+05:00", "currency": "KZT", "amount_minor": 733757000, "invoice_refs": ["BILL-H9-2592"]}
+{"doc_id": "ATT-H9-8081", "payment_id": "PMT-H9-1373", "timestamp": "2026-04-05T14:56:00+05:00", "currency": "KZT", "amount_minor": 617756000, "invoice_refs": ["BILL-H9-2588"]}
+{"doc_id": "ATT-H9-7588", "payment_id": "PMT-H9-1374", "timestamp": "2026-04-06T14:31:00+05:00", "currency": "KZT", "amount_minor": 845609000, "invoice_refs": ["BILL-H9-2586", "BILL-H9-2570"]}

@@ -1,0 +1,210 @@
+{
+  "clean_tables_sha256": "9d1b24f093ad4b8288915d77bd0611a511e41ab276532d1251a3381f2d03a5fc",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 0,
+      "period_classification": 0
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [
+      "A"
+    ],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 4,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_4caf173eac149fbf",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "doc_id": "DOC-D7-7511",
+        "due_at": "2026-05-22T16:47:00+05:00",
+        "entity_id": "CUST-D7-283",
+        "invoice_id": "INV-D7-1419",
+        "issued_at": "2026-04-22T16:47:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 263000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "total_minor": 263000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 10 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "customer": "Copperleaf Ceramics AS",
+        "date": "2026-04-22",
+        "doc_id": "DOC-D7-7511",
+        "entity_id": "CUST-D7-283",
+        "invoice_id": "INV-D7-1419",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 263000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 263000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 125487294,
+        "entity_id": "CUST-D7-283",
+        "invoice_id": "INV-D7-1419",
+        "payment_id": null,
+        "row_id": "JE-D7-32923",
+        "timestamp": "2026-04-22T16:47:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 125487294,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-D7-283",
+        "invoice_id": "INV-D7-1419",
+        "payment_id": null,
+        "row_id": "JE-D7-32924",
+        "timestamp": "2026-04-22T16:47:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 347746246,
+      "before": 345792514,
+      "field": "debit_minor",
+      "key": "JE-D7-33237",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "rate of 2026-06-27 used instead of 2026-06-29"
+    },
+    {
+      "after": 347746246,
+      "before": 345792514,
+      "field": "credit_minor",
+      "key": "JE-D7-33238",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "rate of 2026-06-27 used instead of 2026-06-29"
+    },
+    {
+      "after": 498359467,
+      "before": 497615543,
+      "field": "debit_minor",
+      "key": "JE-D7-33257",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-06-28 used instead of 2026-06-29"
+    },
+    {
+      "after": 498359467,
+      "before": 497615543,
+      "field": "credit_minor",
+      "key": "JE-D7-33256",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-06-28 used instead of 2026-06-29"
+    },
+    {
+      "after": "2026-07-01T16:37:00+05:00",
+      "before": "2026-06-29T16:37:00+05:00",
+      "field": "timestamp",
+      "key": "JE-D7-33257",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I3",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-01 instead of 2026-06-29)"
+    },
+    {
+      "after": "2026-07-01T16:37:00+05:00",
+      "before": "2026-06-29T16:37:00+05:00",
+      "field": "timestamp",
+      "key": "JE-D7-33256",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I3",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-01 instead of 2026-06-29)"
+    },
+    {
+      "after": 205515219,
+      "before": 293593170,
+      "field": "credit_minor",
+      "key": "JE-D7-33279",
+      "op": "set",
+      "rng_stream": "inject.A.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 88077951,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-D7-283",
+        "invoice_id": null,
+        "payment_id": "RCPT-D7-3389",
+        "row_id": "JE-D7-33282",
+        "timestamp": "2026-07-03T13:47:00+05:00"
+      },
+      "rng_stream": "inject.A.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    }
+  ],
+  "seed": 2004
+}

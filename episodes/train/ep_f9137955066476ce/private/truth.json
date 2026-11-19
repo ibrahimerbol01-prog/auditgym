@@ -1,0 +1,159 @@
+{
+  "episode_id": "ep_f9137955066476ce",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-H9-2561",
+          "BILL-H9-2572"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2561",
+        "BILL-H9-2572"
+      ],
+      "conversions": 0,
+      "currency": "EUR",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 1512000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-H9-2511",
+          "BILL-H9-2516"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2511",
+        "BILL-H9-2516"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 333862000,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-H9-2512",
+          "L-H9-28484",
+          "PMT-H9-1307"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2512",
+        "PMT-H9-1307"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 86526650,
+      "interacts_with": [],
+      "issue_id": "I-03",
+      "type": "payment_allocation"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-H9-2560",
+          "L-H9-29220",
+          "PMT-H9-1344"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2560",
+        "PMT-H9-1344"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 593805000,
+      "interacts_with": [],
+      "issue_id": "I-04",
+      "type": "payment_allocation"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-01-09|EUR|KZT",
+          "BILL-H9-2515",
+          "L-H9-28510"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2515"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 1139658,
+      "interacts_with": [],
+      "issue_id": "I-05",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-02-11|USD|KZT",
+          "BILL-H9-2549",
+          "L-H9-28888"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2549"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 2001122,
+      "interacts_with": [],
+      "issue_id": "I-06",
+      "type": "date_or_fx",
+      "variant": "b"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-H9-2589",
+          "L-H9-29662"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2589"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+invoices",
+      "expected_amount_minor": 609902000,
+      "interacts_with": [],
+      "issue_id": "I-07",
+      "type": "period_classification"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-H9-2593",
+          "L-H9-29583"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-H9-2593"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+invoices",
+      "expected_amount_minor": 497610000,
+      "interacts_with": [],
+      "issue_id": "I-08",
+      "type": "period_classification"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 AuditGym is a reproducible RL environment for financial-audit agents: synthetic company books with hidden, recorded errors; five read-only investigation tools; a matcher and reward that pay for proof, not for persuasion. It is an environment and an evaluator — it trains nothing.
 
-Numbers below come from `report.json` produced by `python -m auditgym.verify` (ENV 1.0.0, Python 3.11, one run ≈ 16 s on 2 cores).
+Numbers below come from `report.json` produced by `python -m auditgym.verify` (ENV 1.0.0, Python 3.11, one run ≈ 15 s).
 
 ## 1. Architecture
 
@@ -67,8 +67,8 @@ Baseline policies, mean return on 9 hidden-style episodes (3 clean, 3 mixed, 3 i
 | Policy | Clean | Mixed | Interacting | Mean steps |
 |---|---|---|---|---|
 | Oracle (evaluator-only) | +1.000 | +1.000 | +1.000 | 1 |
-| Reconciliation (public tools only) | +0.967 | +0.961 | +0.966 | 18.6 |
-| Random (seed 7) | −1.000 | −1.000 | −1.000 | 11.7 |
+| Reconciliation (public tools only) | +0.967 | +0.962 | +0.966 | 18.4 |
+| Random (seed 7) | −1.000 | −1.000 | −1.000 | 10.6 |
 | Flag-everything | −1.000 | −1.000 | −1.000 | 2 |
 
 ## 6. Failure analysis
@@ -91,7 +91,24 @@ So the distractors do their job: recurring invoices and advances punish the two 
 
 `eval/verify_independent.py` was written by a separate agent from the specification only, without access to the generator or the rules engine (a test asserts it imports neither). It re-proves every declared issue from the public records and checks that one acceptable evidence set is sufficient *on its own*. On its first run it found a real bug — a foreign-currency period error whose evidence set could not prove the amount — which we fixed by adding the policy-date FX row to such sets. It now runs inside `verify` on all 20 hidden-style episodes.
 
-## 8. Limitations (honest)
+## 8. Adversarial testing (red team)
+
+A second separate agent attacked the environment white-box from the agent's side: path traversal through every id, cursor and URL; existence probing; cursor forging; malformed and oversized input on stdio, HTTP and the calculator (200k random calculator strings); about 2,600 extreme configs; scoring tricks; resubmission; closed-mode reward leaks; cross-episode state. It found eight real problems, each now a test in `tests/attacks/` and fixed:
+
+| Finding | Severity | Fix |
+|---|---|---|
+| One malformed stdio line (5,000-digit integer, 50,000-deep JSON) killed the stdio front door | blocker | bounded error for any unparsable line; front doors never raise |
+| Malformed HTTP bodies and Content-Length dropped the connection | low | 400 JSON errors |
+| A non-JSON submission (set, bytes, 980-deep nesting) ended the episode without a score | medium | sanitized: invalid structure, reward −1, logged |
+| `reset` mid-episode abandoned it unscored (read for free, then replay) | medium | an abandoned episode is scored as empty with all its steps charged |
+| Open-mode near-miss reasons let an agent probe which (type, ids) are real | low-medium | only matched / not matched is shown; reasons stay with the organizer |
+| Organizer commands (`reference`, `finalize`) reachable through the env's evaluator pipe; negative step counts accepted | low-medium | organizer token held only by the organizer client; the env gets a restricted channel; steps validated and counted by the evaluator |
+| A bad `episode_dir` killed the evaluator process | low | bounded error |
+| Cross-origin / foreign-Host POSTs accepted by the localhost server | low | Host, Origin and Content-Type checks |
+
+It also trained classifiers on public features to predict which invoices host errors: formatting features (ids, minutes, round amounts, offsets, line counts) are at chance (AUC 0.49–0.51). It found one real tell — host invoices were drawn from a narrower date window — which we removed; the remaining signal comes from the errors' own nature (cut-off errors sit near the period end, FX errors need a foreign invoice). An in-process Python agent shares memory with the environment and is trusted by construction; untrusted agents should use the stdio or HTTP front doors.
+
+## 9. Limitations (honest)
 
 - **Synthetic only.** All companies, people, accounts and money are fictional; the FX series are random walks. Nothing here is evidence of fitness for real audit work, and the reward does not prove it.
 - **Simplified FX policy.** Spot rate of the policy date in the company time zone, one rounding at the end; inspired by IAS 21 from secondary sources, not a faithful implementation.
@@ -102,8 +119,9 @@ So the distractors do their job: recurring invoices and advances punish the two 
 - **Open generator.** The code is public and deterministic. `episode_id` does not reveal the seed, but anyone with unlimited compute could search seeds by regenerating and comparing records; hidden seeds should be large (64-bit).
 - **No model training.** We train nothing and claim no model improvement.
 - **Docker base image.** The Dockerfile pins `python:3.11-slim-bookworm`; pin it by digest on the build machine before release (instructions in the Dockerfile).
+- **The 60 s limit is real.** The brief's 60 s per episode applies to the front doors too; an LLM agent that thinks for seconds per step will be truncated. The UI pauses the clock for human practice only.
 - **Our checks are stand-ins.** The organizers' 20/20/20 check definitions were not available to us when this was written; our lists are built from the brief and may differ in detail.
 
-## 9. Tools and resources used
+## 10. Tools and resources used
 
 Python 3.11 standard library only at runtime. Fonts: Dela Gothic One, Onest, JetBrains Mono (SIL Open Font License, bundled with their licenses). Built with the help of AI coding assistants (Anthropic Claude; Google Antigravity/Gemini), with every result checked by the tests above.

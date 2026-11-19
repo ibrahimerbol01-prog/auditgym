@@ -1,0 +1,83 @@
+{
+  "episode_id": "ep_662aa3717384af22",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-B8-1412",
+          "IN-B8-1423"
+        ]
+      ],
+      "affected_ids": [
+        "IN-B8-1412",
+        "IN-B8-1423"
+      ],
+      "conversions": 0,
+      "currency": "GBP",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 228000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-B8-1430",
+          "L-B8-20357",
+          "RCPT-B8-3025"
+        ]
+      ],
+      "affected_ids": [
+        "IN-B8-1430",
+        "RCPT-B8-3025"
+      ],
+      "conversions": 1,
+      "currency": "EUR",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 81495,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "payment_allocation"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-09-03|USD|EUR",
+          "IN-B8-1402",
+          "L-B8-20046"
+        ]
+      ],
+      "affected_ids": [
+        "IN-B8-1402"
+      ],
+      "conversions": 1,
+      "currency": "EUR",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 5414,
+      "interacts_with": [],
+      "issue_id": "I-03",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-09-30|USD|EUR",
+          "IN-B8-1432",
+          "L-B8-20394"
+        ]
+      ],
+      "affected_ids": [
+        "IN-B8-1432"
+      ],
+      "conversions": 1,
+      "currency": "EUR",
+      "detectability_tier": "ledger+invoices",
+      "expected_amount_minor": 918460,
+      "interacts_with": [],
+      "issue_id": "I-04",
+      "type": "period_classification"
+    }
+  ]
+}

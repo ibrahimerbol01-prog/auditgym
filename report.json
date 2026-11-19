@@ -14,140 +14,140 @@
         "name": "reset returns (observation, info) with task, manifest, policy, budget and finding rules",
         "passed": true,
         "error": null,
-        "seconds": 0.115
+        "seconds": 0.078
       },
       {
         "id": "C2",
         "name": "step returns (observation, reward, terminated, truncated, info)",
         "passed": true,
         "error": null,
-        "seconds": 0.058
+        "seconds": 0.039
       },
       {
         "id": "C3",
         "name": "all observations and actions are JSON-serializable",
         "passed": true,
         "error": null,
-        "seconds": 0.054
+        "seconds": 0.051
       },
       {
         "id": "C4",
         "name": "same seed, config, version and actions reproduce observations and rewards (also across processes)",
         "passed": true,
         "error": null,
-        "seconds": 0.323
+        "seconds": 0.419
       },
       {
         "id": "C5",
         "name": "reset isolates state, including interleaved environments",
         "passed": true,
         "error": null,
-        "seconds": 0.113
+        "seconds": 0.124
       },
       {
         "id": "C6",
         "name": "observations are copies, never internal objects",
         "passed": true,
         "error": null,
-        "seconds": 0.034
+        "seconds": 0.055
       },
       {
         "id": "C7",
         "name": "list_records never returns more than 50 rows",
         "passed": true,
         "error": null,
-        "seconds": 0.04
+        "seconds": 0.056
       },
       {
         "id": "C8",
         "name": "cursors are stable; tampered or cross-table cursors give a bounded error",
         "passed": true,
         "error": null,
-        "seconds": 0.036
+        "seconds": 0.038
       },
       {
         "id": "C9",
         "name": "unknown id gives a bounded error and consumes a step",
         "passed": true,
         "error": null,
-        "seconds": 0.036
+        "seconds": 0.035
       },
       {
         "id": "C10",
         "name": "unknown action or table gives a bounded error and consumes a step",
         "passed": true,
         "error": null,
-        "seconds": 0.033
+        "seconds": 0.036
       },
       {
         "id": "C11",
         "name": "calculator does exact decimal arithmetic",
         "passed": true,
         "error": null,
-        "seconds": 0.068
+        "seconds": 0.037
       },
       {
         "id": "C12",
         "name": "calculator rejects code, names, calls, files, exponents and oversized input",
         "passed": true,
         "error": null,
-        "seconds": 0.052
+        "seconds": 0.037
       },
       {
         "id": "C13",
         "name": "a 100th step that is not submit truncates with an empty observation",
         "passed": true,
         "error": null,
-        "seconds": 0.039
+        "seconds": 0.046
       },
       {
         "id": "C14",
         "name": "the 60 s wall-clock limit truncates (injectable clock)",
         "passed": true,
         "error": null,
-        "seconds": 0.036
+        "seconds": 0.038
       },
       {
         "id": "C15",
         "name": "submit ends the episode with terminated=true",
         "passed": true,
         "error": null,
-        "seconds": 0.06
+        "seconds": 0.056
       },
       {
         "id": "C16",
         "name": "invalid structure gives reward -1 and an evaluator-side log entry",
         "passed": true,
         "error": null,
-        "seconds": 0.037
+        "seconds": 0.05
       },
       {
         "id": "C17",
         "name": "limits 30 findings / 10 evidence ids / 1000 chars are enforced",
         "passed": true,
         "error": null,
-        "seconds": 0.199
+        "seconds": 0.164
       },
       {
         "id": "C18",
         "name": "step or submit after the end gives a bounded error and changes nothing",
         "passed": true,
         "error": null,
-        "seconds": 0.033
+        "seconds": 0.038
       },
       {
         "id": "C19",
         "name": "no hidden truth in observations, errors, paths or debug output (both modes)",
         "passed": true,
         "error": null,
-        "seconds": 0.345
+        "seconds": 0.349
       },
       {
         "id": "C20",
         "name": "reward is 0 during the episode; closed mode returns 0.0 and no scoring until the run ends",
         "passed": true,
         "error": null,
-        "seconds": 0.081
+        "seconds": 0.096
       }
     ],
     "data": [
@@ -156,70 +156,70 @@
         "name": "hidden-style episode 1: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.055
+        "seconds": 0.071
       },
       {
         "id": "D2",
         "name": "hidden-style episode 2: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.051
+        "seconds": 0.07
       },
       {
         "id": "D3",
         "name": "hidden-style episode 3: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.049
+        "seconds": 0.065
       },
       {
         "id": "D4",
         "name": "hidden-style episode 4: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.046
+        "seconds": 0.06
       },
       {
         "id": "D5",
         "name": "hidden-style episode 5: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.055
+        "seconds": 0.07
       },
       {
         "id": "D6",
         "name": "hidden-style episode 6: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.063
+        "seconds": 0.089
       },
       {
         "id": "D7",
         "name": "hidden-style episode 7: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.05
+        "seconds": 0.062
       },
       {
         "id": "D8",
         "name": "hidden-style episode 8: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.058
+        "seconds": 0.08
       },
       {
         "id": "D9",
         "name": "hidden-style episode 9: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.069
+        "seconds": 0.076
       },
       {
         "id": "D10",
         "name": "hidden-style episode 10: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.074
+        "seconds": 0.073
       },
       {
         "id": "D11",
@@ -233,63 +233,63 @@
         "name": "hidden-style episode 12: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.116
+        "seconds": 0.081
       },
       {
         "id": "D13",
         "name": "hidden-style episode 13: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.077
+        "seconds": 0.065
       },
       {
         "id": "D14",
         "name": "hidden-style episode 14: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.085
+        "seconds": 0.074
       },
       {
         "id": "D15",
         "name": "hidden-style episode 15: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.097
+        "seconds": 0.068
       },
       {
         "id": "D16",
         "name": "hidden-style episode 16: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.08
+        "seconds": 0.128
       },
       {
         "id": "D17",
         "name": "hidden-style episode 17: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.084
+        "seconds": 0.086
       },
       {
         "id": "D18",
         "name": "hidden-style episode 18: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.115
+        "seconds": 0.081
       },
       {
         "id": "D19",
         "name": "hidden-style episode 19: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.115
+        "seconds": 0.059
       },
       {
         "id": "D20",
         "name": "hidden-style episode 20: balance before, declared discrepancy after, independent evidence",
         "passed": true,
         "error": null,
-        "seconds": 0.147
+        "seconds": 0.075
       }
     ],
     "reward": [
@@ -403,7 +403,7 @@
         "name": "resubmission is refused and cannot change the score",
         "passed": true,
         "error": null,
-        "seconds": 0.06
+        "seconds": 0.032
       },
       {
         "id": "R17",
@@ -417,7 +417,7 @@
         "name": "timeout is scored as an empty submission with all steps counted",
         "passed": true,
         "error": null,
-        "seconds": 0.059
+        "seconds": 0.058
       },
       {
         "id": "R19",
@@ -440,35 +440,35 @@
         "name": "pair 1: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.28
+        "seconds": 0.308
       },
       {
         "id": "P2",
         "name": "pair 2: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.301
+        "seconds": 0.259
       },
       {
         "id": "P3",
         "name": "pair 3: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.344
+        "seconds": 0.312
       },
       {
         "id": "P4",
         "name": "pair 4: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.269
+        "seconds": 0.261
       },
       {
         "id": "P5",
         "name": "pair 5: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.298
+        "seconds": 0.329
       },
       {
         "id": "P6",
@@ -482,98 +482,98 @@
         "name": "pair 7: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.29
+        "seconds": 0.267
       },
       {
         "id": "P8",
         "name": "pair 8: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.321
+        "seconds": 0.299
       },
       {
         "id": "P9",
         "name": "pair 9: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.295
+        "seconds": 0.257
       },
       {
         "id": "P10",
         "name": "pair 10: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.347
+        "seconds": 0.303
       },
       {
         "id": "P11",
         "name": "pair 11: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.245
+        "seconds": 0.298
       },
       {
         "id": "P12",
         "name": "pair 12: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.274
+        "seconds": 0.283
       },
       {
         "id": "P13",
         "name": "pair 13: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.266
+        "seconds": 0.267
       },
       {
         "id": "P14",
         "name": "pair 14: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.373
+        "seconds": 0.326
       },
       {
         "id": "P15",
         "name": "pair 15: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.314
+        "seconds": 0.248
       },
       {
         "id": "P16",
         "name": "pair 16: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.334
+        "seconds": 0.31
       },
       {
         "id": "P17",
         "name": "pair 17: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.351
+        "seconds": 0.286
       },
       {
         "id": "P18",
         "name": "pair 18: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.257
+        "seconds": 0.247
       },
       {
         "id": "P19",
         "name": "pair 19: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.315
+        "seconds": 0.283
       },
       {
         "id": "P20",
         "name": "pair 20: exact repeat; new order and IDs keep the oracle answer and reward",
         "passed": true,
         "error": null,
-        "seconds": 0.254
+        "seconds": 0.261
       }
     ],
     "engineering": [
@@ -596,7 +596,7 @@
         "name": "trajectory logs exist with the required fields and no hidden reference in observations",
         "passed": true,
         "error": null,
-        "seconds": 0.055
+        "seconds": 0.058
       },
       {
         "id": "E4",
@@ -631,6 +631,16 @@
       "recall": 0.0,
       "f1": 1.0,
       "steps": 1,
+      "seconds": 0.037
+    },
+    {
+      "policy": "oracle",
+      "group": "clean",
+      "return": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 1.0,
+      "steps": 1,
       "seconds": 0.034
     },
     {
@@ -641,21 +651,51 @@
       "recall": 0.0,
       "f1": 1.0,
       "steps": 1,
-      "seconds": 0.035
-    },
-    {
-      "policy": "oracle",
-      "group": "clean",
-      "return": 1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 1.0,
-      "steps": 1,
-      "seconds": 0.056
+      "seconds": 0.062
     },
     {
       "policy": "oracle",
       "group": "interacting",
+      "return": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "steps": 1,
+      "seconds": 0.045
+    },
+    {
+      "policy": "oracle",
+      "group": "interacting",
+      "return": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "steps": 1,
+      "seconds": 0.029
+    },
+    {
+      "policy": "oracle",
+      "group": "interacting",
+      "return": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "steps": 1,
+      "seconds": 0.028
+    },
+    {
+      "policy": "oracle",
+      "group": "mixed",
+      "return": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "steps": 1,
+      "seconds": 0.049
+    },
+    {
+      "policy": "oracle",
+      "group": "mixed",
       "return": 1.0,
       "precision": 1.0,
       "recall": 1.0,
@@ -665,53 +705,13 @@
     },
     {
       "policy": "oracle",
-      "group": "interacting",
-      "return": 1.0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "steps": 1,
-      "seconds": 0.031
-    },
-    {
-      "policy": "oracle",
-      "group": "interacting",
-      "return": 1.0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "steps": 1,
-      "seconds": 0.032
-    },
-    {
-      "policy": "oracle",
       "group": "mixed",
       "return": 1.0,
       "precision": 1.0,
       "recall": 1.0,
       "f1": 1.0,
       "steps": 1,
-      "seconds": 0.053
-    },
-    {
-      "policy": "oracle",
-      "group": "mixed",
-      "return": 1.0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "steps": 1,
-      "seconds": 0.036
-    },
-    {
-      "policy": "oracle",
-      "group": "mixed",
-      "return": 1.0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "steps": 1,
-      "seconds": 0.036
+      "seconds": 0.033
     },
     {
       "policy": "reconcile",
@@ -721,7 +721,7 @@
       "recall": 0.0,
       "f1": 1.0,
       "steps": 19,
-      "seconds": 0.041
+      "seconds": 0.04
     },
     {
       "policy": "reconcile",
@@ -731,7 +731,7 @@
       "recall": 0.0,
       "f1": 1.0,
       "steps": 17,
-      "seconds": 0.04
+      "seconds": 0.039
     },
     {
       "policy": "reconcile",
@@ -751,7 +751,7 @@
       "recall": 1.0,
       "f1": 1.0,
       "steps": 21,
-      "seconds": 0.043
+      "seconds": 0.037
     },
     {
       "policy": "reconcile",
@@ -771,27 +771,17 @@
       "recall": 1.0,
       "f1": 1.0,
       "steps": 17,
-      "seconds": 0.037
+      "seconds": 0.032
     },
     {
       "policy": "reconcile",
       "group": "mixed",
-      "return": 0.952,
+      "return": 0.954,
       "precision": 1.0,
       "recall": 1.0,
       "f1": 1.0,
-      "steps": 25,
-      "seconds": 0.058
-    },
-    {
-      "policy": "reconcile",
-      "group": "mixed",
-      "return": 0.966,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "steps": 18,
-      "seconds": 0.039
+      "steps": 24,
+      "seconds": 0.059
     },
     {
       "policy": "reconcile",
@@ -801,7 +791,17 @@
       "recall": 1.0,
       "f1": 1.0,
       "steps": 18,
-      "seconds": 0.049
+      "seconds": 0.05
+    },
+    {
+      "policy": "reconcile",
+      "group": "mixed",
+      "return": 0.966,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "steps": 18,
+      "seconds": 0.045
     },
     {
       "policy": "random",
@@ -811,7 +811,7 @@
       "recall": 0.0,
       "f1": 0.0,
       "steps": 7,
-      "seconds": 0.035
+      "seconds": 0.057
     },
     {
       "policy": "random",
@@ -821,7 +821,7 @@
       "recall": 0.0,
       "f1": 0.0,
       "steps": 11,
-      "seconds": 0.035
+      "seconds": 0.063
     },
     {
       "policy": "random",
@@ -831,7 +831,7 @@
       "recall": 0.0,
       "f1": 0.0,
       "steps": 8,
-      "seconds": 0.063
+      "seconds": 0.081
     },
     {
       "policy": "random",
@@ -840,18 +840,8 @@
       "precision": 0.0,
       "recall": 0.0,
       "f1": 0.0,
-      "steps": 5,
-      "seconds": 0.035
-    },
-    {
-      "policy": "random",
-      "group": "interacting",
-      "return": -1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "steps": 13,
-      "seconds": 0.033
+      "steps": 10,
+      "seconds": 0.056
     },
     {
       "policy": "random",
@@ -861,7 +851,17 @@
       "recall": 0.0,
       "f1": 0.0,
       "steps": 14,
-      "seconds": 0.035
+      "seconds": 0.046
+    },
+    {
+      "policy": "random",
+      "group": "interacting",
+      "return": -1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "steps": 14,
+      "seconds": 0.037
     },
     {
       "policy": "random",
@@ -870,7 +870,7 @@
       "precision": 0.0,
       "recall": 0.0,
       "f1": 0.0,
-      "steps": 16,
+      "steps": 7,
       "seconds": 0.055
     },
     {
@@ -880,8 +880,8 @@
       "precision": 0.0,
       "recall": 0.0,
       "f1": 0.0,
-      "steps": 15,
-      "seconds": 0.045
+      "steps": 12,
+      "seconds": 0.041
     },
     {
       "policy": "random",
@@ -890,27 +890,7 @@
       "precision": 0.0,
       "recall": 0.0,
       "f1": 0.0,
-      "steps": 16,
-      "seconds": 0.04
-    },
-    {
-      "policy": "flag_all",
-      "group": "clean",
-      "return": -1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "steps": 2,
-      "seconds": 0.037
-    },
-    {
-      "policy": "flag_all",
-      "group": "clean",
-      "return": -1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "steps": 2,
+      "steps": 12,
       "seconds": 0.035
     },
     {
@@ -921,37 +901,57 @@
       "recall": 0.0,
       "f1": 0.0,
       "steps": 2,
+      "seconds": 0.031
+    },
+    {
+      "policy": "flag_all",
+      "group": "clean",
+      "return": -1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "steps": 2,
+      "seconds": 0.027
+    },
+    {
+      "policy": "flag_all",
+      "group": "clean",
+      "return": -1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "steps": 2,
+      "seconds": 0.057
+    },
+    {
+      "policy": "flag_all",
+      "group": "interacting",
+      "return": -1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "steps": 2,
+      "seconds": 0.042
+    },
+    {
+      "policy": "flag_all",
+      "group": "interacting",
+      "return": -1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "steps": 2,
+      "seconds": 0.031
+    },
+    {
+      "policy": "flag_all",
+      "group": "interacting",
+      "return": -1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "steps": 2,
       "seconds": 0.029
-    },
-    {
-      "policy": "flag_all",
-      "group": "interacting",
-      "return": -1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "steps": 2,
-      "seconds": 0.069
-    },
-    {
-      "policy": "flag_all",
-      "group": "interacting",
-      "return": -1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "steps": 2,
-      "seconds": 0.034
-    },
-    {
-      "policy": "flag_all",
-      "group": "interacting",
-      "return": -1.0,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "steps": 2,
-      "seconds": 0.033
     },
     {
       "policy": "flag_all",
@@ -981,7 +981,7 @@
       "recall": 0.0,
       "f1": 0.0,
       "steps": 2,
-      "seconds": 0.035
+      "seconds": 0.036
     }
   ],
   "policy_summary": [
@@ -994,7 +994,7 @@
     {
       "policy": "reconcile",
       "clean": 0.9673333333333334,
-      "mixed": 0.9613333333333333,
+      "mixed": 0.9620000000000001,
       "interacting": 0.9659999999999999
     },
     {
@@ -1088,5 +1088,5 @@
     "failures": []
   },
   "independent_verifier": true,
-  "seconds": 15.3
+  "seconds": 14.8
 }

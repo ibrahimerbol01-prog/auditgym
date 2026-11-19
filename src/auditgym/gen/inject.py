@@ -197,7 +197,8 @@ def inject_all(w: World) -> Dict[str, Any]:
         return {"ops": [], "issues": []}
     for inv in w.hosts["duplicate_invoice"]:
         rng = Rng(w.seed, ch, ENV_VERSION, "inject.dup", inv)
-        d = w.meta[inv]["date"] + timedelta(days=rng.rand_int(1, 10))
+        room = max(1, min(10, (w.period_end - w.meta[inv]["date"]).days))
+        d = w.meta[inv]["date"] + timedelta(days=rng.rand_int(1, room))
         issues.append(inject_duplicate(w, m, rng, inv, d, f"inject.dup.{inv}"))
     for pay in w.hosts["payment_allocation"]:
         rng = Rng(w.seed, ch, ENV_VERSION, "inject.alloc", pay)

@@ -1,0 +1,37 @@
+{"doc_id": "DOC-Y3-5620", "payment_id": "PMT-Y3-3015", "timestamp": "2026-04-18T16:45:00+05:00", "currency": "EUR", "amount_minor": 1867880, "invoice_refs": ["IN-Y3-3926"]}
+{"doc_id": "DOC-Y3-6179", "payment_id": "PMT-Y3-3016", "timestamp": "2026-04-21T09:00:00+05:00", "currency": "KZT", "amount_minor": 172488000, "invoice_refs": null}
+{"doc_id": "DOC-Y3-9826", "payment_id": "PMT-Y3-3017", "timestamp": "2026-04-29T09:37:00+05:00", "currency": "KZT", "amount_minor": 61122000, "invoice_refs": null}
+{"doc_id": "DOC-Y3-9503", "payment_id": "PMT-Y3-3018", "timestamp": "2026-05-01T14:14:00+05:00", "currency": "KZT", "amount_minor": 390472800, "invoice_refs": ["IN-Y3-3925"]}
+{"doc_id": "DOC-Y3-4929", "payment_id": "PMT-Y3-3019", "timestamp": "2026-05-02T15:16:00+05:00", "currency": "KZT", "amount_minor": 298341000, "invoice_refs": ["IN-Y3-3927"]}
+{"doc_id": "DOC-Y3-1629", "payment_id": "PMT-Y3-3020", "timestamp": "2026-05-02T15:38:00+05:00", "currency": "EUR", "amount_minor": 1484000, "invoice_refs": ["IN-Y3-3931"]}
+{"doc_id": "DOC-Y3-6153", "payment_id": "PMT-Y3-3021", "timestamp": "2026-05-04T14:22:00+05:00", "currency": "KZT", "amount_minor": 326341000, "invoice_refs": ["IN-Y3-3932"]}
+{"doc_id": "DOC-Y3-1188", "payment_id": "PMT-Y3-3022", "timestamp": "2026-05-05T12:41:00+05:00", "currency": "KZT", "amount_minor": 1529073000, "invoice_refs": ["IN-Y3-3929", "IN-Y3-3938"]}
+{"doc_id": "DOC-Y3-5216", "payment_id": "PMT-Y3-3023", "timestamp": "2026-05-06T10:13:00+05:00", "currency": "KZT", "amount_minor": 722488000, "invoice_refs": ["IN-Y3-3934"]}
+{"doc_id": "DOC-Y3-2144", "payment_id": "PMT-Y3-3024", "timestamp": "2026-05-06T11:25:00+05:00", "currency": "KZT", "amount_minor": 655903000, "invoice_refs": ["IN-Y3-3936", "IN-Y3-3939"]}
+{"doc_id": "DOC-Y3-1295", "payment_id": "PMT-Y3-3025", "timestamp": "2026-05-22T17:22:00+05:00", "currency": "KZT", "amount_minor": 655756000, "invoice_refs": ["IN-Y3-3945"]}
+{"doc_id": "DOC-Y3-1857", "payment_id": "PMT-Y3-3026", "timestamp": "2026-05-24T15:32:00+05:00", "currency": "KZT", "amount_minor": 192487000, "invoice_refs": ["IN-Y3-3935"]}
+{"doc_id": "DOC-Y3-4471", "payment_id": "PMT-Y3-3027", "timestamp": "2026-05-26T10:35:00+05:00", "currency": "KZT", "amount_minor": 484195000, "invoice_refs": ["IN-Y3-3943"]}
+{"doc_id": "DOC-Y3-6086", "payment_id": "PMT-Y3-3028", "timestamp": "2026-05-27T17:26:00+05:00", "currency": "KZT", "amount_minor": 374878000, "invoice_refs": ["IN-Y3-3944"]}
+{"doc_id": "DOC-Y3-7777", "payment_id": "PMT-Y3-3029", "timestamp": "2026-05-31T17:58:00+05:00", "currency": "KZT", "amount_minor": 773414000, "invoice_refs": ["IN-Y3-3940"]}
+{"doc_id": "DOC-Y3-4196", "payment_id": "PMT-Y3-3030", "timestamp": "2026-06-07T15:47:00+05:00", "currency": "KZT", "amount_minor": 201600000, "invoice_refs": ["IN-Y3-3947"]}
+{"doc_id": "DOC-Y3-1273", "payment_id": "PMT-Y3-3031", "timestamp": "2026-06-09T10:25:00+05:00", "currency": "KZT", "amount_minor": 210927000, "invoice_refs": ["IN-Y3-3951"]}
+{"doc_id": "DOC-Y3-8840", "payment_id": "PMT-Y3-3032", "timestamp": "2026-06-09T16:57:00+05:00", "currency": "KZT", "amount_minor": 135610000, "invoice_refs": ["IN-Y3-3946"]}
+{"doc_id": "DOC-Y3-6714", "payment_id": "PMT-Y3-3033", "timestamp": "2026-06-10T10:58:00+05:00", "currency": "KZT", "amount_minor": 647805000, "invoice_refs": ["IN-Y3-3956"]}
+{"doc_id": "DOC-Y3-3614", "payment_id": "PMT-Y3-3034", "timestamp": "2026-06-10T17:56:00+05:00", "currency": "KZT", "amount_minor": 627122000, "invoice_refs": ["IN-Y3-3961"]}
+{"doc_id": "DOC-Y3-8722", "payment_id": "PMT-Y3-3035", "timestamp": "2026-06-14T09:09:00+05:00", "currency": "KZT", "amount_minor": 322098000, "invoice_refs": ["IN-Y3-3950"]}
+{"doc_id": "DOC-Y3-2538", "payment_id": "PMT-Y3-3036", "timestamp": "2026-06-14T09:27:00+05:00", "currency": "KZT", "amount_minor": 712195000, "invoice_refs": ["IN-Y3-3952", "IN-Y3-3953"]}
+{"doc_id": "DOC-Y3-9737", "payment_id": "PMT-Y3-3037", "timestamp": "2026-06-15T10:11:00+05:00", "currency": "EUR", "amount_minor": 882000, "invoice_refs": ["IN-Y3-3954"]}
+{"doc_id": "DOC-Y3-4229", "payment_id": "PMT-Y3-3038", "timestamp": "2026-06-17T09:41:00+05:00", "currency": "KZT", "amount_minor": 470975000, "invoice_refs": ["IN-Y3-3969"]}
+{"doc_id": "DOC-Y3-3372", "payment_id": "PMT-Y3-3039", "timestamp": "2026-06-19T12:15:00+05:00", "currency": "KZT", "amount_minor": 626927000, "invoice_refs": ["IN-Y3-3966"]}
+{"doc_id": "DOC-Y3-2276", "payment_id": "PMT-Y3-3040", "timestamp": "2026-06-21T13:54:00+05:00", "currency": "KZT", "amount_minor": 1002488000, "invoice_refs": ["IN-Y3-3955"]}
+{"doc_id": "DOC-Y3-1120", "payment_id": "PMT-Y3-3041", "timestamp": "2026-06-21T16:25:00+05:00", "currency": "KZT", "amount_minor": 719511000, "invoice_refs": ["IN-Y3-3968"]}
+{"doc_id": "DOC-Y3-9159", "payment_id": "PMT-Y3-3042", "timestamp": "2026-06-22T09:06:00+05:00", "currency": "KZT", "amount_minor": 305042850, "invoice_refs": ["IN-Y3-3967"]}
+{"doc_id": "DOC-Y3-8428", "payment_id": "PMT-Y3-3043", "timestamp": "2026-06-23T09:22:00+05:00", "currency": "KZT", "amount_minor": 179152150, "invoice_refs": ["IN-Y3-3967"]}
+{"doc_id": "DOC-Y3-8585", "payment_id": "PMT-Y3-3044", "timestamp": "2026-06-24T16:01:00+05:00", "currency": "KZT", "amount_minor": 918488000, "invoice_refs": ["IN-Y3-3971"]}
+{"doc_id": "DOC-Y3-5506", "payment_id": "PMT-Y3-3045", "timestamp": "2026-06-26T17:49:00+05:00", "currency": "KZT", "amount_minor": 254635000, "invoice_refs": ["IN-Y3-3964"]}
+{"doc_id": "DOC-Y3-6600", "payment_id": "PMT-Y3-3046", "timestamp": "2026-06-27T12:52:00+05:00", "currency": "KZT", "amount_minor": 118790400, "invoice_refs": ["IN-Y3-3962"]}
+{"doc_id": "DOC-Y3-7137", "payment_id": "PMT-Y3-3047", "timestamp": "2026-06-29T14:53:00+05:00", "currency": "KZT", "amount_minor": 178185600, "invoice_refs": ["IN-Y3-3962"]}
+{"doc_id": "DOC-Y3-2933", "payment_id": "PMT-Y3-3048", "timestamp": "2026-06-30T09:30:00+05:00", "currency": "KZT", "amount_minor": 1229658000, "invoice_refs": ["IN-Y3-3978"]}
+{"doc_id": "DOC-Y3-1110", "payment_id": "PMT-Y3-3049", "timestamp": "2026-07-01T17:00:00+05:00", "currency": "EUR", "amount_minor": 681000, "invoice_refs": ["IN-Y3-3963"]}
+{"doc_id": "DOC-Y3-6939", "payment_id": "PMT-Y3-3050", "timestamp": "2026-07-03T14:20:00+05:00", "currency": "KZT", "amount_minor": 628878000, "invoice_refs": ["IN-Y3-3979"]}
+{"doc_id": "DOC-Y3-1844", "payment_id": "PMT-Y3-3051", "timestamp": "2026-07-03T17:28:00+05:00", "currency": "EUR", "amount_minor": 798950, "invoice_refs": ["IN-Y3-3970"]}

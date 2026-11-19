@@ -1,0 +1,44 @@
+{
+  "episode_id": "ep_eacc0f8d77a8ecde",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-D2-3469",
+          "BILL-D2-3472"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-D2-3469",
+        "BILL-D2-3472"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 211172000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "BILL-D2-3489",
+          "GL-D2-23531",
+          "PAY-D2-1814"
+        ]
+      ],
+      "affected_ids": [
+        "BILL-D2-3489",
+        "PAY-D2-1814"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 103567823,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "payment_allocation"
+    }
+  ]
+}

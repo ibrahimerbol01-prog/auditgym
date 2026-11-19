@@ -1,0 +1,24 @@
+{"doc_id": "DOC-S9-8572", "payment_id": "RCPT-S9-1594", "timestamp": "2026-06-02T17:43:00+00:00", "currency": "EUR", "amount_minor": 312000, "invoice_refs": ["BILL-S9-1553"]}
+{"doc_id": "DOC-S9-1438", "payment_id": "RCPT-S9-1595", "timestamp": "2026-06-04T12:16:00+00:00", "currency": "EUR", "amount_minor": 558000, "invoice_refs": ["BILL-S9-1560"]}
+{"doc_id": "DOC-S9-2628", "payment_id": "RCPT-S9-1596", "timestamp": "2026-06-05T10:12:00+00:00", "currency": "EUR", "amount_minor": 682000, "invoice_refs": ["BILL-S9-1560"]}
+{"doc_id": "DOC-S9-9477", "payment_id": "RCPT-S9-1597", "timestamp": "2026-06-07T16:03:00+00:00", "currency": "EUR", "amount_minor": 1222000, "invoice_refs": ["BILL-S9-1561"]}
+{"doc_id": "DOC-S9-6954", "payment_id": "RCPT-S9-1598", "timestamp": "2026-06-13T12:24:00+00:00", "currency": "EUR", "amount_minor": 924000, "invoice_refs": ["BILL-S9-1566"]}
+{"doc_id": "DOC-S9-1247", "payment_id": "RCPT-S9-1599", "timestamp": "2026-06-14T09:07:00+00:00", "currency": "EUR", "amount_minor": 2408000, "invoice_refs": ["BILL-S9-1567", "BILL-S9-1554"]}
+{"doc_id": "DOC-S9-8557", "payment_id": "RCPT-S9-1600", "timestamp": "2026-06-14T16:03:00+00:00", "currency": "EUR", "amount_minor": 1785000, "invoice_refs": ["BILL-S9-1563"]}
+{"doc_id": "DOC-S9-3205", "payment_id": "RCPT-S9-1601", "timestamp": "2026-06-17T10:59:00+00:00", "currency": "EUR", "amount_minor": 64000, "invoice_refs": ["BILL-S9-1568"]}
+{"doc_id": "DOC-S9-1045", "payment_id": "RCPT-S9-1602", "timestamp": "2026-06-17T16:34:00+00:00", "currency": "KWD", "amount_minor": 2900000, "invoice_refs": ["BILL-S9-1573"]}
+{"doc_id": "DOC-S9-4145", "payment_id": "RCPT-S9-1603", "timestamp": "2026-06-19T15:06:00+00:00", "currency": "EUR", "amount_minor": 1234000, "invoice_refs": ["BILL-S9-1572"]}
+{"doc_id": "DOC-S9-7696", "payment_id": "RCPT-S9-1604", "timestamp": "2026-06-20T17:15:00+00:00", "currency": "EUR", "amount_minor": 693000, "invoice_refs": ["BILL-S9-1564"]}
+{"doc_id": "DOC-S9-4298", "payment_id": "RCPT-S9-1605", "timestamp": "2026-06-21T10:43:00+00:00", "currency": "EUR", "amount_minor": 435530, "invoice_refs": ["BILL-S9-1578"]}
+{"doc_id": "DOC-S9-5638", "payment_id": "RCPT-S9-1606", "timestamp": "2026-06-21T12:46:00+00:00", "currency": "EUR", "amount_minor": 908000, "invoice_refs": ["BILL-S9-1552"]}
+{"doc_id": "DOC-S9-8598", "payment_id": "RCPT-S9-1607", "timestamp": "2026-06-22T09:03:00+00:00", "currency": "EUR", "amount_minor": 662000, "invoice_refs": ["BILL-S9-1575"]}
+{"doc_id": "DOC-S9-1948", "payment_id": "RCPT-S9-1608", "timestamp": "2026-06-22T12:58:00+00:00", "currency": "EUR", "amount_minor": 497000, "invoice_refs": ["BILL-S9-1556"]}
+{"doc_id": "DOC-S9-2941", "payment_id": "RCPT-S9-1609", "timestamp": "2026-06-22T13:09:00+00:00", "currency": "EUR", "amount_minor": 75000, "invoice_refs": null}
+{"doc_id": "DOC-S9-6534", "payment_id": "RCPT-S9-1610", "timestamp": "2026-06-23T15:36:00+00:00", "currency": "EUR", "amount_minor": 46000, "invoice_refs": ["BILL-S9-1571"]}
+{"doc_id": "DOC-S9-9912", "payment_id": "RCPT-S9-1611", "timestamp": "2026-06-25T17:19:00+00:00", "currency": "EUR", "amount_minor": 1211000, "invoice_refs": ["BILL-S9-1569"]}
+{"doc_id": "DOC-S9-6817", "payment_id": "RCPT-S9-1612", "timestamp": "2026-06-28T14:56:00+00:00", "currency": "EUR", "amount_minor": 285120, "invoice_refs": ["BILL-S9-1577"]}
+{"doc_id": "DOC-S9-1919", "payment_id": "RCPT-S9-1613", "timestamp": "2026-06-29T11:39:00+00:00", "currency": "EUR", "amount_minor": 2013000, "invoice_refs": ["BILL-S9-1582"]}
+{"doc_id": "DOC-S9-6610", "payment_id": "RCPT-S9-1614", "timestamp": "2026-07-02T14:15:00+00:00", "currency": "EUR", "amount_minor": 302000, "invoice_refs": ["BILL-S9-1584"]}
+{"doc_id": "DOC-S9-3605", "payment_id": "RCPT-S9-1615", "timestamp": "2026-07-04T15:23:00+00:00", "currency": "EUR", "amount_minor": 985920, "invoice_refs": ["BILL-S9-1574"]}
+{"doc_id": "DOC-S9-6079", "payment_id": "RCPT-S9-1616", "timestamp": "2026-07-06T12:07:00+00:00", "currency": "EUR", "amount_minor": 234080, "invoice_refs": ["BILL-S9-1585"]}
+{"doc_id": "DOC-S9-7571", "payment_id": "RCPT-S9-1617", "timestamp": "2026-07-11T13:26:00+00:00", "currency": "EUR", "amount_minor": 183920, "invoice_refs": ["BILL-S9-1585"]}

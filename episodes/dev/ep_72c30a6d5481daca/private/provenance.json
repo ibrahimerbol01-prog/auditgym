@@ -1,0 +1,322 @@
+{
+  "clean_tables_sha256": "5b27d88a4c87eba9ee270890dec40d425c7ba9e9b71faf740c1a9c2ead88efca",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 2,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [
+      "B"
+    ],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 4,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_72c30a6d5481daca",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "EUR",
+        "doc_id": "DOC-Y3-9179",
+        "due_at": "2026-05-09T14:05:00+05:00",
+        "entity_id": "E-Y3-829",
+        "invoice_id": "IN-Y3-3924",
+        "issued_at": "2026-04-09T14:05:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 97000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 808000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "total_minor": 905000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 7 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "EUR",
+        "customer": "Marlow Labs GmbH",
+        "date": "2026-04-09",
+        "doc_id": "DOC-Y3-9179",
+        "entity_id": "E-Y3-829",
+        "invoice_id": "IN-Y3-3924",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 97000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 808000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 905000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 455737185,
+        "entity_id": "E-Y3-829",
+        "invoice_id": "IN-Y3-3924",
+        "payment_id": null,
+        "row_id": "L-Y3-30005",
+        "timestamp": "2026-04-09T14:05:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 455737185,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "E-Y3-829",
+        "invoice_id": "IN-Y3-3924",
+        "payment_id": null,
+        "row_id": "L-Y3-30004",
+        "timestamp": "2026-04-09T14:05:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "L-Y3-30423",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": null,
+      "before": "IN-Y3-3978",
+      "field": "invoice_id",
+      "key": "L-Y3-30423",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": 436731300,
+      "before": 433543910,
+      "field": "debit_minor",
+      "key": "L-Y3-30323",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-06-18 used instead of 2026-06-14"
+    },
+    {
+      "after": 436731300,
+      "before": 433543910,
+      "field": "credit_minor",
+      "key": "L-Y3-30324",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-06-18 used instead of 2026-06-14"
+    },
+    {
+      "after": "2026-07-04T14:34:00+05:00",
+      "before": "2026-06-28T14:34:00+05:00",
+      "field": "timestamp",
+      "key": "L-Y3-30455",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-04 instead of 2026-06-28)"
+    },
+    {
+      "after": "2026-07-04T14:34:00+05:00",
+      "before": "2026-06-28T14:34:00+05:00",
+      "field": "timestamp",
+      "key": "L-Y3-30454",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-04 instead of 2026-06-28)"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "DOC-Y3-7760",
+        "due_at": "2026-07-29T12:06:00+05:00",
+        "entity_id": "E-Y3-737",
+        "invoice_id": "IN-Y3-3980",
+        "issued_at": "2026-06-29T12:06:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 294051000,
+            "description": "Design services",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 290195000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "total_minor": 584246000
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "invoices",
+      "why": "duplicate of §I5 re-issued 4 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Cobalt Clinics LLC",
+        "date": "2026-06-29",
+        "doc_id": "DOC-Y3-7760",
+        "entity_id": "E-Y3-737",
+        "invoice_id": "IN-Y3-3980",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 294051000,
+            "description": "Design services",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          },
+          {
+            "amount_minor": 290195000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 584246000
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 584246000,
+        "entity_id": "E-Y3-737",
+        "invoice_id": "IN-Y3-3980",
+        "payment_id": null,
+        "row_id": "L-Y3-30452",
+        "timestamp": "2026-06-29T12:06:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 584246000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "E-Y3-737",
+        "invoice_id": "IN-Y3-3980",
+        "payment_id": null,
+        "row_id": "L-Y3-30453",
+        "timestamp": "2026-06-29T12:06:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I5",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2026-07-04T12:06:00+05:00",
+      "before": "2026-06-29T12:06:00+05:00",
+      "field": "timestamp",
+      "key": "L-Y3-30452",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I61",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-04 instead of 2026-06-29)"
+    },
+    {
+      "after": "2026-07-04T12:06:00+05:00",
+      "before": "2026-06-29T12:06:00+05:00",
+      "field": "timestamp",
+      "key": "L-Y3-30453",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I61",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-04 instead of 2026-06-29)"
+    }
+  ],
+  "seed": 2005
+}

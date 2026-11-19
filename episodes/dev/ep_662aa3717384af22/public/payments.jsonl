@@ -1,0 +1,29 @@
+{"doc_id": "SCAN-B8-2185", "payment_id": "RCPT-B8-3003", "timestamp": "2026-09-07T13:28:00+00:00", "currency": "EUR", "amount_minor": 1624000, "invoice_refs": ["IN-B8-1396"]}
+{"doc_id": "SCAN-B8-2198", "payment_id": "RCPT-B8-3004", "timestamp": "2026-09-08T12:52:00+00:00", "currency": "EUR", "amount_minor": 1118000, "invoice_refs": ["IN-B8-1397"]}
+{"doc_id": "SCAN-B8-9067", "payment_id": "RCPT-B8-3005", "timestamp": "2026-09-10T17:06:00+00:00", "currency": "USD", "amount_minor": 650000, "invoice_refs": null}
+{"doc_id": "SCAN-B8-2113", "payment_id": "RCPT-B8-3006", "timestamp": "2026-09-12T12:09:00+00:00", "currency": "EUR", "amount_minor": 875000, "invoice_refs": ["IN-B8-1398"]}
+{"doc_id": "SCAN-B8-9993", "payment_id": "RCPT-B8-3007", "timestamp": "2026-09-14T09:41:00+00:00", "currency": "GBP", "amount_minor": 875000, "invoice_refs": ["IN-B8-1410"]}
+{"doc_id": "SCAN-B8-9796", "payment_id": "RCPT-B8-3008", "timestamp": "2026-09-14T17:11:00+00:00", "currency": "USD", "amount_minor": 760000, "invoice_refs": ["IN-B8-1399"]}
+{"doc_id": "SCAN-B8-9207", "payment_id": "RCPT-B8-3009", "timestamp": "2026-09-15T12:08:00+00:00", "currency": "USD", "amount_minor": 738000, "invoice_refs": ["IN-B8-1402"]}
+{"doc_id": "SCAN-B8-9497", "payment_id": "RCPT-B8-3010", "timestamp": "2026-09-16T13:00:00+00:00", "currency": "EUR", "amount_minor": 717000, "invoice_refs": ["IN-B8-1417"]}
+{"doc_id": "SCAN-B8-3343", "payment_id": "RCPT-B8-3011", "timestamp": "2026-09-16T17:37:00+00:00", "currency": "EUR", "amount_minor": 648000, "invoice_refs": ["IN-B8-1405"]}
+{"doc_id": "SCAN-B8-2556", "payment_id": "RCPT-B8-3012", "timestamp": "2026-09-17T17:34:00+00:00", "currency": "EUR", "amount_minor": 695000, "invoice_refs": ["IN-B8-1400"]}
+{"doc_id": "SCAN-B8-7376", "payment_id": "RCPT-B8-3013", "timestamp": "2026-09-19T16:50:00+00:00", "currency": "GBP", "amount_minor": 1419000, "invoice_refs": ["IN-B8-1401"]}
+{"doc_id": "SCAN-B8-5717", "payment_id": "RCPT-B8-3014", "timestamp": "2026-09-21T11:24:00+00:00", "currency": "GBP", "amount_minor": 373000, "invoice_refs": ["IN-B8-1413"]}
+{"doc_id": "SCAN-B8-9616", "payment_id": "RCPT-B8-3015", "timestamp": "2026-09-22T11:39:00+00:00", "currency": "GBP", "amount_minor": 1096000, "invoice_refs": ["IN-B8-1404"]}
+{"doc_id": "SCAN-B8-2951", "payment_id": "RCPT-B8-3016", "timestamp": "2026-09-22T17:36:00+00:00", "currency": "EUR", "amount_minor": 393000, "invoice_refs": ["IN-B8-1418"]}
+{"doc_id": "SCAN-B8-5113", "payment_id": "RCPT-B8-3017", "timestamp": "2026-09-23T13:12:00+00:00", "currency": "EUR", "amount_minor": 116000, "invoice_refs": ["IN-B8-1420"]}
+{"doc_id": "SCAN-B8-4412", "payment_id": "RCPT-B8-3018", "timestamp": "2026-09-25T13:38:00+00:00", "currency": "GBP", "amount_minor": 228000, "invoice_refs": ["IN-B8-1412"]}
+{"doc_id": "SCAN-B8-4204", "payment_id": "RCPT-B8-3019", "timestamp": "2026-09-27T09:38:00+00:00", "currency": "GBP", "amount_minor": 1324000, "invoice_refs": ["IN-B8-1426"]}
+{"doc_id": "SCAN-B8-7255", "payment_id": "RCPT-B8-3020", "timestamp": "2026-09-27T10:14:00+00:00", "currency": "EUR", "amount_minor": 356000, "invoice_refs": ["IN-B8-1415", "IN-B8-1414"]}
+{"doc_id": "SCAN-B8-7575", "payment_id": "RCPT-B8-3021", "timestamp": "2026-09-27T12:43:00+00:00", "currency": "EUR", "amount_minor": 1631000, "invoice_refs": ["IN-B8-1411"]}
+{"doc_id": "SCAN-B8-2725", "payment_id": "RCPT-B8-3022", "timestamp": "2026-09-28T16:10:00+00:00", "currency": "EUR", "amount_minor": 333000, "invoice_refs": ["IN-B8-1406"]}
+{"doc_id": "SCAN-B8-5539", "payment_id": "RCPT-B8-3023", "timestamp": "2026-09-30T11:13:00+00:00", "currency": "EUR", "amount_minor": 695500, "invoice_refs": ["IN-B8-1408"]}
+{"doc_id": "SCAN-B8-2470", "payment_id": "RCPT-B8-3024", "timestamp": "2026-09-30T14:44:00+00:00", "currency": "GBP", "amount_minor": 499000, "invoice_refs": ["IN-B8-1419", "IN-B8-1403"]}
+{"doc_id": "SCAN-B8-5446", "payment_id": "RCPT-B8-3025", "timestamp": "2026-10-02T13:35:00+00:00", "currency": "USD", "amount_minor": 190000, "invoice_refs": ["IN-B8-1430"]}
+{"doc_id": "SCAN-B8-5180", "payment_id": "RCPT-B8-3026", "timestamp": "2026-10-02T14:16:00+00:00", "currency": "EUR", "amount_minor": 1342000, "invoice_refs": ["IN-B8-1416", "IN-B8-1433"]}
+{"doc_id": "SCAN-B8-7629", "payment_id": "RCPT-B8-3027", "timestamp": "2026-10-02T17:23:00+00:00", "currency": "USD", "amount_minor": 1742000, "invoice_refs": ["IN-B8-1428"]}
+{"doc_id": "SCAN-B8-5533", "payment_id": "RCPT-B8-3028", "timestamp": "2026-10-03T13:46:00+00:00", "currency": "EUR", "amount_minor": 211000, "invoice_refs": ["IN-B8-1429"]}
+{"doc_id": "SCAN-B8-1542", "payment_id": "RCPT-B8-3029", "timestamp": "2026-10-05T16:48:00+00:00", "currency": "EUR", "amount_minor": 822000, "invoice_refs": ["IN-B8-1427"]}
+{"doc_id": "SCAN-B8-5918", "payment_id": "RCPT-B8-3030", "timestamp": "2026-10-06T14:12:00+00:00", "currency": "EUR", "amount_minor": 1050920, "invoice_refs": ["IN-B8-1435"]}
+{"doc_id": "SCAN-B8-2633", "payment_id": "RCPT-B8-3031", "timestamp": "2026-10-06T17:58:00+00:00", "currency": "EUR", "amount_minor": 374500, "invoice_refs": ["IN-B8-1408"]}

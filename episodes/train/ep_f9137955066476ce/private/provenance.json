@@ -1,0 +1,403 @@
+{
+  "clean_tables_sha256": "d3fc20b3b9f5d5ca2162f579dfdb4d75c2617dbad4d4af5c17754f446992bddf",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 2,
+      "duplicate_invoice": 2,
+      "payment_allocation": 2,
+      "period_classification": 2
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 300,
+    "n_invoices": 80,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_f9137955066476ce",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "EUR",
+        "doc_id": "ATT-H9-7819",
+        "due_at": "2026-04-07T12:44:00+05:00",
+        "entity_id": "CUST-H9-211",
+        "invoice_id": "BILL-H9-2572",
+        "issued_at": "2026-03-08T12:44:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 77000,
+            "description": "Design services",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 646000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 789000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          }
+        ],
+        "total_minor": 1512000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 8 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "EUR",
+        "customer": "Tamarind Ceramics AS",
+        "date": "2026-03-08",
+        "doc_id": "ATT-H9-7819",
+        "entity_id": "CUST-H9-211",
+        "invoice_id": "BILL-H9-2572",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 77000,
+            "description": "Design services",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 646000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 789000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 1512000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 775965960,
+        "entity_id": "CUST-H9-211",
+        "invoice_id": "BILL-H9-2572",
+        "payment_id": null,
+        "row_id": "L-H9-29297",
+        "timestamp": "2026-03-08T12:44:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 775965960,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-H9-211",
+        "invoice_id": "BILL-H9-2572",
+        "payment_id": null,
+        "row_id": "L-H9-29296",
+        "timestamp": "2026-03-08T12:44:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "ATT-H9-9192",
+        "due_at": "2026-02-09T15:33:00+05:00",
+        "entity_id": "CUST-H9-312",
+        "invoice_id": "BILL-H9-2516",
+        "issued_at": "2026-01-10T15:33:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 170350000,
+            "description": "Quality inspection",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 163512000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "total_minor": 333862000
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "invoices",
+      "why": "duplicate of §I2 re-issued 7 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Stellar Optics Ltd",
+        "date": "2026-01-10",
+        "doc_id": "ATT-H9-9192",
+        "entity_id": "CUST-H9-312",
+        "invoice_id": "BILL-H9-2516",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 170350000,
+            "description": "Quality inspection",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 163512000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 333862000
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 333862000,
+        "entity_id": "CUST-H9-312",
+        "invoice_id": "BILL-H9-2516",
+        "payment_id": null,
+        "row_id": "L-H9-28521",
+        "timestamp": "2026-01-10T15:33:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 333862000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-H9-312",
+        "invoice_id": "BILL-H9-2516",
+        "payment_id": null,
+        "row_id": "L-H9-28522",
+        "timestamp": "2026-01-10T15:33:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 160692350,
+      "before": 247219000,
+      "field": "credit_minor",
+      "key": "L-H9-28482",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 86526650,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-H9-574",
+        "invoice_id": null,
+        "payment_id": "PMT-H9-1307",
+        "row_id": "L-H9-28484",
+        "timestamp": "2026-01-07T09:17:00+05:00"
+      },
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "L-H9-29220",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P2",
+      "table": "ledger",
+      "why": "receipt §P2 not applied to §I4"
+    },
+    {
+      "after": null,
+      "before": "BILL-H9-2560",
+      "field": "invoice_id",
+      "key": "L-H9-29220",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P2",
+      "table": "ledger",
+      "why": "receipt §P2 not applied to §I4"
+    },
+    {
+      "after": 807831424,
+      "before": 806691766,
+      "field": "debit_minor",
+      "key": "L-H9-28510",
+      "op": "set",
+      "rng_stream": "inject.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-01-11 used instead of 2026-01-09"
+    },
+    {
+      "after": 807831424,
+      "before": 806691766,
+      "field": "credit_minor",
+      "key": "L-H9-28509",
+      "op": "set",
+      "rng_stream": "inject.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-01-11 used instead of 2026-01-09"
+    },
+    {
+      "after": 151414254,
+      "before": 153415376,
+      "field": "debit_minor",
+      "key": "L-H9-28888",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "rate of 2026-02-07 used instead of 2026-02-11"
+    },
+    {
+      "after": 151414254,
+      "before": 153415376,
+      "field": "credit_minor",
+      "key": "L-H9-28889",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "rate of 2026-02-07 used instead of 2026-02-11"
+    },
+    {
+      "after": "2026-02-07T17:50:00+05:00",
+      "before": "2026-02-11T17:50:00+05:00",
+      "field": "timestamp",
+      "key": "L-H9-28888",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "posted with wrong date 2026-02-07"
+    },
+    {
+      "after": "2026-02-07T17:50:00+05:00",
+      "before": "2026-02-11T17:50:00+05:00",
+      "field": "timestamp",
+      "key": "L-H9-28889",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "posted with wrong date 2026-02-07"
+    },
+    {
+      "after": "2026-04-04T12:45:00+05:00",
+      "before": "2026-03-28T12:45:00+05:00",
+      "field": "timestamp",
+      "key": "L-H9-29662",
+      "op": "set",
+      "rng_stream": "inject.period.§I7",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-28)"
+    },
+    {
+      "after": "2026-04-04T12:45:00+05:00",
+      "before": "2026-03-28T12:45:00+05:00",
+      "field": "timestamp",
+      "key": "L-H9-29661",
+      "op": "set",
+      "rng_stream": "inject.period.§I7",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-28)"
+    },
+    {
+      "after": "2026-03-29T09:29:00+05:00",
+      "before": "2026-04-02T09:29:00+05:00",
+      "field": "timestamp",
+      "key": "L-H9-29583",
+      "op": "set",
+      "rng_stream": "inject.period.§I8",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-03-29 instead of 2026-04-02)"
+    },
+    {
+      "after": "2026-03-29T09:29:00+05:00",
+      "before": "2026-04-02T09:29:00+05:00",
+      "field": "timestamp",
+      "key": "L-H9-29582",
+      "op": "set",
+      "rng_stream": "inject.period.§I8",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-03-29 instead of 2026-04-02)"
+    }
+  ],
+  "seed": 1008
+}

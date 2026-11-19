@@ -1,0 +1,115 @@
+{
+  "episode_id": "ep_4caf173eac149fbf",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "INV-D7-1415",
+          "INV-D7-1419"
+        ]
+      ],
+      "affected_ids": [
+        "INV-D7-1415",
+        "INV-D7-1419"
+      ],
+      "conversions": 0,
+      "currency": "USD",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 263000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-06-29|USD|KZT",
+          "INV-D7-1458",
+          "JE-D7-33237"
+        ]
+      ],
+      "affected_ids": [
+        "INV-D7-1458"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 1953732,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-06-29|USD|KZT",
+          "INV-D7-1460",
+          "JE-D7-33257"
+        ]
+      ],
+      "affected_ids": [
+        "INV-D7-1460"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 743924,
+      "interacts_with": [
+        "I-04",
+        "I-05"
+      ],
+      "issue_id": "I-03",
+      "scenario": "A",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-06-29|USD|KZT",
+          "INV-D7-1460",
+          "JE-D7-33257"
+        ]
+      ],
+      "affected_ids": [
+        "INV-D7-1460"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 497615543,
+      "interacts_with": [
+        "I-03",
+        "I-05"
+      ],
+      "issue_id": "I-04",
+      "scenario": "A",
+      "type": "period_classification"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "INV-D7-1460",
+          "JE-D7-33282",
+          "RCPT-D7-3389"
+        ]
+      ],
+      "affected_ids": [
+        "INV-D7-1460",
+        "RCPT-D7-3389"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 88077951,
+      "interacts_with": [
+        "I-03",
+        "I-04"
+      ],
+      "issue_id": "I-05",
+      "scenario": "A",
+      "type": "payment_allocation"
+    }
+  ]
+}

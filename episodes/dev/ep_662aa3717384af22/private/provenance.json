@@ -1,0 +1,189 @@
+{
+  "clean_tables_sha256": "736178494b21c5fb6b0e72ce5caf8be8b0532149bf78b12ec079531825bdcaaf",
+  "config": {
+    "base_currency": "EUR",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "KWD",
+      "GBP"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 40,
+    "period_months": 1,
+    "period_start_month": 9,
+    "period_year": 2026,
+    "timezone": "UTC"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_662aa3717384af22",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "GBP",
+        "doc_id": "SCAN-B8-1328",
+        "due_at": "2026-10-19T14:27:00+00:00",
+        "entity_id": "E-B8-634",
+        "invoice_id": "IN-B8-1423",
+        "issued_at": "2026-09-19T14:27:00+00:00",
+        "line_items": [
+          {
+            "amount_minor": 228000,
+            "description": "Customs brokerage",
+            "service_period": {
+              "end": "2026-09-30",
+              "start": "2026-09-01"
+            }
+          }
+        ],
+        "total_minor": 228000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 9 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "GBP",
+        "customer": "Silverbirch Ceramics AS",
+        "date": "2026-09-19",
+        "doc_id": "SCAN-B8-1328",
+        "entity_id": "E-B8-634",
+        "invoice_id": "IN-B8-1423",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 228000,
+            "description": "Customs brokerage",
+            "service_period": {
+              "end": "2026-09-30",
+              "start": "2026-09-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 228000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "EUR",
+        "debit_minor": 268650,
+        "entity_id": "E-B8-634",
+        "invoice_id": "IN-B8-1423",
+        "payment_id": null,
+        "row_id": "L-B8-20195",
+        "timestamp": "2026-09-19T14:27:00+00:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 268650,
+        "currency": "EUR",
+        "debit_minor": 0,
+        "entity_id": "E-B8-634",
+        "invoice_id": "IN-B8-1423",
+        "payment_id": null,
+        "row_id": "L-B8-20196",
+        "timestamp": "2026-09-19T14:27:00+00:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 95670,
+      "before": 177165,
+      "field": "credit_minor",
+      "key": "L-B8-20355",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 81495,
+        "currency": "EUR",
+        "debit_minor": 0,
+        "entity_id": "E-B8-776",
+        "invoice_id": null,
+        "payment_id": "RCPT-B8-3025",
+        "row_id": "L-B8-20357",
+        "timestamp": "2026-10-02T13:35:00+00:00"
+      },
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "after": 692620,
+      "before": 687206,
+      "field": "debit_minor",
+      "key": "L-B8-20046",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-09-05 used instead of 2026-09-03"
+    },
+    {
+      "after": 692620,
+      "before": 687206,
+      "field": "credit_minor",
+      "key": "L-B8-20047",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-09-05 used instead of 2026-09-03"
+    },
+    {
+      "after": "2026-10-04T15:07:00+00:00",
+      "before": "2026-09-30T15:07:00+00:00",
+      "field": "timestamp",
+      "key": "L-B8-20394",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-10-04 instead of 2026-09-30)"
+    },
+    {
+      "after": "2026-10-04T15:07:00+00:00",
+      "before": "2026-09-30T15:07:00+00:00",
+      "field": "timestamp",
+      "key": "L-B8-20393",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-10-04 instead of 2026-09-30)"
+    }
+  ],
+  "seed": 2009
+}

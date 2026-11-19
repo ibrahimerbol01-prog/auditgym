@@ -1,0 +1,19 @@
+{
+  "base_currency": "EUR",
+  "counts": {
+    "documents": 71,
+    "fx": 162,
+    "invoices": 47,
+    "ledger": 416,
+    "payments": 24
+  },
+  "episode_id": "ep_defa4b1104157840",
+  "period_end": "2026-06-30",
+  "period_start": "2026-06-01",
+  "rounding": {
+    "applies_to": "conversion_to_base",
+    "mode": "half_even"
+  },
+  "schema_version": "1.0",
+  "timezone": "UTC"
+}
