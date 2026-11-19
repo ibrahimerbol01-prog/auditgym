@@ -133,8 +133,66 @@ class TestUIStatic(unittest.TestCase):
         self.assertIn("prefers-reduced-motion", read("style.css"))
         self.assertIn(":focus-visible", read("style.css"))
 
+    def test_hero_case_figures_match_the_episode_data(self):
+        """Every figure in the hero case card is read from train-03's public tables, so a regenerated
+        suite can never leave a stale or invented number on the start page."""
+        import csv
+        from decimal import ROUND_HALF_EVEN, Decimal
+        ep = "ep_8969ce76c2b8c8da"
+        pub = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "episodes", "train", ep, "public")
+        html = read("index.html")
+        case = re.search(r'<figure class="case.*?</figure>', html, re.S).group(0)
+        self.assertIn(ep, case)
+
+        def group(minor):
+            whole, frac = divmod(minor, 100)
+            return f"{whole:,}".replace(",", " ") + f".{frac:02d}"
+
+        with open(os.path.join(pub, "invoices.jsonl"), encoding="utf-8") as fh:
+            invoices = {r["invoice_id"]: r for r in map(json.loads, filter(str.strip, fh))}
+        with open(os.path.join(pub, "fx.csv"), encoding="utf-8") as fh:
+            fx = {(r["date"], r["source_currency"], r["target_currency"]): r["rate"] for r in csv.DictReader(fh)}
+        with open(os.path.join(pub, "ledger.csv"), encoding="utf-8") as fh:
+            ledger = {r["row_id"]: r for r in csv.DictReader(fh)}
+        rows = re.findall(r'<tr class="([^"]*)"><td>(INV-[\w-]+)</td><td class="dt">(\d\d)\.(\d\d)</td><td class="num">([\d ]+\.\d\d)<span class="u">([A-Z]{3})</span></td><td class="gl">(GL-[\w-]+)</td><td><svg[^>]*><use href="#tm-(\w+)"/></svg></td></tr>', case)
+        self.assertEqual([r[1] for r in rows], ["INV-S3-3285", "INV-S3-3286", "INV-S3-3287", "INV-S3-3288", "INV-S3-3289"])
+        for cls, inv, dd, mm, total, ccy, gl, mark in rows:
+            rec = invoices[inv]
+            self.assertEqual(rec["issued_at"][5:10], f"{mm}-{dd}", inv)
+            self.assertEqual(rec["currency"], ccy, inv)
+            self.assertEqual(group(rec["total_minor"]), total, inv)
+            # the cited ledger row is this invoice's receivable; a tick means it agrees, a cross that it does not
+            self.assertEqual((ledger[gl]["invoice_id"], ledger[gl]["account"]), (inv, "1200"), gl)
+            agrees = ccy == "KZT" and int(ledger[gl]["debit_minor"]) == rec["total_minor"]
+            self.assertEqual(mark, "agree" if agrees else "exc", f"{inv}: mark {mark}")
+        inv = invoices["INV-S3-3287"]
+        right, wrong = fx[("2026-03-13", "USD", "KZT")], fx[("2026-03-18", "USD", "KZT")]
+        self.assertEqual((right, wrong), ("503.695", "501.515"))
+        booked = int(ledger["GL-S3-11663"]["debit_minor"])
+        self.assertEqual(ledger["GL-S3-11663"]["invoice_id"], "INV-S3-3287")
+        cent = Decimal("1")
+        expected = int((Decimal(inv["total_minor"]) * Decimal(right)).quantize(cent, ROUND_HALF_EVEN))
+        self.assertEqual(int((Decimal(inv["total_minor"]) * Decimal(wrong)).quantize(cent, ROUND_HALF_EVEN)), booked)
+        diff = expected - booked
+        figures = {
+            "invoice": group(inv["total_minor"]), "right rate": right, "wrong rate": wrong,
+            "should be booked": group(expected), "booked": group(booked), "difference": group(diff),
+            "difference in minor units": str(diff), "invoice date": "13.03", "wrong rate date": "18.03",
+        }
+        self.assertEqual((figures["should be booked"], figures["booked"], figures["difference"], figures["difference in minor units"]),
+                         ("10 134 343.40", "10 090 481.80", "43 861.60", "4386160"))
+        for name, text in figures.items():
+            self.assertTrue(text in case, f"hero {name} {text!r} is not shown or is stale")
+        self.assertIn(f'data-count="{diff}"', case)
+
     def test_colour_contrast_meets_wcag_aa(self):
-        v = css_vars()
+        light = re.search(r"\[data-theme=light\]\{(.*?)\}", read("style.css"), re.S)
+        themes = [("dark", css_vars())] + ([("light", {**css_vars(), **dict(re.findall(r"--([\w-]+):(#[0-9a-fA-F]{6})", light.group(1)))})] if light else [])
+        for name, v in themes:
+            with self.subTest(theme=name):
+                self._contrast(v)
+
+    def _contrast(self, v):
         pairs = [  # (foreground, background, minimum ratio)
             ("txt", "bg", 7), ("txt", "s1", 7), ("txt2", "s1", 4.5), ("txt2", "s2", 4.5), ("txt3", "s1", 4.5),
             ("gold", "bg", 4.5), ("gold", "s1", 4.5), ("gold-ink", "gold", 7), ("pos", "s1", 4.5), ("neg", "s1", 4.5),
