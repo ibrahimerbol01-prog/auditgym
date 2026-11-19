@@ -24,19 +24,28 @@ async function api(path, body) {
 function toast(msg, kind) { document.querySelectorAll(".toast").forEach((x) => x.remove()); const t = el("div", { class: "toast" + (kind === "ok" ? " ok" : ""), role: kind === "ok" ? "status" : "alert" }, msg); document.body.append(t); setTimeout(() => t.remove(), 3200); }
 const sign = (x, d = 3) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(d);
 
-// ---------- market tape: real numbers from report.json ----------
+// ---------- quote tape, policy board, hero figure: real numbers from report.json ----------
+const POL = { oracle: ["ORACLE", "Эталон", "знает ответ — потолок награды"], reconcile: ["RECONCILE", "Сверщик", "аккуратные правила сверки"], random: ["RANDOM", "Стажёр", "случайные находки"], flag_all: ["FLAG_ALL", "Паникёр", "обвиняет всё подряд"] };
+const REPORT = fetch("/data/report.json").then((r) => r.json()).catch(() => null);
+const meanOf = (p) => (p.clean + p.mixed + p.interacting) / 3;
+const divBar = (v) => el("div", { class: "dv", "aria-hidden": "true" }, el("i", { class: v >= 0 ? "up" : "dn", style: `width:${Math.min(1, Math.abs(v)) * 50}%` }));
 (async () => {
   const tape = $("tape"); if (!tape) return;
-  const names = { oracle: "ORACLE", reconcile: "RECONCILE", random: "RANDOM", flag_all: "FLAG_ALL" };
   const items = [];
-  try {
-    const r = await (await fetch("/data/report.json")).json();
-    for (const p of r.policy_summary || []) { const v = (p.clean + p.mixed + p.interacting) / 3; items.push([names[p.policy] || p.policy, sign(v), v >= 0 ? "up" : "dn", v >= 0 ? "▲" : "▼"]); }
-    if (r.estimated_score) items.push(["VERIFY", `${r.estimated_score.total.toFixed(1)} / 100`, "up", "●"]);
-    if (r.fuzz) items.push(["FUZZ", `${r.fuzz.configs} конфигов · ${r.fuzz.failures.length} сбоев`, r.fuzz.failures.length ? "dn" : "up", "●"]);
-  } catch { /* report not built: fall back to static facts */ }
-  items.push(["ERRORS", "4 типа", "", ""], ["TOOLS", "5 · read-only", "", ""], ["BUDGET", "100 шагов", "", ""], ["DEPS", "0", "up", "●"]);
-  const one = () => items.map(([k, v, c, a]) => `<b>${k}</b><span class="${c}">${a ? a + " " : ""}${v}</span><span class="sep">/</span>`).join("");
+  const r = await REPORT;
+  if (r) {
+    for (const p of r.policy_summary || []) { const v = meanOf(p); items.push([(POL[p.policy] || [p.policy])[0], (v >= 0 ? "▲ " : "▼ ") + sign(v), v >= 0 ? "up" : "dn"]); }
+    if (r.estimated_score) items.push(["VERIFY", `${r.estimated_score.total.toFixed(1)} / 100`, "v"]);
+    if (r.fuzz) items.push(["FUZZ", `${r.fuzz.configs} конфигов · ${r.fuzz.failures.length} сбоев`, r.fuzz.failures.length ? "dn" : "v"]);
+    if (r.estimated_score && $("spec-verify")) $("spec-verify").textContent = Math.round(r.estimated_score.total);
+    const board = $("board");
+    if (board) for (const p of r.policy_summary || []) {
+      const v = meanOf(p); const n = POL[p.policy] || [p.policy, p.policy, ""];
+      board.append(el("div", { class: "pc", role: "listitem" }, el("div", { class: "pc-n" }, el("span", {}, n[1]), el("code", {}, p.policy)), el("div", { class: "pc-v " + (v >= 0 ? "up" : "dn") }, sign(v)), divBar(v), el("div", { class: "pc-s" }, n[2])));
+    }
+  }
+  items.push(["ERRORS", "4 типа", "v"], ["TOOLS", "5 · read-only", "v"], ["BUDGET", "100 шагов", "v"], ["DEPS", "0", "v"]);
+  const one = () => items.map(([k, v, c]) => `<b>${k}</b><span class="${c}">${v}</span><i class="sep"></i>`).join("");
   tape.innerHTML = one() + one();
 })();
 
@@ -46,15 +55,16 @@ async function loadSplit(split) {
   const tb = $("ep-rows"); const req = (loadSplit.req = (loadSplit.req || 0) + 1);
   tb.setAttribute("aria-busy", "true");
   let spec;
-  try { spec = await (await fetch(`/data/${split}.json`)).json(); } catch { if (req === loadSplit.req) { tb.textContent = ""; tb.append(el("tr", {}, el("td", { colspan: 5 }, "конфигурации не найдены"))); } return; }
+  try { spec = await (await fetch(`/data/${split}.json`)).json(); } catch { if (req === loadSplit.req) { tb.textContent = ""; tb.append(el("tr", {}, el("td", { colspan: 5, class: "empty-cell" }, "Конфигурации не найдены — запустите python -m auditgym.cli build-suite"))); } return; }
   if (req !== loadSplit.req) return; // a newer tab click won: never mix rows from two sets
   tb.textContent = ""; tb.removeAttribute("aria-busy");
   spec.episodes.forEach((e, i) => {
-    const c = e.config; const kind = c.clean ? "чистая компания" : [...(c.interactions || []).map((x) => "взаимодействие " + x), c.errors ? "ошибки по конфигу" : "ошибки по умолчанию"].join(" · ");
-    const cur = (c.base_currency || "KZT") + " · " + (c.foreign_currencies || ["USD", "EUR"]).join(" ");
+    const c = e.config; const name = `${split}-${String(i + 1).padStart(2, "0")}`;
+    const kinds = c.clean ? [el("span", { class: "k clean" }, "чистая компания")] : [...(c.interactions || []).map((x) => el("span", { class: "k ix" }, "взаимодействие " + x)), el("span", { class: "k" }, c.errors ? "ошибки по конфигу" : "ошибки по умолчанию")];
     tb.append(el("tr", {},
-      el("td", { class: "mono" }, `${split}-${String(i + 1).padStart(2, "0")}`), el("td", { class: "mono" }, e.seed), el("td", {}, kind), el("td", { class: "mono" }, cur),
-      el("td", { class: "num" }, el("button", { class: "btn outline small", "aria-label": `Открыть эпизод ${split}-${String(i + 1).padStart(2, "0")}`, onclick: () => start(e.seed, c) }, "Открыть →"))));
+      el("td", { class: "ep" }, name), el("td", { class: "seed" }, "seed " + e.seed), el("td", { class: "cfg" }, ...kinds),
+      el("td", { class: "cur" }, el("b", {}, c.base_currency || "KZT"), " · " + (c.foreign_currencies || ["USD", "EUR"]).join(" ")),
+      el("td", { class: "go" }, el("button", { class: "btn outline small", "aria-label": `Открыть эпизод ${name}`, onclick: () => start(e.seed, c) }, "Открыть ", el("span", { "aria-hidden": "true" }, "→")))));
   });
 }
 document.querySelectorAll("[data-split]").forEach((b) => b.addEventListener("click", () => loadSplit(b.dataset.split)));
@@ -94,7 +104,7 @@ async function step(action, label) {
   const o = r.observation;
   const ok = o && o.ok !== false && !(r.truncated);
   $("log").querySelectorAll(".cur").forEach((x) => x.classList.remove("cur"));
-  $("log").prepend(el("li", { class: "row cur", style: "flex-wrap:nowrap;gap:12px" }, el("span", { class: "muted", style: "width:38px" }, "#" + S.steps), el("span", { style: "width:120px" }, action.tool), el("span", { class: "muted", style: "flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, label || ""), el("span", { class: ok ? "ok" : "bad" }, ok ? "ok" : (o.error ? o.error.code : "truncated"))));
+  $("log").prepend(el("li", { class: "row cur", style: "flex-wrap:nowrap;gap:12px" }, el("span", { style: "width:34px;color:var(--txt3)" }, String(S.steps).padStart(2, "0")), el("span", { style: "width:112px;color:var(--txt)" }, action.tool), el("span", { style: "flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, label || ""), el("span", { class: ok ? "ok" : "bad" }, ok ? "ok" : (o.error ? o.error.code : "truncated"))));
   if (r.truncated) { showResult(null, r.reward, true); }
   return r;
 }
@@ -132,15 +142,25 @@ function renderPage() {
   for (const row of page.rows) {
     const id = rowId(S.table, row);
     const tr = el("tr", { class: S.sel && S.sel.id === id ? "sel" : "", tabindex: "0", "aria-selected": String(!!(S.sel && S.sel.id === id)), "data-id": id, onclick: () => select(S.table, row), onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(S.table, row); } else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); const n = e.key === "ArrowDown" ? tr.nextElementSibling : tr.previousElementSibling; if (n) n.focus(); } } });
-    for (const c of cols) {
-      let v = row[c]; if (v === null || v === undefined) v = "—";
-      if (/_minor$/.test(c) && typeof v === "number") v = fmt(v, c === "debit_minor" || c === "credit_minor" ? S.ep.manifest.base_currency : row.currency);
-      if (Array.isArray(v)) v = v.join(", ");
-      tr.append(el("td", { class: (/minor|rate/.test(c) ? "num " : "") + (/id|refs|date|timestamp|issued/.test(c) ? "mono" : "") }, v));
-    }
+    for (const c of cols) tr.append(cell(c, row[c], row));
     tb.append(tr);
   }
   t.append(tb);
+}
+// One table cell. The values are exactly the environment's; spans only dim the less important parts.
+function cell(c, v, row) {
+  const num = /minor|rate/.test(c); const cls = (num ? "num " : "") + (/id|refs|date|timestamp|issued|account|currency/.test(c) ? "mono" : "") + (c === COLS[S.table][0] ? " id" : "");
+  if (v === null || v === undefined || v === "") return el("td", { class: cls }, el("span", { class: "tz" }, "—"));
+  if (/_minor$/.test(c) && typeof v === "number") {
+    if (v === 0 && /debit|credit/.test(c)) return el("td", { class: cls }, el("span", { class: "tz" }, "0"));
+    const s = fmt(v, c === "debit_minor" || c === "credit_minor" ? S.ep.manifest.base_currency : row.currency); const d = s.lastIndexOf(".");
+    return el("td", { class: cls }, d < 0 ? s : s.slice(0, d), ...(d < 0 ? [] : [el("span", { class: "dec" }, s.slice(d))]));
+  }
+  if (Array.isArray(v)) v = v.join(", ");
+  const m = typeof v === "string" && v.match(/^(\d{4}-\d\d-\d\d)T(\d\d:\d\d:\d\d)(.*)$/);
+  if (m) return el("td", { class: cls }, m[1], el("span", { class: "tz" }, "T"), el("span", { class: "tm" }, m[2]), el("span", { class: "tz" }, m[3]));
+  if (c === "currency") return el("td", { class: cls }, el("span", { class: "ccy" }, v));
+  return el("td", { class: cls }, String(v));
 }
 $("prev").addEventListener("click", () => { const p = S.pages[S.table]; if (p.i > 0) { p.i -= 1; renderPage(); } });
 $("next").addEventListener("click", async () => { const p = S.pages[S.table]; if (p.i < p.list.length - 1) { p.i += 1; renderPage(); return; } const c = p.list[p.i].next_cursor; if (c) await fetchPage(S.table, c); });
@@ -171,8 +191,20 @@ function renderRecord() {
 }
 $("open-doc").addEventListener("click", async () => {
   const r = await step({ tool: "get_document", args: { doc_id: S.sel.row.doc_id } }, S.sel.row.doc_id);
-  if (r.observation.ok) { const box = $("rec-doc"); box.textContent = ""; box.append(el("div", { class: "doc" }, el("div", { class: "h" }, `[ ${S.sel.row.doc_id} ]`), el("pre", {}, JSON.stringify(r.observation.result, null, 2)))); }
+  if (r.observation.ok) { const box = $("rec-doc"); box.textContent = ""; const d = r.observation.result; box.append(el("div", { class: "doc" }, el("div", { class: "h" }, el("b", {}, S.sel.row.doc_id), el("span", {}, d && d.kind ? String(d.kind) : "документ")), el("pre", {}, docText(d)))); }
 });
+// A document as a printed statement: aligned "key  value" lines, line items indented. Same data as the JSON.
+function docText(d) {
+  if (!d || typeof d !== "object") return JSON.stringify(d, null, 2);
+  const keys = Object.keys(d).filter((k) => !Array.isArray(d[k]) || !d[k].length || typeof d[k][0] !== "object"); const w = Math.max(...keys.map((k) => k.length), 8) + 2;
+  const val = (k, v) => (/_minor$/.test(k) && typeof v === "number" ? `${v}   = ${fmt(v, d.currency || "")}` : typeof v === "object" && v !== null ? JSON.stringify(v) : String(v));
+  const out = keys.map((k) => k.padEnd(w) + val(k, d[k]));
+  for (const [k, list] of Object.entries(d)) if (Array.isArray(list) && list.length && typeof list[0] === "object") {
+    out.push("", `${k} (${list.length})`);
+    list.forEach((it, i) => { out.push(`  ${String(i + 1).padStart(2, "0")}`); for (const [a, b] of Object.entries(it)) out.push("      " + a.padEnd(Math.max(w - 4, a.length + 2)) + (a === "service_period" && b ? `${b.start} → ${b.end}` : val(a, b))); });
+  }
+  return out.join("\n");
+}
 const addTo = (list, label) => { if (list.includes(S.sel.id)) return toast(`${S.sel.id} уже в списке «${label}»`); if (list.length >= 10) return toast("Не больше 10 ID"); list.push(S.sel.id); renderDraft(); toast(`${S.sel.id} → ${label}`, "ok"); };
 $("add-aff").addEventListener("click", () => addTo(S.draft.aff, "затронутые"));
 $("add-ev").addEventListener("click", () => addTo(S.draft.ev, "доказательства"));
@@ -231,7 +263,7 @@ function showResult(rep, reward, truncated) {
   const f1 = rep ? rep.f1 : 0, steps = rep ? rep.inspection_steps : S.steps;
   $("r-formula").textContent = truncated ? "лимит шагов: засчитано как пустой ответ" : `clip(2 × ${f1.toFixed(3)} − 1 − 0.002 × ${steps}, −1, 1)`;
   const tiles = $("r-tiles"); tiles.textContent = "";
-  const t = (label, value, note) => tiles.append(el("div", { class: "card" }, el("div", { class: "muted", style: "font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600" }, label), el("div", { class: "disp", style: "font-size:32px" }, value), el("div", { class: "muted", style: "font-size:13px" }, note)));
+  const t = (label, value, note) => tiles.append(el("div", { class: "card" }, el("div", { class: "tl" }, label), el("div", { class: "disp" }, value), el("div", { class: "tn" }, note)));
   if (rep && rep.status === "invalid_structure") { t("Статус", "−1", "неверная структура: " + (rep.error || "")); }
   t("Precision", rep ? rep.precision.toFixed(3) : "—", rep ? `совпало ${rep.tp} из ${rep.tp + rep.fp}` : "");
   t("Recall", rep ? rep.recall.toFixed(3) : "—", rep ? `найдено ${rep.tp} из ${rep.tp + rep.fn}` : "");
@@ -239,9 +271,15 @@ function showResult(rep, reward, truncated) {
   t("Шаги расследования", steps, "+ 1 отправка");
   t("Цена шагов", "−" + (0.002 * steps).toFixed(3), "0.002 за каждый шаг");
   t("Находок", S.findings.length, "максимум 30");
+  renderBench(reward);
   const list = $("r-list"); list.textContent = "";
   (rep && rep.per_finding || []).forEach((pf) => { const f = S.findings[pf.index]; list.append(el("div", { class: "row", style: "border-top:1px solid var(--line);padding:8px 0" }, el("span", { class: "badge " + (pf.matched ? "lime" : "pink") }, pf.matched ? "✓ Совпала" : "✗ Не совпала"), el("span", { class: "mono" }, `${f.type} · ${f.affected_ids.join(", ")} · ${f.currency} ${fmt(f.claimed_amount_minor, f.currency)}`), el("span", { class: "muted" }, pf.matched ? "полный набор доказательств" : ""))); });
   if (!list.childNodes.length) list.append(el("div", { class: "muted" }, "Находок не было."));
+}
+async function renderBench(reward) {
+  const b = $("r-bench"); b.textContent = ""; const r = await REPORT; if (!r) return;
+  const rows = [["Вы · этот эпизод", "you", reward], ...(r.policy_summary || []).map((p) => [(POL[p.policy] || [0, p.policy])[1], p.policy, meanOf(p)])];
+  for (const [name, code, v] of rows) b.append(el("div", { class: "bn" + (code === "you" ? " you" : "") }, el("span", { class: "nm" }, name, code === "you" ? "" : el("code", { class: "muted small" }, code)), divBar(v), el("span", { class: "vv " + (v > 0 ? "ok" : v < 0 ? "bad" : "") }, sign(v))));
 }
 $("again").addEventListener("click", () => { $("result").classList.add("hidden"); $("start").classList.remove("hidden"); window.scrollTo(0, 0); });
 loadSplit("train").then(async () => {
