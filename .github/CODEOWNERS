@@ -1,0 +1,5 @@
+# Every PR needs the lead's approval. Core scoring and generation are the highest-risk files.
+*                       @ibrahimerbol01-prog
+/src/auditgym/eval/     @ibrahimerbol01-prog
+/src/auditgym/gen/      @ibrahimerbol01-prog
+/tests/attacks/         @ibrahimerbol01-prog

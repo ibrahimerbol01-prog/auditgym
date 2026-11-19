@@ -1,0 +1,50 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  tests-and-verify:
+    name: tests + verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    env:
+      PYTHONPATH: src
+      PYTHONHASHSEED: random
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Unit, rubric and attack tests
+        run: python -m unittest discover -s tests -q
+      - name: The one verification command
+        run: python -m auditgym.verify --out ci-report.json --trajectories ci-trajectories.jsonl
+      - name: Committed episodes match the generator (golden hashes)
+        run: python -m unittest tests.test_golden -q
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report-${{ matrix.os }}
+          path: ci-report.json
+  docker-offline:
+    name: docker build + offline verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: docker build -t auditgym .
+      - name: Verify with no network, 2 CPU, 4 GB
+        run: docker run --rm --network none --cpus=2 --memory=4g auditgym
+      - name: Demo
+        run: docker run --rm --network none auditgym demo
