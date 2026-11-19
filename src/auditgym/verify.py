@@ -492,8 +492,28 @@ def failure_analysis(svc: ServiceClient, eps: List[Dict[str, Any]]) -> Dict[str,
         for iss in ep["private"]["truth"]["issues"]:
             d = tiers.setdefault(iss["detectability_tier"], {"issues": 0})
             d["issues"] += 1
+    from .policies.naive import TRICKS
+    tricks = {}
+    for name, fn in TRICKS.items():
+        tp = fpn = fnn = 0
+        rewards = []
+        for ep in eps:
+            t = ep["public"]["tables"]
+            res = score(fn(t, ep["public"]["policy"], ep["public"]["manifest"]["episode_id"]), ep["private"]["truth"]["issues"], 20)
+            tp, fpn, fnn = tp + res["tp"], fpn + res["fp"], fnn + res["fn"]
+            rewards.append(res["reward"])
+        tricks[name] = {"tp": tp, "fp": fpn, "fn": fnn, "mean_reward": sum(rewards) / len(rewards)}
+    careful = []
+    for ep in eps:
+        t = ep["public"]["tables"]
+        fs = find_issues(t["ledger"], t["invoices"], t["payments"], t["fx"], ep["public"]["policy"], ep["public"]["manifest"]["episode_id"])
+        careful.append(score(fs, ep["private"]["truth"]["issues"], 20)["reward"])
+    tricks["careful_rules (reference)"] = {"tp": sum(v["found"] for v in per_type.values()), "fp": fp,
+                                           "fn": sum(v["issues"] - v["found"] for v in per_type.values()),
+                                           "mean_reward": sum(careful) / len(careful)}
     return {"reconcile_rules_recall_by_type": per_type, "reconcile_false_positives": fp, "issues_by_tier": tiers,
-            "note": "Measured on the 20 hidden-style episodes with full information (no step budget)."}
+            "naive_tricks": tricks,
+            "note": "Measured on the 20 hidden-style episodes with full information; rewards assume 20 inspection steps."}
 
 
 def engineering_checks(report_dir: str, traj_path: str) -> List[Dict[str, Any]]:

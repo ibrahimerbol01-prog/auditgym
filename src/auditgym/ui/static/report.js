@@ -35,6 +35,15 @@ async function main() {
     const rec = v.issues ? v.found / v.issues : 1;
     $("fa").append(el("div", {}, el("div", { class: "row", style: "justify-content:space-between;font-size:13px" }, el("span", { class: "mono" }, type), el("b", {}, `${rec.toFixed(2)} · ${v.found}/${v.issues}`)), el("div", { class: "b" }, el("i", { style: `width:${rec * 100}%;background:${rec >= 0.9 ? "var(--lime)" : rec >= 0.6 ? "var(--lilac)" : "var(--pink)"}` }))));
   }
+  const NAMES = { duplicates_by_amount_only: "дубли только по сумме", utc_dates_instead_of_company_tz: "даты по UTC, а не по компании", any_unapplied_cash_is_an_error: "любой нераспределённый кэш = ошибка", findings_without_evidence: "находки без доказательств", "careful_rules (reference)": "аккуратные правила (эталон)" };
+  const tr = rep.failure_analysis.naive_tricks || {};
+  if (Object.keys(tr).length) {
+    $("fa").append(el("div", { class: "muted", style: "font-size:13px;margin-top:6px" }, "Наивные трюки против отвлекающих случаев · средняя награда (−1 … +1)"));
+    for (const [k, v] of Object.entries(tr)) {
+      const w = Math.max(0, (v.mean_reward + 1) / 2) * 100;
+      $("fa").append(el("div", {}, el("div", { class: "row", style: "justify-content:space-between;font-size:13px" }, el("span", {}, NAMES[k] || k), el("b", { class: "mono" }, sgn(v.mean_reward) + ` · FP ${v.fp} · FN ${v.fn}`)), el("div", { class: "b" }, el("i", { style: `width:${w}%;background:${v.mean_reward > 0.9 ? "var(--lime)" : v.mean_reward > 0 ? "var(--lilac)" : "var(--pink)"}` }))));
+    }
+  }
   $("fz").textContent = `Фаззинг конфигураций: ${rep.fuzz.valid_episodes_ok} валидных эпизодов без ошибок, ${rep.fuzz.rejected_with_bounded_error} конфигов отклонены с понятной ошибкой, сбоев: ${rep.fuzz.failures.length}. Ложных срабатываний правил: ${rep.failure_analysis.reconcile_false_positives}.`;
   await loadTraj();
 }

@@ -1,1 +1,109 @@
-# placeholder
+# AuditGym — design note
+
+AuditGym is a reproducible RL environment for financial-audit agents: synthetic company books with hidden, recorded errors; five read-only investigation tools; a matcher and reward that pay for proof, not for persuasion. It is an environment and an evaluator — it trains nothing.
+
+Numbers below come from `report.json` produced by `python -m auditgym.verify` (ENV 1.0.0, Python 3.11, one run ≈ 16 s on 2 cores).
+
+## 1. Architecture
+
+```
+  Evaluator service (own process)          AuditEnv (Python API / stdio / HTTP)        Agent / policy
+  generate(seed, config) ──public only──▶  reset(seed, config) -> (obs, info)   ◀──▶  {"tool", "args"}
+  holds truth, provenance, clean books     step(action) -> 5-tuple                     sees only tool results
+  score(findings, steps) ◀──submission───  submit -> evaluator                          never sees seed or truth
+  reference() / finalize()  (organizer API, never reachable from the agent)
+```
+
+The environment process never loads `truth.json`, `provenance.json` or the clean tables: they live only in the evaluator service, which runs as a separate process speaking JSON lines. The agent talks to the environment only, so it has no channel to read or write evaluator state. In closed mode the terminal reward is `0.0` and `info` is `{}`; scores stay in the service until `finalize`.
+
+## 2. Data generation
+
+1. **Consistent hidden history** (`gen/history.py`): customers with a fixed billing currency, invoices with line items and service periods, payments (full, split, lump-sum, short-pay with a documented deduction and credit note, advances), supplier expenses, and daily synthetic FX random walks. The ledger is double entry in the base currency and balances by construction; every base amount is foreign amount × the policy-date rate, rounded half-even once.
+2. **Recorded causal injections** (`gen/inject.py`): every change goes through a mutator that logs a replayable operation (`provenance.json`). `replay(clean, operations) == public` is checked for every episode.
+3. **Anti-tell naming** (`gen/export.py`): IDs are assigned after injection by one canonical routine — chronological numbering from a random start, per-episode prefixes. `id_seed` changes only names, `layout_seed` only file row order.
+4. **episode_id** is a hash of the canonical public tables, never of the seed (the generator is open source; a seed-derived id would let anyone recover the seed and regenerate the truth).
+
+### Error types and the separation rule
+
+| Type | What changes (only) | Expected amount | Minimal evidence |
+|---|---|---|---|
+| duplicate_invoice | a second invoice, same entity, line items **and service period**, new number | invoice total, invoice currency | both invoice ids |
+| payment_allocation | allocation rows: part or all of a receipt left in 2350 Unapplied cash though the payment references the invoice | unapplied base amount | payment, invoice, unapplied row |
+| date_or_fx (a) | booked base amount uses another day's rate | \|booked − correct\|, base | invoice, AR row, fx row of the policy date |
+| date_or_fx (b) | posting date moved inside the period and amount at that day's rate | \|booked − correct\|, base | invoice, AR row, fx row of the policy date |
+| period_classification | posting timestamp moved across the period boundary (amount stays correct) | correct base amount | invoice, AR row (+ policy-date fx row if foreign) |
+
+No injection changes two of {amount, period, allocation rows, extra record}. Interaction scenarios: **A** — a foreign invoice near the period end with a wrong-day rate, posted after the boundary, and partly paid by a receipt that is only partly applied (3 linked issues); **B** — a duplicate whose second copy is also posted after the boundary (2 linked issues). Each issue's amount is its own injection delta, so fixing one never changes another.
+
+**Legitimate distractors** (must not be flagged): split and lump-sum payments, short pay with a documented deduction + credit note, advances with no invoice reference held in unapplied cash, recurring invoices with the same lines and amount but a different service period, timestamps written in UTC that resolve to the next local day.
+
+## 3. Contract and tools
+
+`reset(seed, config)` → `(observation, info)`; the first observation carries the task, manifest, policy, tool schemas, the finding schema and the published per-type finding rules. `step(action)` → `(observation, reward, terminated, truncated, info)`. Tools: `list_records` (≤ 50 rows, stable opaque cursors), `get_record`, `get_document`, `calculator` (Decimal recursive-descent parser: numbers, `+ - * / ( )`, unary minus, limits on length, digits, depth and result size), `submit`. Every step — including unknown tools, tables and ids — consumes one step and returns a bounded error from a fixed code list with a fixed message. 100 steps including submit; 60 s wall clock (injectable clock); truncation returns `{}` and is scored as an empty submission with all steps counted.
+
+## 4. Matching and reward (published, code in `eval/scoring.py`)
+
+- Invalid structure (wrong keys or types, unknown type, NaN/Infinity, `bool`/float/negative/huge amounts, > 30 findings, > 10 evidence ids, explanation > 1000 chars, wrong episode_id) → episode ends, reward −1, evaluator log entry.
+- Normalization: NFKC + trim; ids and currency upper-cased; id lists sorted and de-duplicated.
+- A finding matches an issue iff type, canonical `affected_ids` and currency are equal, `|claimed − expected| ≤ 1 + conversions`, and the evidence contains one complete acceptable set.
+- One-to-one maximum matching (augmenting paths); ties prefer the smaller amount error, then the lower finding index. Unmatched and duplicate findings are false positives.
+- P, R = 0 on a zero denominator; F1 = 2TP/(2TP+FP+FN); both empty → F1 = 1; empty reference with findings → F1 = 0.
+- `reward = clip(2·F1 − 1 − 0.002·inspection_steps, −1, 1)`. The explanation is never parsed.
+
+## 5. Measured results
+
+Verification (our own stand-ins for the organizers' checks, one test per item):
+
+| Area | Passed |
+|---|---|
+| Contract and isolation (C1–C20) | 20 / 20 |
+| Data and reference (20 hidden-style episodes, incl. the independent verifier) | 20 / 20 |
+| Reward reliability (R1–R20) | 20 / 20 |
+| Reproducibility (20 pairs: exact repeat; new order and ids keep the oracle answer and reward) | 20 / 20 |
+| Config fuzzing (50 random configs) | 37 valid episodes pass every check; 13 rejected with a bounded error; 0 failures |
+
+Baseline policies, mean return on 9 hidden-style episodes (3 clean, 3 mixed, 3 interacting):
+
+| Policy | Clean | Mixed | Interacting | Mean steps |
+|---|---|---|---|---|
+| Oracle (evaluator-only) | +1.000 | +1.000 | +1.000 | 1 |
+| Reconciliation (public tools only) | +0.967 | +0.961 | +0.966 | 18.6 |
+| Random (seed 7) | −1.000 | −1.000 | −1.000 | 11.7 |
+| Flag-everything | −1.000 | −1.000 | −1.000 | 2 |
+
+## 6. Failure analysis
+
+The reconciliation baseline applies careful rules (company time zone, document date, service periods, documented deductions) and, with full information, finds all 89 issues on the 20 hidden-style episodes with 0 false positives. Its only cost is the step budget (≈ 19 page reads → −0.04).
+
+What defeats simpler solvers — each row replaces one careful rule with a shortcut (rewards assume 20 steps):
+
+| Shortcut | TP | FP | FN | Mean reward |
+|---|---|---|---|---|
+| Duplicates by entity + amount only (ignores service period) | 89 | 47 | 0 | +0.23 |
+| Any cash in unapplied = allocation error (ignores documented advances) | 89 | 25 | 0 | +0.34 |
+| UTC calendar dates instead of the company time zone | 89 | 5 | 0 | +0.92 |
+| Right findings but no evidence ids | 22 | 67 | 67 | −0.15 |
+| Careful rules (reference) | 89 | 0 | 0 | +0.96 |
+
+So the distractors do their job: recurring invoices and advances punish the two most common shortcuts hard, the time-zone distractor is rarer (one or two per episode at distractor level 1), and unproven accusations are worth less than nothing.
+
+## 7. Independent verification
+
+`eval/verify_independent.py` was written by a separate agent from the specification only, without access to the generator or the rules engine (a test asserts it imports neither). It re-proves every declared issue from the public records and checks that one acceptable evidence set is sufficient *on its own*. On its first run it found a real bug — a foreign-currency period error whose evidence set could not prove the amount — which we fixed by adding the policy-date FX row to such sets. It now runs inside `verify` on all 20 hidden-style episodes.
+
+## 8. Limitations (honest)
+
+- **Synthetic only.** All companies, people, accounts and money are fictional; the FX series are random walks. Nothing here is evidence of fitness for real audit work, and the reward does not prove it.
+- **Simplified FX policy.** Spot rate of the policy date in the company time zone, one rounding at the end; inspired by IAS 21 from secondary sources, not a faithful implementation.
+- **Error density is unrealistic.** Up to 12 issues in 200–2,000 ledger rows is far above real base rates.
+- **The careful baseline is strong.** With unlimited reading it solves every episode; difficulty comes from distractors and evidence requirements, not from hidden facts. We consider that correct for this brief (difficulty must not make the task unsolvable), but it means the environment separates careful from careless solvers more than strong from very strong ones.
+- **Tolerance.** Absolute `1 + conversions` minor units forgives rounding only; a solver that rounds twice can miss by more.
+- **Reward shape.** Silence on erroneous books and wild accusations on clean books both score −1; the reward cannot tell "did nothing" from "was badly wrong".
+- **Open generator.** The code is public and deterministic. `episode_id` does not reveal the seed, but anyone with unlimited compute could search seeds by regenerating and comparing records; hidden seeds should be large (64-bit).
+- **No model training.** We train nothing and claim no model improvement.
+- **Docker base image.** The Dockerfile pins `python:3.11-slim-bookworm`; pin it by digest on the build machine before release (instructions in the Dockerfile).
+- **Our checks are stand-ins.** The organizers' 20/20/20 check definitions were not available to us when this was written; our lists are built from the brief and may differ in detail.
+
+## 9. Tools and resources used
+
+Python 3.11 standard library only at runtime. Fonts: Dela Gothic One, Onest, JetBrains Mono (SIL Open Font License, bundled with their licenses). Built with the help of AI coding assistants (Anthropic Claude; Google Antigravity/Gemini), with every result checked by the tests above.
