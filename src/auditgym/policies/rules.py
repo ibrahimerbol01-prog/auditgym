@@ -74,8 +74,9 @@ def find_issues(ledger: List[dict], invoices: List[dict], payments: List[dict], 
         # period_classification: posting period differs from the policy-date period.
         d_post = local_date(ar["timestamp"], tzn)
         if in_period(d_policy) != in_period(d_post):
+            ev = [iid, ar["row_id"]] + ([f"{d_policy.isoformat()}|{ccy}|{base}"] if ccy != base else [])
             findings.append({"type": "period_classification", "affected_ids": [iid], "claimed_amount_minor": expected,
-                             "currency": base, "evidence_ids": sorted([iid, ar["row_id"]]),
+                             "currency": base, "evidence_ids": sorted(ev),
                              "explanation": "Posted outside the period of its issue date."})
 
     # payment_allocation: referenced invoice exists but part of the receipt sits in unapplied cash.

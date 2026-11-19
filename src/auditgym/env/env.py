@@ -46,7 +46,7 @@ FINDING_RULES = {
     "period_classification": {"affected_ids": "[invoice_id]",
                               "amount": "the invoice's correct base amount (foreign total x policy-date rate)",
                               "currency": "base currency",
-                              "minimal_evidence": "invoice_id and its accounts-receivable ledger row"},
+                              "minimal_evidence": "invoice_id, its accounts-receivable ledger row and, for a foreign invoice, the fx row of the policy date"},
     "tolerance": "|claimed - expected| <= 1 + conversions (0 for duplicates, 1 when a conversion is involved)",
     "matching": "one-to-one; duplicates and extra findings are false positives; the explanation is never scored",
 }

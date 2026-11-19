@@ -179,8 +179,11 @@ def inject_period(w: World, m: Mutator, rng: Rng, inv: str, stream: str) -> dict
               f"posted in the wrong period ({nd.isoformat()} instead of {d.isoformat()})", stream)
     correct = w.to_base(meta["total"], meta["currency"], d)
     conv = 1 if meta["currency"] != w.base else 0
+    ev = [inv, meta["ar_row"]]
+    if meta["currency"] != w.base:  # the amount needs the policy-date rate to be provable from the set
+        ev.append(fx_id(d, meta["currency"], w.base))
     return _issue(type="period_classification", affected_ids=[inv], expected_amount_minor=correct, currency=w.base,
-                  acceptable_evidence_sets=[sorted([inv, meta["ar_row"]])], conversions=conv,
+                  acceptable_evidence_sets=[sorted(ev)], conversions=conv,
                   detectability_tier="ledger+invoices")
 
 
