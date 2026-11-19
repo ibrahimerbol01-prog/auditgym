@@ -2,7 +2,7 @@
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === "class") e.className = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); } for (const k of kids) e.append(k instanceof Node ? k : document.createTextNode(String(k))); return e; };
 const AREAS = [["contract", "Контракт и изоляция", 25, "проверок"], ["data", "Данные и эталон", 25, "эпизодов"], ["reward", "Надёжность награды", 25, "проверок"], ["repro", "Воспроизводимость", 15, "пар"], ["engineering", "Инженерия и объяснение", 10, "критериев"]];
-const RANK = { oracle: ["Эталон", "lime"], reconcile: ["Сверщик", "lilac"], random: ["Стажёр", "dim"], flag_all: ["Паникёр", "pink"] };
+const RANK = { oracle: ["Эталон", "gold"], reconcile: ["Сверщик", "lime"], random: ["Стажёр", "dim"], flag_all: ["Паникёр", "pink"] };
 const sgn = (x) => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(3);
 
 async function main() {
@@ -14,8 +14,8 @@ async function main() {
   for (const [k, name, max, unit] of AREAS) {
     const checks = rep.areas[k]; const pass = checks.filter((c) => c.passed).length;
     const cells = el("div", { class: "cells", role: "img", "aria-label": `${pass} из ${checks.length}` }, ...checks.map((c) => el("i", { class: c.passed ? "" : "f", title: `${c.id}: ${c.name}${c.error ? " — " + c.error : ""}` })));
-    $("areas").append(el("div", { class: "card", style: "display:flex;flex-direction:column;gap:10px" }, el("div", { style: "font-weight:700;min-height:42px" }, name),
-      el("div", {}, el("span", { class: "disp", style: `font-size:30px;color:${pass === checks.length ? "var(--lime)" : "var(--txt)"}` }, (+rep.estimated_score[keys[k]]).toFixed(1)), el("span", { class: "muted" }, " / " + max)),
+    $("areas").append(el("div", { class: "card", style: "display:flex;flex-direction:column;gap:10px" }, el("div", { style: "font-weight:600;min-height:42px;font-size:14px" }, name),
+      el("div", {}, el("span", { class: "disp", style: `font-size:34px;font-weight:400;color:${pass === checks.length ? "var(--lime)" : "var(--txt)"}` }, (+rep.estimated_score[keys[k]]).toFixed(1)), el("span", { class: "muted" }, " / " + max)),
       cells, el("div", { class: "mono muted", style: "font-size:12px" }, `${pass} / ${checks.length} ${unit}`)));
   }
   const groups = ["clean", "mixed", "interacting"];
@@ -26,14 +26,14 @@ async function main() {
     const rows = rep.policies.filter((r) => r.policy === s.policy);
     const avg = (k) => rows.reduce((a, r) => a + (r[k] || 0), 0) / rows.length;
     tb.append(el("tr", {}, el("td", {}, el("span", { class: "badge " + RANK[s.policy][1] }, RANK[s.policy][0]), " ", el("span", { class: "mono" }, s.policy)),
-      ...groups.map((g) => el("td", { class: "num mono" }, sgn(s[g]))), el("td", { class: "num" }, avg("f1").toFixed(2)), el("td", { class: "num" }, avg("steps").toFixed(1)), el("td", { class: "num muted" }, avg("seconds").toFixed(2) + " с")));
+      ...groups.map((g) => el("td", { class: "num mono " + (s[g] > 0 ? "ok" : s[g] < 0 ? "bad" : "") }, sgn(s[g]))), el("td", { class: "num" }, avg("f1").toFixed(2)), el("td", { class: "num" }, avg("steps").toFixed(1)), el("td", { class: "num muted" }, avg("seconds").toFixed(2) + " с")));
   }
   t.append(tb);
   $("pol-sub").textContent = `${rep.policies.length / 4} эпизодов на политику · средняя награда`;
   const fa = rep.failure_analysis.reconcile_rules_recall_by_type;
   for (const [type, v] of Object.entries(fa)) {
     const rec = v.issues ? v.found / v.issues : 1;
-    $("fa").append(el("div", {}, el("div", { class: "row", style: "justify-content:space-between;font-size:13px" }, el("span", { class: "mono" }, type), el("b", {}, `${rec.toFixed(2)} · ${v.found}/${v.issues}`)), el("div", { class: "b" }, el("i", { style: `width:${rec * 100}%;background:${rec >= 0.9 ? "var(--lime)" : rec >= 0.6 ? "var(--lilac)" : "var(--pink)"}` }))));
+    $("fa").append(el("div", {}, el("div", { class: "row", style: "justify-content:space-between;font-size:13px" }, el("span", { class: "mono" }, type), el("b", {}, `${rec.toFixed(2)} · ${v.found}/${v.issues}`)), el("div", { class: "b" }, el("i", { style: `width:${rec * 100}%;background:${rec >= 0.9 ? "var(--pos)" : rec >= 0.6 ? "var(--lilac)" : "var(--pink)"}` }))));
   }
   const NAMES = { duplicates_by_amount_only: "дубли только по сумме", utc_dates_instead_of_company_tz: "даты по UTC, а не по компании", any_unapplied_cash_is_an_error: "любой нераспределённый кэш = ошибка", findings_without_evidence: "находки без доказательств", "careful_rules (reference)": "аккуратные правила (эталон)" };
   const tr = rep.failure_analysis.naive_tricks || {};
@@ -41,7 +41,7 @@ async function main() {
     $("fa").append(el("div", { class: "muted", style: "font-size:13px;margin-top:6px" }, "Наивные трюки против отвлекающих случаев · средняя награда (−1 … +1)"));
     for (const [k, v] of Object.entries(tr)) {
       const w = Math.max(0, (v.mean_reward + 1) / 2) * 100;
-      $("fa").append(el("div", {}, el("div", { class: "row", style: "justify-content:space-between;font-size:13px" }, el("span", {}, NAMES[k] || k), el("b", { class: "mono" }, sgn(v.mean_reward) + ` · FP ${v.fp} · FN ${v.fn}`)), el("div", { class: "b" }, el("i", { style: `width:${w}%;background:${v.mean_reward > 0.9 ? "var(--lime)" : v.mean_reward > 0 ? "var(--lilac)" : "var(--pink)"}` }))));
+      $("fa").append(el("div", {}, el("div", { class: "row", style: "justify-content:space-between;font-size:13px" }, el("span", {}, NAMES[k] || k), el("b", { class: "mono" }, sgn(v.mean_reward) + ` · FP ${v.fp} · FN ${v.fn}`)), el("div", { class: "b" }, el("i", { style: `width:${w}%;background:${v.mean_reward > 0.9 ? "var(--pos)" : v.mean_reward > 0 ? "var(--lilac)" : "var(--pink)"}` }))));
     }
   }
   $("fz").textContent = `Фаззинг конфигураций: ${rep.fuzz.valid_episodes_ok} валидных эпизодов без ошибок, ${rep.fuzz.rejected_with_bounded_error} конфигов отклонены с понятной ошибкой, сбоев: ${rep.fuzz.failures.length}. Ложных срабатываний правил: ${rep.failure_analysis.reconcile_false_positives}.`;
@@ -68,7 +68,7 @@ function select() {
 function render() {
   const ol = $("steps"); ol.textContent = "";
   view.forEach((s, i) => { const a = s.action; const args = a.tool === "submit" ? `${a.args.findings.findings.length} находок` : JSON.stringify(a.args).slice(0, 60);
-    const li = el("li", { class: "row", style: `flex-wrap:nowrap;gap:10px;padding:4px 6px;border-radius:10px 3px;cursor:pointer;${i === pos ? "background:rgba(184,242,92,.12);box-shadow:inset 3px 0 0 var(--lime)" : ""}`, onclick: () => { pos = i; render(); } },
+    const li = el("li", { class: "row", tabindex: "0", "aria-current": i === pos ? "step" : "false", style: `flex-wrap:nowrap;gap:10px;padding:5px 8px;border-radius:6px;cursor:pointer;${i === pos ? "background:var(--gold-soft);box-shadow:inset 2px 0 0 var(--gold)" : ""}`, onclick: () => { pos = i; render(); }, onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pos = i; render(); } } },
       el("span", { class: "muted", style: "width:34px" }, "#" + s.step), el("span", { style: "width:100px" }, a.tool), el("span", { class: "muted", style: "flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, args));
     ol.append(li); });
   $("scrub").value = pos;

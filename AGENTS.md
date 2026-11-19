@@ -4,7 +4,7 @@ FinTech case of Genesis Hackathon 2026: an RL environment + evaluator for audit 
 scores the environment, not an agent. Deadline Nov 22, 23:59 Astana (UTC+5); freeze 18:00.
 
 ## Before you change anything
-- Run `PYTHONPATH=src python -m unittest discover -s tests -q` (33 tests) and
+- Run `PYTHONPATH=src python -m unittest discover -s tests -q` (45 tests; the 5 browser tests run when Playwright is installed, CI always runs them) and
   `PYTHONPATH=src python -m auditgym.verify` (must end with every check passing). Both must stay green.
 - Read DESIGN.md (how it works, published rules) and docs/TASKS.md (your task).
 
@@ -17,6 +17,8 @@ scores the environment, not an agent. Deadline Nov 22, 23:59 Astana (UTC+5); fre
 - Agent-facing code (`env/`, `policies/` except oracle, `ui/`) never touches truth, provenance or `private/`.
 - Changing generation changes episodes: then run `python -m auditgym.cli build-suite` and commit the new
   `episodes/` and `episodes/golden_hashes.json` together, and say so in the commit message.
+- UI: `tests/test_ui_static.py` (files, fonts, ids, labels, contrast, offline) and `tests/test_ui_browser.py`
+  (full journey by mouse and keyboard) must stay green. Colours come only from the tokens in `style.css`.
 - Field names follow the brief exactly (see README "The environment in one screen").
 
 ## Workflow

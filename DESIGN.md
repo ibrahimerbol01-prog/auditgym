@@ -124,4 +124,4 @@ It also trained classifiers on public features to predict which invoices host er
 
 ## 10. Tools and resources used
 
-Python 3.11 standard library only at runtime. Fonts: Dela Gothic One, Onest, JetBrains Mono (SIL Open Font License, bundled with their licenses). Built with the help of AI coding assistants (Anthropic Claude; Google Antigravity/Gemini), with every result checked by the tests above.
+Python 3.11 standard library only at runtime. Fonts: Source Serif 4, Inter, JetBrains Mono (SIL Open Font License, bundled with their licenses; the UI makes no network requests, which a browser test asserts). Built with the help of AI coding assistants (Anthropic Claude; Google Antigravity/Gemini), with every result checked by the tests above.

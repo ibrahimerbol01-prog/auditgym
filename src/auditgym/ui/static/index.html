@@ -3,57 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0c0d0f">
+<meta name="description" content="AuditGym — офлайн-среда обучения с подкреплением для ИИ-агентов финансового аудита: синтетические книги, скрытые ошибки, доказательная награда.">
 <title>AuditGym — тренажёр аудита для ИИ-агентов</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 28 28%27%3E%3Crect x=%271.5%27 y=%271.5%27 width=%2725%27 height=%2725%27 rx=%277%27 fill=%27%231d1530%27 stroke=%27%23f4eeff%27 stroke-width=%272%27/%3E%3Cpath d=%27M7 9h14M7 14h8%27 stroke=%27%23f4eeff%27 stroke-width=%272%27/%3E%3Cpath d=%27M15 18l3 3 5-6%27 stroke=%27%23b8f25c%27 stroke-width=%272.8%27 fill=%27none%27/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%230c0d0f%27/%3E%3Crect x=%274.5%27 y=%274.5%27 width=%2723%27 height=%2723%27 rx=%275%27 fill=%27none%27 stroke=%27%23cdae74%27 stroke-width=%271.5%27/%3E%3Cpath d=%27M9 11h14M9 16h8%27 stroke=%27%23ede8de%27 stroke-width=%271.6%27 stroke-linecap=%27round%27/%3E%3Cpath d=%27M17 21l2.6 2.6L24 18%27 stroke=%27%23cdae74%27 stroke-width=%272%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/inter-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/source-serif-4-cyrillic-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+<a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top"><div class="wrap">
   <a class="brand" href="/" aria-label="AuditGym, главная">
-    <svg width="30" height="30" viewBox="0 0 28 28" aria-hidden="true"><rect x="1.5" y="1.5" width="25" height="25" rx="7" ry="3" fill="none" stroke="#f4eeff" stroke-width="2"></rect><path d="M7 9h14M7 14h8M7 19h6" stroke="#f4eeff" stroke-width="2" stroke-linecap="round"></path><path d="M17 18l2.5 2.5L24 15" stroke="#b8f25c" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>AUDITGYM</a>
-  <nav class="main" aria-label="Главное"><a href="/" class="on">Старт и расследование</a><a href="/report.html">Повторы и отчёт</a></nav>
-  <div class="chips"><span class="chip">ENV 1.0.0</span><span class="chip">PY 3.11</span><span class="chip lime">● OFFLINE</span></div>
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="2.5" y="2.5" width="27" height="27" rx="6" fill="none" stroke="#cdae74" stroke-width="1.5"/><path d="M9 11h14M9 16h8" stroke="#ede8de" stroke-width="1.6" stroke-linecap="round"/><path d="M17 21l2.6 2.6L24 18" stroke="#cdae74" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>AUDITGYM</a>
+  <nav class="main" aria-label="Разделы"><a href="/" class="on" aria-current="page">Расследование</a><a href="/report.html">Повторы и отчёт</a></nav>
+  <div class="chips" aria-label="Окружение"><span class="chip">ENV 1.0.0</span><span class="chip">PY 3.11</span><span class="chip live">● офлайн</span></div>
 </div></header>
 
+<div id="main" tabindex="-1">
 <!-- START -->
 <main id="start" class="wrap">
-  <section class="hero">
-    <div style="flex:1 1 540px;min-width:0;display:flex;flex-direction:column;gap:18px">
-      <div class="rec"><b>● REC</b> GENESIS HACKATHON 2026 // FINTECH // ОНЛАЙН-ОТБОР</div>
-      <h1>Тренажёр <span class="hl">аудита</span> для <span style="white-space:nowrap">ИИ-агентов<span class="cursor">_</span></span></h1>
+  <section class="hero" aria-labelledby="hero-h">
+    <div style="flex:1 1 560px;min-width:0;display:flex;flex-direction:column;gap:22px">
+      <div class="eyebrow">Genesis Hackathon 2026 · FinTech</div>
+      <h1 id="hero-h">Тренажёр <span class="hl">аудита</span> для&nbsp;<span style="white-space:nowrap">ИИ-агентов</span></h1>
       <p>Синтетические книги вымышленных компаний со скрытыми записанными ошибками. Агент расследует пятью инструментами только для чтения, приводит доказательства — и получает награду за доказанное, а не за угаданное.</p>
-      <div class="row" style="gap:16px"><a class="btn primary" href="#pick">Начать эпизод</a><a class="btn ghost" href="/report.html">Смотреть повторы</a></div>
-      <div class="mono muted" style="font-size:11px;letter-spacing:.3em">DON'T PANIC · ВСЕГО 100 ШАГОВ</div>
+      <div class="row" style="gap:12px"><a class="btn primary" href="#pick">Начать эпизод <span aria-hidden="true">→</span></a><a class="btn ghost" href="/report.html">Смотреть повторы</a></div>
+      <div class="trust"><span>Python 3.11, только стандартная библиотека</span><span>работает без сети</span><span>детерминировано по seed</span></div>
     </div>
-    <div class="stats">
-      <div class="stat lime"><div class="n">4</div><div class="t">типа ошибок, вперемешку и с взаимодействиями</div></div>
-      <div class="stat"><div class="n">5</div><div class="t">инструментов только для чтения, без shell и SQL</div></div>
-      <div class="stat"><div class="n">100</div><div class="t">шагов на эпизод, включая отправку</div></div>
-      <div class="stat"><div class="n" style="color:var(--pink)">1</div><div class="t">команда проверяет всё: <span class="mono" style="color:var(--txt)">verify</span></div></div>
+    <div class="stats" role="list" aria-label="Среда в цифрах">
+      <div class="stat gold" role="listitem"><div class="n">4</div><div class="t">типа ошибок — вперемешку и с взаимодействиями</div></div>
+      <div class="stat" role="listitem"><div class="n">5</div><div class="t">инструментов только для чтения, без shell и SQL</div></div>
+      <div class="stat" role="listitem"><div class="n">100</div><div class="t">шагов на эпизод, включая отправку</div></div>
+      <div class="stat" role="listitem"><div class="n">1</div><div class="t">команда проверяет всё: <span class="mono" style="color:var(--txt)">verify</span></div></div>
     </div>
   </section>
 
+  <div class="ticker" aria-hidden="true" style="margin:0 0 8px"><span id="tape"></span></div>
+
   <section class="how" aria-labelledby="how-h">
-    <div class="sec-h"><span class="sec-n">01</span><h2 id="how-h">Как устроена среда</h2><span class="muted">агент видит только середину · ответы живут в отдельном процессе</span></div>
+    <div class="sec-h"><span class="sec-n">01</span><h2 id="how-h">Как устроена среда</h2><span class="muted">агент видит только середину, ответы живут в отдельном процессе</span></div>
     <div class="zones">
       <div class="zone hidden-z">
-        <div class="zone-l"><span class="lock">●</span> ОРГАНИЗАТОР · СКРЫТО</div>
+        <div class="zone-l"><span class="lock"></span>ОРГАНИЗАТОР · СКРЫТО</div>
         <div class="node"><b>01</b><span>Согласованная история</span><em>книги сходятся до копейки</em></div>
-        <div class="node"><b>02</b><span>Записанные инъекции</span><em>4 типа ошибок + провенанс</em></div>
+        <div class="node"><b>02</b><span>Записанные инъекции</span><em>4 типа ошибок и их провенанс</em></div>
         <div class="node"><b>03</b><span>Переименование</span><em>ID и порядок строк — после инъекций</em></div>
       </div>
       <div class="flow" aria-hidden="true"><i></i></div>
       <div class="zone agent-z">
-        <div class="zone-l"><span class="eye">◉</span> АГЕНТ ВИДИТ</div>
-        <div class="tools">
-          <span>list_records</span><span>get_record</span><span>get_document</span><span>calculator</span><span class="sub">submit</span>
-        </div>
+        <div class="zone-l"><span class="eye"></span>АГЕНТ ВИДИТ</div>
+        <div class="tools"><span>list_records</span><span>get_record</span><span>get_document</span><span>calculator</span><span class="sub">submit</span></div>
         <div class="muted" style="font-size:13px">Каждая находка: тип · затронутые ID · сумма в минорных единицах · валюта · ID доказательств.</div>
-        <div class="node wide"><b>≤100</b><span>шагов на эпизод</span><em>только чтение · без shell и SQL · 60 c</em></div>
+        <div class="node wide"><b>100</b><span>шагов на эпизод</span><em>только чтение · без shell и SQL · 60 с</em></div>
       </div>
       <div class="flow" aria-hidden="true"><i></i></div>
       <div class="zone hidden-z">
-        <div class="zone-l"><span class="lock">●</span> ОЦЕНЩИК · ОТДЕЛЬНЫЙ ПРОЦЕСС</div>
+        <div class="zone-l"><span class="lock"></span>ОЦЕНЩИК · ОТДЕЛЬНЫЙ ПРОЦЕСС</div>
         <div class="node"><b>1:1</b><span>Сопоставление</span><em>тип · ID · валюта · сумма · доказательства</em></div>
         <div class="node lime"><b>±1</b><span>Награда</span><em>clip(2·F1 − 1 − 0.002·шаги)</em></div>
       </div>
@@ -61,117 +68,127 @@
   </section>
 
   <section class="errs" aria-labelledby="err-h">
-    <div class="sec-h"><span class="sec-n">02</span><h2 id="err-h">Четыре типа ошибок</h2><span class="muted">вперемешку, с взаимодействиями и ловушками-двойниками</span></div>
+    <div class="sec-h"><span class="sec-n">02</span><h2 id="err-h">Четыре типа ошибок</h2><span class="muted">вперемешку, с взаимодействиями и законными двойниками</span></div>
     <div class="err-grid">
-      <article class="err"><div class="err-ic">⧉</div><h3>duplicate_invoice</h3><p>Тот же счёт проведён второй раз под новым номером.</p><div class="trap">ловушка: регулярные счета с другим сервисным периодом</div></article>
-      <article class="err"><div class="err-ic">⇄</div><h3>payment_allocation</h3><p>Оплата застряла в 2350 «нераспределённые» вместо счёта.</p><div class="trap">ловушка: честные авансы, сплит- и общие платежи</div></article>
-      <article class="err"><div class="err-ic">¤</div><h3>date_or_fx</h3><p>Курс взят не за тот день или дата не та — сумма в книге неверна.</p><div class="trap">ловушка: суммы, которые расходятся законно — кредит-ноты и короткие оплаты</div></article>
-      <article class="err"><div class="err-ic">⌛</div><h3>period_classification</h3><p>Сумма верна, но проводка попала не в тот отчётный период.</p><div class="trap">ловушка: время записано в UTC у границы периода</div></article>
+      <article class="err"><div class="err-ic" aria-hidden="true">⧉</div><h3>duplicate_invoice</h3><p>Тот же счёт проведён второй раз под новым номером.</p><div class="trap">Ловушка<br>регулярные счета с другим сервисным периодом</div></article>
+      <article class="err"><div class="err-ic" aria-hidden="true">⇄</div><h3>payment_allocation</h3><p>Оплата застряла на счёте 2350 «нераспределённые» вместо счёта клиента.</p><div class="trap">Ловушка<br>честные авансы, сплит- и общие платежи</div></article>
+      <article class="err"><div class="err-ic" aria-hidden="true">¤</div><h3>date_or_fx</h3><p>Курс взят не за тот день или дата не та — сумма в книге неверна.</p><div class="trap">Ловушка<br>законные расхождения: кредит-ноты и короткие оплаты</div></article>
+      <article class="err"><div class="err-ic" aria-hidden="true">◷</div><h3>period_classification</h3><p>Сумма верна, но проводка попала не в тот отчётный период.</p><div class="trap">Ловушка<br>время записано в UTC у границы периода</div></article>
     </div>
   </section>
 
-  <section id="pick" class="window" aria-labelledby="pick-h">
-    <div class="bar">[ episodes.exe ]<span class="dots"><i></i><i></i><i></i></span></div>
-    <div class="body" style="display:flex;flex-direction:column;gap:14px">
-      <div class="row" style="gap:14px">
-        <h2 id="pick-h" style="font-size:24px">Выберите эпизод</h2>
+  <section id="pick" class="window" aria-labelledby="pick-h" style="margin-bottom:64px">
+    <div class="bar"><span>Эпизоды</span><span class="live">готово к запуску</span></div>
+    <div class="body" style="display:flex;flex-direction:column;gap:16px">
+      <div class="row" style="gap:18px">
+        <h2 id="pick-h" style="font-size:26px">Выберите эпизод</h2>
         <div class="tabs" role="tablist" aria-label="Набор эпизодов">
           <button class="tab on" role="tab" aria-selected="true" data-split="train">Train · 10</button>
           <button class="tab" role="tab" aria-selected="false" data-split="dev">Dev · 10</button>
         </div>
       </div>
       <div class="scroll"><table class="grid" style="min-width:720px">
-        <thead><tr><th>#</th><th>Seed</th><th>Конфигурация</th><th>Валюты</th><th></th></tr></thead>
+        <caption class="sr-only">Эпизоды выбранного набора</caption>
+        <thead><tr><th scope="col">Эпизод</th><th scope="col">Seed</th><th scope="col">Конфигурация</th><th scope="col">Валюты</th><th scope="col"><span class="sr-only">Действие</span></th></tr></thead>
         <tbody id="ep-rows"></tbody>
       </table></div>
       <p class="muted" style="margin:0;font-size:13px">Открытый режим: итоговая награда показывается игроку. Учебные часы в интерфейсе на паузе — в зачётных прогонах лимит 60 секунд. Число ошибок до начала эпизода не показывается никогда.</p>
     </div>
   </section>
-  <div class="ticker" aria-hidden="true" style="margin:36px -28px 0"><span>LEDGER ✦ INVOICES ✦ PAYMENTS ✦ FX ✦ EVIDENCE ✦ REWARD ✦ LEDGER ✦ INVOICES ✦ PAYMENTS ✦ FX ✦ EVIDENCE ✦ REWARD ✦ LEDGER ✦ INVOICES ✦ PAYMENTS ✦ FX ✦ EVIDENCE ✦ REWARD ✦ LEDGER ✦ INVOICES ✦ PAYMENTS ✦ FX ✦ EVIDENCE ✦ REWARD ✦ </span></div>
 </main>
 
 <!-- PLAY -->
 <div id="play" class="hidden">
-  <div class="epbar"><div class="wrap row" style="padding-top:10px;padding-bottom:10px;gap:18px">
-    <div style="min-width:0"><div id="ep-title" style="font-weight:600"></div><div id="ep-sub" class="mono muted" style="font-size:12px"></div></div>
-    <span class="badge lime">ОТКРЫТЫЙ РЕЖИМ</span>
+  <div class="epbar"><div class="wrap row" style="padding-top:12px;padding-bottom:12px;gap:18px">
+    <div style="min-width:0"><h1 id="ep-title" style="font-family:var(--body);font-size:15px;font-weight:600;letter-spacing:0"></h1><div id="ep-sub" class="mono muted" style="font-size:12px"></div></div>
+    <span class="badge lime">Открытый режим</span>
     <div style="margin-left:auto;flex:0 1 440px;min-width:260px">
-      <div class="row muted" style="justify-content:space-between;font-size:12px"><span>Бюджет шагов</span><span id="budget-txt"></span></div>
+      <div class="row muted" style="justify-content:space-between;font-size:12px"><span>Бюджет шагов</span><span id="budget-txt" aria-live="polite"></span></div>
       <div id="budget" class="budget" role="img"></div>
     </div>
   </div></div>
   <div class="wrap layout">
-    <section class="main-col card" style="padding:0" aria-label="Записи">
-      <div class="row" style="padding:6px 12px 0;border-bottom:1px solid var(--line)">
+    <div class="main-col" style="display:flex;flex-direction:column;gap:20px">
+    <section class="card" style="padding:0;overflow:hidden" aria-label="Записи">
+      <div class="row" style="padding:6px 14px 0;border-bottom:1px solid var(--line)">
         <div class="tabs" role="tablist" aria-label="Таблицы" id="table-tabs"></div>
         <div class="row muted" style="margin-left:auto;font-size:13px;padding-bottom:6px">
-          <span id="page-info"></span>
-          <button class="btn outline small" id="prev" aria-label="Предыдущая страница">‹</button>
-          <button class="btn outline small" id="next" aria-label="Следующая страница, 1 шаг">›</button>
+          <span id="page-info" class="tnum"></span>
+          <button class="btn outline small" id="prev" aria-label="Предыдущая страница" disabled>‹</button>
+          <button class="btn outline small" id="next" aria-label="Следующая страница, 1 шаг" disabled>›</button>
           <span class="chip">страница = 1 шаг</span>
         </div>
       </div>
-      <div class="scroll" style="max-height:560px"><table class="grid" id="records"></table></div>
-      <div class="muted" style="padding:10px 14px;font-size:12px;border-top:1px solid var(--line)" id="table-note">Нажмите на вкладку, чтобы загрузить первую страницу (1 шаг). Выделение строк — ваше: среда сама ничего не подсвечивает.</div>
+      <div class="scroll"><table class="grid" id="records"></table></div>
+      <div class="muted" style="padding:10px 16px;font-size:12px;border-top:1px solid var(--line)" id="table-note">Откройте вкладку таблицы — первая страница стоит 1 шаг. Выделение строк — ваше: среда сама ничего не подсвечивает.</div>
     </section>
+    <section class="card" aria-labelledby="log-h">
+      <h3 id="log-h" style="font-size:18px">Журнал действий</h3>
+      <ol class="log" id="log" style="margin-top:10px" aria-live="polite"></ol>
+    </section>
+    </div>
     <aside class="side-col" aria-label="Рабочая панель">
       <section class="card" aria-labelledby="rec-h">
-        <div class="row"><h3 id="rec-h" style="font-size:16px">Запись</h3><span id="rec-id" class="mono muted" style="font-size:13px"></span></div>
-        <dl class="kv" id="rec-kv" style="margin-top:8px"><dt>—</dt><dd>выберите строку</dd></dl>
+        <div class="row" style="justify-content:space-between"><h3 id="rec-h">Запись</h3><span id="rec-id" class="mono muted" style="font-size:12px"></span></div>
+        <dl class="kv" id="rec-kv" style="margin-top:10px"><dt>—</dt><dd>выберите строку в таблице</dd></dl>
         <div id="rec-doc"></div>
         <div class="rec-actions">
-          <button class="btn outline small" id="open-doc" disabled>Документ · 1 шаг</button>
-          <button class="btn small primary" id="add-aff" disabled>+ затронутые</button>
-          <button class="btn small primary" id="add-ev" disabled>+ доказательства</button>
+          <button class="btn outline small" id="open-doc" disabled>Открыть документ · 1 шаг</button>
+          <button class="btn small primary" id="add-aff" disabled>+ Затронутые</button>
+          <button class="btn small primary" id="add-ev" disabled>+ Доказательства</button>
         </div>
       </section>
       <section class="card" aria-labelledby="calc-h">
-        <h3 id="calc-h" style="font-size:16px">Калькулятор <span class="muted" style="font-family:var(--body);font-size:12px">decimal · + − × ÷ ( ) · 1 шаг</span></h3>
-        <div class="row" style="margin-top:8px;flex-wrap:nowrap"><label for="calc-in" class="hidden">Выражение</label><input id="calc-in" class="mono" placeholder="12400.00 * (491.35 - 488.00)"><button class="btn small primary" id="calc-go">=</button></div>
-        <div id="calc-out" class="mono calc-out"><span class="muted">результат появится здесь</span></div>
+        <div class="row" style="justify-content:space-between"><h3 id="calc-h">Калькулятор</h3><span class="muted" style="font-size:12px">decimal · + − × ÷ ( ) · 1 шаг</span></div>
+        <div class="row" style="margin-top:10px;flex-wrap:nowrap"><label for="calc-in" class="sr-only">Выражение</label><input id="calc-in" class="mono" placeholder="12400.00 * (491.35 - 488.00)" autocomplete="off" spellcheck="false"><button class="btn small primary" id="calc-go" aria-label="Вычислить, 1 шаг">=</button></div>
+        <div id="calc-out" class="calc-out" aria-live="polite"><span class="muted">результат появится здесь</span></div>
       </section>
       <section class="card" aria-labelledby="find-h">
-        <div class="row"><h3 id="find-h" style="font-size:16px">Находки <span class="muted" id="find-count" style="font-family:var(--body)">0 / 30</span></h3></div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;border:2px solid var(--line2);background:var(--ink3);border-radius:18px 5px;padding:12px">
-          <div class="row" style="flex-wrap:nowrap">
-            <label class="f" style="flex:1">Тип<select id="f-type"><option>duplicate_invoice</option><option>payment_allocation</option><option>date_or_fx</option><option>period_classification</option></select></label>
-            <label class="f" style="width:110px">Валюта<input id="f-ccy" class="mono"></label>
+        <div class="row" style="justify-content:space-between"><h3 id="find-h">Находки</h3><span class="muted tnum" id="find-count">0 / 30</span></div>
+        <div class="draft">
+          <div class="row" style="flex-wrap:nowrap;align-items:flex-end">
+            <label class="f" style="flex:1">Тип ошибки<select id="f-type"><option>duplicate_invoice</option><option>payment_allocation</option><option>date_or_fx</option><option>period_classification</option></select></label>
+            <label class="f" style="width:96px">Валюта<input id="f-ccy" class="mono" maxlength="3" autocomplete="off" spellcheck="false"></label>
           </div>
-          <label class="f">Сумма · минорные единицы<input id="f-amt" class="mono" inputmode="numeric"></label>
-          <div id="f-amt-hint" class="muted" style="font-size:12px"></div>
-          <div><div class="muted" style="font-size:12px">Затронутые ID</div><div class="row" id="f-aff" style="margin-top:4px"></div></div>
-          <div><div class="muted" style="font-size:12px">Доказательства <span id="f-ev-n">0 / 10</span></div><div class="row" id="f-ev" style="margin-top:4px"></div></div>
+          <label class="f">Сумма · минорные единицы<input id="f-amt" class="mono" inputmode="numeric" autocomplete="off" aria-describedby="f-amt-hint"></label>
+          <div id="f-amt-hint" class="hint" aria-live="polite"></div>
+          <div><div class="muted" style="font-size:12px;font-weight:500">Затронутые ID</div><div class="row" id="f-aff" style="margin-top:6px"></div></div>
+          <div><div class="muted" style="font-size:12px;font-weight:500">Доказательства <span id="f-ev-n" class="tnum">0 / 10</span></div><div class="row" id="f-ev" style="margin-top:6px"></div></div>
           <label class="f">Объяснение · не влияет на оценку<textarea id="f-exp" rows="2" maxlength="1000"></textarea></label>
           <button class="btn small outline" id="f-add">Добавить находку</button>
         </div>
-        <ol id="f-list" class="f-list"></ol>
-        <button class="btn primary" id="submit" style="width:100%;margin-top:12px">Отправить находки →</button>
-        <div class="muted" style="font-size:12px;text-align:center;margin-top:8px">отправка завершает эпизод и стоит 1 шаг</div>
+        <ol id="f-list" class="f-list" aria-label="Добавленные находки"></ol>
+        <button class="btn primary" id="submit" style="width:100%;margin-top:14px">Отправить находки <span aria-hidden="true">→</span></button>
+        <div class="muted" style="font-size:12px;text-align:center;margin-top:8px">Отправка завершает эпизод и стоит 1 шаг</div>
       </section>
     </aside>
-    <section class="card" style="flex:1 1 100%" aria-labelledby="log-h">
-      <h3 id="log-h" style="font-size:16px">Журнал действий</h3>
-      <ol class="log" id="log" style="margin-top:8px"></ol>
-    </section>
+
   </div>
 </div>
 
 <!-- RESULT -->
-<main id="result" class="wrap hidden" style="padding:36px 28px 56px;display:flex;flex-direction:column;gap:24px">
+<main id="result" class="wrap hidden" style="padding:40px 32px 64px;display:flex;flex-direction:column;gap:24px">
   <div class="row" style="gap:20px;align-items:stretch">
-    <div class="reward" style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:12px">
-      <div class="mono" style="font-weight:600">[ reward.exe ] итоговая награда</div>
-      <div class="big" id="r-big"></div>
+    <section class="reward" style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:16px" aria-labelledby="r-h">
+      <div class="eyebrow" id="r-h">Итоговая награда</div>
+      <div class="big" id="r-big" aria-live="polite"></div>
       <div class="gauge" aria-hidden="true"><div class="g-track"><i class="g-zero"></i><i class="g-mark" id="r-mark"></i></div><div class="g-l"><span>−1</span><span>0</span><span>+1</span></div></div>
-      <div class="mono" id="r-formula" style="background:var(--ink);color:var(--lime);border-radius:14px 4px;padding:10px 12px"></div>
-      <div style="font-weight:500">Диапазон −1 … +1. Молчание на книгах с ошибками даёт −1; одно ложное обвинение стоит дороже, чем приносит.</div>
-    </div>
+      <div class="formula" id="r-formula"></div>
+      <div class="muted" style="font-size:14px">Диапазон −1 … +1. Молчание на книгах с ошибками даёт −1; одно ложное обвинение стоит дороже, чем приносит.</div>
+    </section>
     <div class="tiles" id="r-tiles" style="flex:2 1 560px;min-width:0"></div>
   </div>
-  <section class="card"><h2 style="font-size:24px">Ваши находки</h2><div id="r-list" style="margin-top:12px"></div>
-    <p class="muted" style="font-size:13px;margin:12px 0 0">Эталонные ошибки не раскрываются никогда — даже после эпизода.</p></section>
+  <section class="card"><h2 style="font-size:26px">Ваши находки</h2><div id="r-list" style="margin-top:12px"></div>
+    <p class="muted" style="font-size:13px;margin:14px 0 0">Эталонные ошибки не раскрываются никогда — даже после эпизода.</p></section>
   <div class="row"><a class="btn primary" href="/report.html">Повторы и отчёт</a><button class="btn ghost" id="again">Другой эпизод</button></div>
 </main>
+</div>
+
+<dialog class="modal" id="confirm" aria-labelledby="confirm-h">
+  <h2 id="confirm-h">Отправить находки?</h2>
+  <p id="confirm-p"></p>
+  <div class="row" style="justify-content:flex-end;gap:10px"><button class="btn ghost" value="cancel" id="confirm-no">Вернуться</button><button class="btn primary" id="confirm-yes">Отправить</button></div>
+</dialog>
 <script src="/app.js"></script>
 </body>
 </html>

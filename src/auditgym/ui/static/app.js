@@ -21,27 +21,54 @@ async function api(path, body) {
   const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return r.json();
 }
-function toast(msg) { const t = el("div", { class: "toast", role: "status" }, msg); document.body.append(t); setTimeout(() => t.remove(), 2600); }
+function toast(msg, kind) { document.querySelectorAll(".toast").forEach((x) => x.remove()); const t = el("div", { class: "toast" + (kind === "ok" ? " ok" : ""), role: kind === "ok" ? "status" : "alert" }, msg); document.body.append(t); setTimeout(() => t.remove(), 3200); }
+const sign = (x, d = 3) => (x > 0 ? "+" : x < 0 ? "−" : "") + Math.abs(x).toFixed(d);
+
+// ---------- market tape: real numbers from report.json ----------
+(async () => {
+  const tape = $("tape"); if (!tape) return;
+  const names = { oracle: "ORACLE", reconcile: "RECONCILE", random: "RANDOM", flag_all: "FLAG_ALL" };
+  const items = [];
+  try {
+    const r = await (await fetch("/data/report.json")).json();
+    for (const p of r.policy_summary || []) { const v = (p.clean + p.mixed + p.interacting) / 3; items.push([names[p.policy] || p.policy, sign(v), v >= 0 ? "up" : "dn", v >= 0 ? "▲" : "▼"]); }
+    if (r.estimated_score) items.push(["VERIFY", `${r.estimated_score.total.toFixed(1)} / 100`, "up", "●"]);
+    if (r.fuzz) items.push(["FUZZ", `${r.fuzz.configs} конфигов · ${r.fuzz.failures.length} сбоев`, r.fuzz.failures.length ? "dn" : "up", "●"]);
+  } catch { /* report not built: fall back to static facts */ }
+  items.push(["ERRORS", "4 типа", "", ""], ["TOOLS", "5 · read-only", "", ""], ["BUDGET", "100 шагов", "", ""], ["DEPS", "0", "up", "●"]);
+  const one = () => items.map(([k, v, c, a]) => `<b>${k}</b><span class="${c}">${a ? a + " " : ""}${v}</span><span class="sep">/</span>`).join("");
+  tape.innerHTML = one() + one();
+})();
 
 // ---------- start screen ----------
 async function loadSplit(split) {
-  document.querySelectorAll("[data-split]").forEach((b) => { const on = b.dataset.split === split; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
-  const tb = $("ep-rows"); tb.textContent = "";
+  document.querySelectorAll("[data-split]").forEach((b) => { const on = b.dataset.split === split; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; });
+  const tb = $("ep-rows"); const req = (loadSplit.req = (loadSplit.req || 0) + 1);
+  tb.setAttribute("aria-busy", "true");
   let spec;
-  try { spec = await (await fetch(`/data/${split}.json`)).json(); } catch { tb.append(el("tr", {}, el("td", { colspan: 5 }, "конфигурации не найдены"))); return; }
+  try { spec = await (await fetch(`/data/${split}.json`)).json(); } catch { if (req === loadSplit.req) { tb.textContent = ""; tb.append(el("tr", {}, el("td", { colspan: 5 }, "конфигурации не найдены"))); } return; }
+  if (req !== loadSplit.req) return; // a newer tab click won: never mix rows from two sets
+  tb.textContent = ""; tb.removeAttribute("aria-busy");
   spec.episodes.forEach((e, i) => {
     const c = e.config; const kind = c.clean ? "чистая компания" : [...(c.interactions || []).map((x) => "взаимодействие " + x), c.errors ? "ошибки по конфигу" : "ошибки по умолчанию"].join(" · ");
     const cur = (c.base_currency || "KZT") + " · " + (c.foreign_currencies || ["USD", "EUR"]).join(" ");
     tb.append(el("tr", {},
       el("td", { class: "mono" }, `${split}-${String(i + 1).padStart(2, "0")}`), el("td", { class: "mono" }, e.seed), el("td", {}, kind), el("td", { class: "mono" }, cur),
-      el("td", { class: "num" }, el("button", { class: "btn outline small", onclick: () => start(e.seed, c) }, "Открыть →"))));
+      el("td", { class: "num" }, el("button", { class: "btn outline small", "aria-label": `Открыть эпизод ${split}-${String(i + 1).padStart(2, "0")}`, onclick: () => start(e.seed, c) }, "Открыть →"))));
   });
 }
 document.querySelectorAll("[data-split]").forEach((b) => b.addEventListener("click", () => loadSplit(b.dataset.split)));
+// Arrow keys move between tabs in any tablist (WAI-ARIA tabs pattern).
+document.addEventListener("keydown", (e) => {
+  const tab = e.target.closest && e.target.closest('[role="tab"]'); if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+  const tabs = [...tab.parentElement.querySelectorAll('[role="tab"]')]; let i = tabs.indexOf(tab);
+  i = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : (i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+  e.preventDefault(); tabs[i].focus(); tabs[i].click();
+});
 
 async function start(seed, config) {
   const r = await api("/reset", { seed, config });
-  if (!r.observation.ok) { toast(r.observation.error.message); return; }
+  if (!r.observation || !r.observation.ok) { toast(r.observation ? r.observation.error.message : "сервер недоступен"); return; }
   const res = r.observation.result;
   Object.assign(S, { ep: res, steps: 0, table: null, pages: {}, sel: null, findings: [], draft: { aff: [], ev: [] } });
   const m = res.manifest;
@@ -51,16 +78,23 @@ async function start(seed, config) {
   $("start").classList.add("hidden"); $("result").classList.add("hidden"); $("play").classList.remove("hidden");
   $("log").textContent = ""; $("records").textContent = ""; $("f-list").textContent = "";
   renderTabs(); renderBudget(); renderDraft(); renderRecord(); renderFindings(); $("calc-out").innerHTML = '<span class="muted">результат появится здесь</span>';
-  window.scrollTo(0, 0);
+  window.scrollTo(0, 0); $("ep-title").setAttribute("tabindex", "-1"); $("ep-title").focus({ preventScroll: true });
+  document.title = `AuditGym — ${m.episode_id}`;
 }
 
 // ---------- stepping ----------
 async function step(action, label) {
-  const r = await api("/step", { action });
+  // One step at a time: a double click must never spend two steps.
+  if (S.busy) return { observation: { ok: false, error: { code: "busy", message: "предыдущий шаг ещё выполняется" } } };
+  S.busy = true; document.body.setAttribute("aria-busy", "true");
+  let r;
+  try { r = await api("/step", { action }); } catch { toast("Сервер недоступен — перезапустите python -m auditgym.cli ui"); return { observation: { ok: false, error: { code: "network", message: "сервер недоступен" } } }; }
+  finally { S.busy = false; document.body.removeAttribute("aria-busy"); }
   S.steps += 1; renderBudget();
   const o = r.observation;
   const ok = o && o.ok !== false && !(r.truncated);
-  $("log").prepend(el("li", { class: "row", style: "flex-wrap:nowrap;gap:12px" }, el("span", { class: "muted", style: "width:38px" }, "#" + S.steps), el("span", { style: "width:120px" }, action.tool), el("span", { class: "muted", style: "flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, label || ""), el("span", { class: ok ? "ok" : "bad" }, ok ? "ok" : (o.error ? o.error.code : "truncated"))));
+  $("log").querySelectorAll(".cur").forEach((x) => x.classList.remove("cur"));
+  $("log").prepend(el("li", { class: "row cur", style: "flex-wrap:nowrap;gap:12px" }, el("span", { class: "muted", style: "width:38px" }, "#" + S.steps), el("span", { style: "width:120px" }, action.tool), el("span", { class: "muted", style: "flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" }, label || ""), el("span", { class: ok ? "ok" : "bad" }, ok ? "ok" : (o.error ? o.error.code : "truncated"))));
   if (r.truncated) { showResult(null, r.reward, true); }
   return r;
 }
@@ -76,7 +110,7 @@ function renderTabs() {
   const names = { ledger: "Ledger", invoices: "Invoices", payments: "Payments", fx: "FX" };
   for (const [k, v] of Object.entries(names)) {
     const n = S.ep.manifest.counts[k];
-    t.append(el("button", { class: "tab" + (S.table === k ? " on" : ""), role: "tab", "aria-selected": S.table === k, onclick: () => openTable(k) }, v + " ", el("span", { class: "muted" }, n)));
+    t.append(el("button", { class: "tab" + (S.table === k ? " on" : ""), role: "tab", "aria-selected": String(S.table === k), tabindex: S.table === k || (!S.table && k === "ledger") ? "0" : "-1", "aria-label": `${v}, ${n} строк${S.pages[k] ? "" : ", 1 шаг"}`, onclick: () => openTable(k) }, v + " ", el("span", { class: "muted" }, n)));
   }
 }
 async function openTable(name) {
@@ -92,11 +126,12 @@ function renderPage() {
   const off = p.i * 50; $("page-info").textContent = `строки ${off + 1}–${off + page.rows.length} из ${S.ep.manifest.counts[S.table]}`;
   $("prev").disabled = p.i <= 0; $("next").disabled = !page.next_cursor && p.i === p.list.length - 1;
   const t = $("records"); t.textContent = "";
-  t.append(el("thead", {}, el("tr", {}, ...cols.map((c) => el("th", { class: /minor|rate/.test(c) ? "num" : "" }, c)))));
+  t.append(el("caption", { class: "sr-only" }, `Таблица ${S.table}, ${$("page-info").textContent}. Enter — выбрать строку.`));
+  t.append(el("thead", {}, el("tr", {}, ...cols.map((c) => el("th", { scope: "col", class: /minor|rate/.test(c) ? "num" : "" }, c)))));
   const tb = el("tbody");
   for (const row of page.rows) {
     const id = rowId(S.table, row);
-    const tr = el("tr", { class: S.sel && S.sel.id === id ? "sel" : "", tabindex: "0", onclick: () => select(S.table, row), onkeydown: (e) => { if (e.key === "Enter") select(S.table, row); } });
+    const tr = el("tr", { class: S.sel && S.sel.id === id ? "sel" : "", tabindex: "0", "aria-selected": String(!!(S.sel && S.sel.id === id)), "data-id": id, onclick: () => select(S.table, row), onkeydown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(S.table, row); } else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); const n = e.key === "ArrowDown" ? tr.nextElementSibling : tr.previousElementSibling; if (n) n.focus(); } } });
     for (const c of cols) {
       let v = row[c]; if (v === null || v === undefined) v = "—";
       if (/_minor$/.test(c) && typeof v === "number") v = fmt(v, c === "debit_minor" || c === "credit_minor" ? S.ep.manifest.base_currency : row.currency);
@@ -111,7 +146,10 @@ $("prev").addEventListener("click", () => { const p = S.pages[S.table]; if (p.i 
 $("next").addEventListener("click", async () => { const p = S.pages[S.table]; if (p.i < p.list.length - 1) { p.i += 1; renderPage(); return; } const c = p.list[p.i].next_cursor; if (c) await fetchPage(S.table, c); });
 const rowId = (t, r) => t === "fx" ? `${r.date}|${r.source_currency}|${r.target_currency}` : r[{ ledger: "row_id", invoices: "invoice_id", payments: "payment_id" }[t]];
 
-function select(table, row) { S.sel = { table, row, id: rowId(table, row) }; renderRecord(); renderPage(); }
+function select(table, row) {
+  S.sel = { table, row, id: rowId(table, row) }; renderRecord(); renderPage();
+  const back = document.querySelector(`#records tr[data-id="${CSS.escape(S.sel.id)}"]`); if (back) back.focus({ preventScroll: true });
+}
 function renderRecord() {
   const kv = $("rec-kv"); kv.textContent = "";
   if (!S.sel) { $("rec-doc").textContent = ""; kv.append(el("dt", {}, "—"), el("dd", {}, "выберите строку в таблице")); $("rec-id").textContent = ""; ["open-doc", "add-aff", "add-ev"].forEach((x) => ($(x).disabled = true)); return; }
@@ -135,33 +173,38 @@ $("open-doc").addEventListener("click", async () => {
   const r = await step({ tool: "get_document", args: { doc_id: S.sel.row.doc_id } }, S.sel.row.doc_id);
   if (r.observation.ok) { const box = $("rec-doc"); box.textContent = ""; box.append(el("div", { class: "doc" }, el("div", { class: "h" }, `[ ${S.sel.row.doc_id} ]`), el("pre", {}, JSON.stringify(r.observation.result, null, 2)))); }
 });
-$("add-aff").addEventListener("click", () => { if (!S.draft.aff.includes(S.sel.id) && S.draft.aff.length < 10) S.draft.aff.push(S.sel.id); renderDraft(); });
-$("add-ev").addEventListener("click", () => { if (!S.draft.ev.includes(S.sel.id) && S.draft.ev.length < 10) S.draft.ev.push(S.sel.id); renderDraft(); });
+const addTo = (list, label) => { if (list.includes(S.sel.id)) return toast(`${S.sel.id} уже в списке «${label}»`); if (list.length >= 10) return toast("Не больше 10 ID"); list.push(S.sel.id); renderDraft(); toast(`${S.sel.id} → ${label}`, "ok"); };
+$("add-aff").addEventListener("click", () => addTo(S.draft.aff, "затронутые"));
+$("add-ev").addEventListener("click", () => addTo(S.draft.ev, "доказательства"));
 
 $("calc-go").addEventListener("click", async () => {
-  const expr = $("calc-in").value;
+  const expr = $("calc-in").value.trim(); if (!expr) { $("calc-in").focus(); return toast("Введите выражение"); }
   const r = await step({ tool: "calculator", args: { expression: expr } }, expr);
-  const out = $("calc-out"); out.textContent = ""; out.append(r.observation.ok ? el("span", {}, el("span", { class: "muted" }, expr + " = "), r.observation.result.value) : el("span", { class: "bad" }, "ошибка: " + r.observation.error.message));
+  const out = $("calc-out"); out.textContent = ""; out.append(r.observation.ok ? el("span", {}, el("div", { class: "muted", style: "font-size:12px" }, expr + " ="), el("div", { style: "font-size:16px" }, r.observation.result.value)) : el("span", { class: "bad" }, "ошибка: " + r.observation.error.message));
 });
 $("calc-in").addEventListener("keydown", (e) => { if (e.key === "Enter") $("calc-go").click(); });
 
 // ---------- findings ----------
 function renderDraft() {
-  const chips = (list, key) => { const box = $(key); box.textContent = ""; list.forEach((id, i) => box.append(el("button", { class: "idchip", title: "убрать", onclick: () => { list.splice(i, 1); renderDraft(); } }, id + " ×"))); };
+  const chips = (list, key) => { const box = $(key); box.textContent = ""; if (!list.length) box.append(el("span", { class: "muted", style: "font-size:12px" }, "выберите запись и нажмите «+»")); list.forEach((id, i) => box.append(el("button", { class: "idchip", "aria-label": `убрать ${id}`, onclick: () => { list.splice(i, 1); renderDraft(); } }, id + " ×"))); };
   chips(S.draft.aff, "f-aff"); chips(S.draft.ev, "f-ev");
   $("f-ev-n").textContent = `${S.draft.ev.length} / 10`; $("find-count").textContent = `${S.findings.length} / 30`;
   const amt = $("f-amt").value.trim(); const ccy = $("f-ccy").value.trim().toUpperCase();
-  $("f-amt-hint").textContent = amt === "" ? "" : /^\d+$/.test(amt) ? `= ${ccy} ${fmt(Number(amt), ccy)} · целое число ✓` : "сумма должна быть целым числом минорных единиц";
+  const good = /^\d{1,18}$/.test(amt); const h = $("f-amt-hint");
+  h.textContent = amt === "" ? "" : good ? `= ${ccy} ${fmt(Number(amt), ccy)} · целое число ✓` : "сумма — целое число минорных единиц, без точки и пробелов";
+  h.className = "hint " + (amt === "" ? "" : good ? "ok" : "bad"); $("f-amt").setAttribute("aria-invalid", String(amt !== "" && !good));
 }
 ["f-amt", "f-ccy"].forEach((x) => $(x).addEventListener("input", renderDraft));
+$("f-ccy").addEventListener("input", () => { const c = $("f-ccy"); const v = c.value.toUpperCase().replace(/[^A-Z]/g, ""); if (v !== c.value) c.value = v; });
 $("f-add").addEventListener("click", () => {
   const amt = $("f-amt").value.trim();
-  if (!/^\d+$/.test(amt)) return toast("Сумма — целое число минорных единиц");
+  if (!/^\d{1,18}$/.test(amt)) { $("f-amt").focus(); return toast("Сумма — целое число минорных единиц"); }
+  if (!/^[A-Z]{3}$/.test($("f-ccy").value.trim().toUpperCase())) { $("f-ccy").focus(); return toast("Валюта — три буквы, например KZT"); }
   if (!S.draft.aff.length) return toast("Добавьте хотя бы один затронутый ID");
   if (S.findings.length >= 30) return toast("Максимум 30 находок");
   S.findings.push({ type: $("f-type").value, affected_ids: [...S.draft.aff], claimed_amount_minor: Number(amt), currency: $("f-ccy").value.trim().toUpperCase(), evidence_ids: [...S.draft.ev], explanation: $("f-exp").value.slice(0, 1000) });
   S.draft = { aff: [], ev: [] }; $("f-amt").value = ""; $("f-exp").value = "";
-  renderFindings(); renderDraft();
+  renderFindings(); renderDraft(); toast(`Находка №${S.findings.length} добавлена`, "ok");
 });
 function renderFindings() {
   const ol = $("f-list"); ol.textContent = "";
@@ -169,21 +212,28 @@ function renderFindings() {
   S.findings.forEach((f, i) => ol.append(el("li", {}, el("span", { class: "t" }, f.type.split("_")[0]), el("span", { class: "d", title: f.affected_ids.join(", ") }, `${f.affected_ids.join(", ")} · ${f.currency} ${fmt(f.claimed_amount_minor, f.currency)} · ${f.evidence_ids.length} док.`), el("button", { class: "idchip plain", "aria-label": "удалить находку", onclick: () => { S.findings.splice(i, 1); renderFindings(); renderDraft(); } }, "×"))));
 }
 $("submit").addEventListener("click", async () => {
-  if (!confirm(`Отправить ${S.findings.length} находок? Эпизод завершится.`)) return;
+  const d = $("confirm");
+  $("confirm-p").textContent = S.findings.length ? `${S.findings.length} ${S.findings.length === 1 ? "находка" : S.findings.length < 5 ? "находки" : "находок"} уйдут в оценщик. Эпизод завершится, изменить ответ будет нельзя.` : "Список пуст. Пустой ответ на книгах с ошибками даёт −1, на чистых — +1. Эпизод завершится.";
+  const ok = await new Promise((res) => { const y = () => { cleanup(); d.close(); res(true); }; const n = () => { cleanup(); d.close(); res(false); }; const c = () => { cleanup(); res(false); };
+    const cleanup = () => { $("confirm-yes").removeEventListener("click", y); $("confirm-no").removeEventListener("click", n); d.removeEventListener("cancel", c); };
+    $("confirm-yes").addEventListener("click", y); $("confirm-no").addEventListener("click", n); d.addEventListener("cancel", c); d.showModal(); $("confirm-yes").focus(); });
+  if (!ok) { $("submit").focus(); return; }
   const r = await step({ tool: "submit", args: { findings: { episode_id: S.ep.manifest.episode_id, findings: S.findings } } }, `${S.findings.length} находок`);
   if (r.terminated) showResult(r.observation.result.report, r.reward, false);
 });
 
 function showResult(rep, reward, truncated) {
+  document.querySelectorAll(".toast").forEach((x) => x.remove());
   $("play").classList.add("hidden"); $("result").classList.remove("hidden"); window.scrollTo(0, 0);
-  $("r-big").textContent = (reward >= 0 ? "+" : "") + reward.toFixed(3);
+  $("r-big").textContent = sign(reward); $("r-big").className = "big " + (reward > 0 ? "pos" : reward < 0 ? "neg" : "");
+  $("r-big").setAttribute("tabindex", "-1"); $("r-big").focus({ preventScroll: true });
   $("r-mark").style.left = "50%"; requestAnimationFrame(() => setTimeout(() => ($("r-mark").style.left = `${((Math.max(-1, Math.min(1, reward)) + 1) / 2) * 100}%`), 60));
   const f1 = rep ? rep.f1 : 0, steps = rep ? rep.inspection_steps : S.steps;
   $("r-formula").textContent = truncated ? "лимит шагов: засчитано как пустой ответ" : `clip(2 × ${f1.toFixed(3)} − 1 − 0.002 × ${steps}, −1, 1)`;
   const tiles = $("r-tiles"); tiles.textContent = "";
   const t = (label, value, note) => tiles.append(el("div", { class: "card" }, el("div", { class: "muted", style: "font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600" }, label), el("div", { class: "disp", style: "font-size:32px" }, value), el("div", { class: "muted", style: "font-size:13px" }, note)));
   if (rep && rep.status === "invalid_structure") { t("Статус", "−1", "неверная структура: " + (rep.error || "")); }
-  t("Precision", rep ? rep.precision.toFixed(3) : "—", rep ? `${rep.tp} из ${rep.tp + rep.fp} находок совпали` : "");
+  t("Precision", rep ? rep.precision.toFixed(3) : "—", rep ? `совпало ${rep.tp} из ${rep.tp + rep.fp}` : "");
   t("Recall", rep ? rep.recall.toFixed(3) : "—", rep ? `найдено ${rep.tp} из ${rep.tp + rep.fn}` : "");
   t("F1", rep ? f1.toFixed(3) : "—", "2·TP / (2·TP + FP + FN)");
   t("Шаги расследования", steps, "+ 1 отправка");

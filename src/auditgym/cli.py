@@ -58,8 +58,8 @@ def cmd_serve(args) -> int:
     return 0
 
 
-def cmd_ui(args) -> int:
-    from .env.adapters import make_http_server
+def ui_extra_files() -> dict:
+    """Read-only data files the UI may fetch under /data/ (public artefacts only)."""
     extra = {}
     for name in ("report.json", "trajectories.jsonl"):
         for base in (os.getcwd(), ROOT):  # Docker writes them to /work (cwd); a checkout keeps them at the root
@@ -69,7 +69,12 @@ def cmd_ui(args) -> int:
                 break
     for split in ("train", "dev"):
         extra[f"/data/{split}.json"] = os.path.join(ROOT, "configs", f"{split}.json")
-    srv, env = make_http_server(args.port, "open", ui=True, extra_files=extra, host=args.host)
+    return extra
+
+
+def cmd_ui(args) -> int:
+    from .env.adapters import make_http_server
+    srv, env = make_http_server(args.port, "open", ui=True, extra_files=ui_extra_files(), host=args.host)
     url = f"http://127.0.0.1:{args.port}/"
     print(f"AuditGym UI: {url}")
     if not args.no_browser:
