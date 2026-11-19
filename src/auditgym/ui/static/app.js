@@ -50,7 +50,7 @@ async function start(seed, config) {
   $("f-ccy").value = m.base_currency;
   $("start").classList.add("hidden"); $("result").classList.add("hidden"); $("play").classList.remove("hidden");
   $("log").textContent = ""; $("records").textContent = ""; $("f-list").textContent = "";
-  renderTabs(); renderBudget(); renderDraft(); renderRecord();
+  renderTabs(); renderBudget(); renderDraft(); renderRecord(); renderFindings(); $("calc-out").innerHTML = '<span class="muted">результат появится здесь</span>';
   window.scrollTo(0, 0);
 }
 
@@ -69,7 +69,7 @@ function renderBudget() {
   b.classList.toggle("warn", used >= 80);
   for (let i = 0; i < 50; i++) b.append(el("i", { class: i < Math.ceil(used / 2) ? "used" : "" }));
   b.setAttribute("aria-label", `Использовано ${used} из 100 шагов`);
-  $("budget-txt").innerHTML = `<b style="color:var(--txt)">${used}</b> использовано · <b style="color:var(--txt)">${100 - used}</b> осталось`;
+  $("budget-txt").innerHTML = `<span id="budget-n">${100 - used}</span> шагов осталось · ${used} использовано`;
 }
 function renderTabs() {
   const t = $("table-tabs"); t.textContent = "";
@@ -114,14 +114,26 @@ const rowId = (t, r) => t === "fx" ? `${r.date}|${r.source_currency}|${r.target_
 function select(table, row) { S.sel = { table, row, id: rowId(table, row) }; renderRecord(); renderPage(); }
 function renderRecord() {
   const kv = $("rec-kv"); kv.textContent = "";
-  if (!S.sel) { kv.append(el("dt", {}, "—"), el("dd", {}, "выберите строку")); $("rec-id").textContent = ""; ["open-doc", "add-aff", "add-ev"].forEach((x) => ($(x).disabled = true)); return; }
+  if (!S.sel) { $("rec-doc").textContent = ""; kv.append(el("dt", {}, "—"), el("dd", {}, "выберите строку в таблице")); $("rec-id").textContent = ""; ["open-doc", "add-aff", "add-ev"].forEach((x) => ($(x).disabled = true)); return; }
   $("rec-id").textContent = `${S.sel.table} / ${S.sel.id}`;
-  for (const [k, v] of Object.entries(S.sel.row)) kv.append(el("dt", {}, k), el("dd", {}, typeof v === "object" && v !== null ? JSON.stringify(v) : v === null ? "null" : v));
+  $("rec-doc").textContent = "";
+  for (const [k, v] of Object.entries(S.sel.row)) {
+    let dd;
+    if (k === "line_items" && Array.isArray(v)) {
+      const cur = S.sel.row.currency;
+      dd = el("table", { class: "mini" }, el("tr", {}, el("th", {}, "позиция"), el("th", {}, "период"), el("th", { class: "num" }, "сумма")),
+        ...v.map((li) => el("tr", {}, el("td", {}, li.description || "—"), el("td", {}, li.service_period ? `${li.service_period.start} → ${li.service_period.end}` : "—"), el("td", { class: "num" }, typeof li.amount_minor === "number" ? fmt(li.amount_minor, cur) : "—"))));
+    } else if (/_minor$/.test(k) && typeof v === "number") {
+      const cur = S.sel.table === "ledger" ? S.ep.manifest.base_currency : S.sel.row.currency;
+      dd = el("span", {}, String(v), el("span", { class: "muted" }, `  = ${fmt(v, cur)}`));
+    } else dd = typeof v === "object" && v !== null ? JSON.stringify(v) : v === null ? "null" : String(v);
+    kv.append(el("dt", {}, k), el("dd", {}, dd));
+  }
   $("open-doc").disabled = !S.sel.row.doc_id; $("add-aff").disabled = S.sel.table === "fx" || S.sel.table === "ledger"; $("add-ev").disabled = false;
 }
 $("open-doc").addEventListener("click", async () => {
   const r = await step({ tool: "get_document", args: { doc_id: S.sel.row.doc_id } }, S.sel.row.doc_id);
-  if (r.observation.ok) { const kv = $("rec-kv"); kv.append(el("dt", { style: "color:var(--lime)" }, "document"), el("dd", {}, JSON.stringify(r.observation.result, null, 1))); }
+  if (r.observation.ok) { const box = $("rec-doc"); box.textContent = ""; box.append(el("div", { class: "doc" }, el("div", { class: "h" }, `[ ${S.sel.row.doc_id} ]`), el("pre", {}, JSON.stringify(r.observation.result, null, 2)))); }
 });
 $("add-aff").addEventListener("click", () => { if (!S.draft.aff.includes(S.sel.id) && S.draft.aff.length < 10) S.draft.aff.push(S.sel.id); renderDraft(); });
 $("add-ev").addEventListener("click", () => { if (!S.draft.ev.includes(S.sel.id) && S.draft.ev.length < 10) S.draft.ev.push(S.sel.id); renderDraft(); });
@@ -129,7 +141,7 @@ $("add-ev").addEventListener("click", () => { if (!S.draft.ev.includes(S.sel.id)
 $("calc-go").addEventListener("click", async () => {
   const expr = $("calc-in").value;
   const r = await step({ tool: "calculator", args: { expression: expr } }, expr);
-  $("calc-out").textContent = r.observation.ok ? r.observation.result.value : "ошибка: " + r.observation.error.message;
+  const out = $("calc-out"); out.textContent = ""; out.append(r.observation.ok ? el("span", {}, el("span", { class: "muted" }, expr + " = "), r.observation.result.value) : el("span", { class: "bad" }, "ошибка: " + r.observation.error.message));
 });
 $("calc-in").addEventListener("keydown", (e) => { if (e.key === "Enter") $("calc-go").click(); });
 
@@ -153,7 +165,8 @@ $("f-add").addEventListener("click", () => {
 });
 function renderFindings() {
   const ol = $("f-list"); ol.textContent = "";
-  S.findings.forEach((f, i) => ol.append(el("li", {}, el("span", { class: "mono" }, `${f.type} ${f.affected_ids.join(",")} ${f.currency} ${fmt(f.claimed_amount_minor, f.currency)}`), " ", el("button", { class: "idchip plain", onclick: () => { S.findings.splice(i, 1); renderFindings(); renderDraft(); } }, "×"))));
+  if (!S.findings.length) ol.append(el("li", { class: "empty" }, "пока нет находок — молчание на книгах с ошибками даёт −1"));
+  S.findings.forEach((f, i) => ol.append(el("li", {}, el("span", { class: "t" }, f.type.split("_")[0]), el("span", { class: "d", title: f.affected_ids.join(", ") }, `${f.affected_ids.join(", ")} · ${f.currency} ${fmt(f.claimed_amount_minor, f.currency)} · ${f.evidence_ids.length} док.`), el("button", { class: "idchip plain", "aria-label": "удалить находку", onclick: () => { S.findings.splice(i, 1); renderFindings(); renderDraft(); } }, "×"))));
 }
 $("submit").addEventListener("click", async () => {
   if (!confirm(`Отправить ${S.findings.length} находок? Эпизод завершится.`)) return;
@@ -164,6 +177,7 @@ $("submit").addEventListener("click", async () => {
 function showResult(rep, reward, truncated) {
   $("play").classList.add("hidden"); $("result").classList.remove("hidden"); window.scrollTo(0, 0);
   $("r-big").textContent = (reward >= 0 ? "+" : "") + reward.toFixed(3);
+  $("r-mark").style.left = "50%"; requestAnimationFrame(() => setTimeout(() => ($("r-mark").style.left = `${((Math.max(-1, Math.min(1, reward)) + 1) / 2) * 100}%`), 60));
   const f1 = rep ? rep.f1 : 0, steps = rep ? rep.inspection_steps : S.steps;
   $("r-formula").textContent = truncated ? "лимит шагов: засчитано как пустой ответ" : `clip(2 × ${f1.toFixed(3)} − 1 − 0.002 × ${steps}, −1, 1)`;
   const tiles = $("r-tiles"); tiles.textContent = "";
@@ -176,7 +190,7 @@ function showResult(rep, reward, truncated) {
   t("Цена шагов", "−" + (0.002 * steps).toFixed(3), "0.002 за каждый шаг");
   t("Находок", S.findings.length, "максимум 30");
   const list = $("r-list"); list.textContent = "";
-  (rep && rep.per_finding || []).forEach((pf) => { const f = S.findings[pf.index]; list.append(el("div", { class: "row", style: "border-top:1px solid var(--line);padding:8px 0" }, el("span", { class: "badge " + (pf.matched ? "lime" : "pink") }, pf.matched ? "✓ Совпала" : "✗ Не совпала"), el("span", { class: "mono" }, `${f.type} · ${f.affected_ids.join(", ")} · ${f.currency} ${fmt(f.claimed_amount_minor, f.currency)}`), el("span", { class: "muted" }, pf.matched ? "полный набор доказательств" : (pf.near_miss ? "почти: " + ({ "evidence set incomplete": "набор доказательств неполный", "amount outside tolerance": "сумма вне допуска", currency: "не та валюта" }[pf.near_miss] || pf.near_miss) : "")))); });
+  (rep && rep.per_finding || []).forEach((pf) => { const f = S.findings[pf.index]; list.append(el("div", { class: "row", style: "border-top:1px solid var(--line);padding:8px 0" }, el("span", { class: "badge " + (pf.matched ? "lime" : "pink") }, pf.matched ? "✓ Совпала" : "✗ Не совпала"), el("span", { class: "mono" }, `${f.type} · ${f.affected_ids.join(", ")} · ${f.currency} ${fmt(f.claimed_amount_minor, f.currency)}`), el("span", { class: "muted" }, pf.matched ? "полный набор доказательств" : ""))); });
   if (!list.childNodes.length) list.append(el("div", { class: "muted" }, "Находок не было."));
 }
 $("again").addEventListener("click", () => { $("result").classList.add("hidden"); $("start").classList.remove("hidden"); window.scrollTo(0, 0); });
