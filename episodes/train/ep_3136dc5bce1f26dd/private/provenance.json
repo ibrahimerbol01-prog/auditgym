@@ -1,0 +1,182 @@
+{
+  "clean_tables_sha256": "a232ad17838b7ff6d24cfc74d1269de896f364a08012a36c2fb5f52f7901db37",
+  "config": {
+    "base_currency": "EUR",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "KWD",
+      "GBP"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 40,
+    "period_months": 1,
+    "period_start_month": 6,
+    "period_year": 2026,
+    "timezone": "UTC"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_3136dc5bce1f26dd",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "EUR",
+        "doc_id": "DOC-S9-6817",
+        "due_at": "2026-07-16T12:28:00+00:00",
+        "entity_id": "CUST-S9-505",
+        "invoice_id": "BILL-S9-1580",
+        "issued_at": "2026-06-16T12:28:00+00:00",
+        "line_items": [
+          {
+            "amount_minor": 302000,
+            "description": "Quality inspection",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "total_minor": 302000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 1 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "EUR",
+        "customer": "Lumen Clinics LLP",
+        "date": "2026-06-16",
+        "doc_id": "DOC-S9-6817",
+        "entity_id": "CUST-S9-505",
+        "invoice_id": "BILL-S9-1580",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 302000,
+            "description": "Quality inspection",
+            "service_period": {
+              "end": "2026-06-30",
+              "start": "2026-06-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 302000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "EUR",
+        "debit_minor": 302000,
+        "entity_id": "CUST-S9-505",
+        "invoice_id": "BILL-S9-1580",
+        "payment_id": null,
+        "row_id": "L-S9-11506",
+        "timestamp": "2026-06-16T12:28:00+00:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 302000,
+        "currency": "EUR",
+        "debit_minor": 0,
+        "entity_id": "CUST-S9-505",
+        "invoice_id": "BILL-S9-1580",
+        "payment_id": null,
+        "row_id": "L-S9-11507",
+        "timestamp": "2026-06-16T12:28:00+00:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "L-S9-11492",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": null,
+      "before": "BILL-S9-1573",
+      "field": "invoice_id",
+      "key": "L-S9-11492",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": 881087,
+      "before": 879387,
+      "field": "debit_minor",
+      "key": "L-S9-11433",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-06-10 used instead of 2026-06-09"
+    },
+    {
+      "after": 881087,
+      "before": 879387,
+      "field": "credit_minor",
+      "key": "L-S9-11434",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-06-10 used instead of 2026-06-09"
+    },
+    {
+      "after": "2026-07-03T15:53:00+00:00",
+      "before": "2026-06-30T15:53:00+00:00",
+      "field": "timestamp",
+      "key": "L-S9-11687",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-03 instead of 2026-06-30)"
+    },
+    {
+      "after": "2026-07-03T15:53:00+00:00",
+      "before": "2026-06-30T15:53:00+00:00",
+      "field": "timestamp",
+      "key": "L-S9-11686",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-03 instead of 2026-06-30)"
+    }
+  ],
+  "seed": 1009
+}

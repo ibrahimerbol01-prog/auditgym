@@ -1,0 +1,33 @@
+{
+  "clean_tables_sha256": "1565b0387a145c35d8231eb6e83156d4e6f6c9c9e75271cd4f66e8d4886fdc3a",
+  "config": {
+    "base_currency": "KZT",
+    "clean": true,
+    "config_version": "1",
+    "distractor_level": 2,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_356d645110c43785",
+  "operations": [],
+  "seed": 1000
+}

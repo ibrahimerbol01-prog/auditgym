@@ -1,0 +1,114 @@
+{
+  "clean_tables_sha256": "575313026fdf966779a8702178d529bc084d791f238a13c311d654d4ac523747",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 2,
+      "duplicate_invoice": 0,
+      "payment_allocation": 0,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_3044faf167169059",
+  "operations": [
+    {
+      "after": 1013430316,
+      "before": 1009802680,
+      "field": "debit_minor",
+      "key": "GL-S3-11615",
+      "op": "set",
+      "rng_stream": "inject.fx.§I1",
+      "table": "ledger",
+      "why": "rate of 2026-03-08 used instead of 2026-03-03"
+    },
+    {
+      "after": 1013430316,
+      "before": 1009802680,
+      "field": "credit_minor",
+      "key": "GL-S3-11614",
+      "op": "set",
+      "rng_stream": "inject.fx.§I1",
+      "table": "ledger",
+      "why": "rate of 2026-03-08 used instead of 2026-03-03"
+    },
+    {
+      "after": 507673760,
+      "before": 503797696,
+      "field": "debit_minor",
+      "key": "GL-S3-11677",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "rate of 2026-03-18 used instead of 2026-03-16"
+    },
+    {
+      "after": 507673760,
+      "before": 503797696,
+      "field": "credit_minor",
+      "key": "GL-S3-11676",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "rate of 2026-03-18 used instead of 2026-03-16"
+    },
+    {
+      "after": "2026-03-18T11:16:00+05:00",
+      "before": "2026-03-16T11:16:00+05:00",
+      "field": "timestamp",
+      "key": "GL-S3-11677",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "posted with wrong date 2026-03-18"
+    },
+    {
+      "after": "2026-03-18T11:16:00+05:00",
+      "before": "2026-03-16T11:16:00+05:00",
+      "field": "timestamp",
+      "key": "GL-S3-11676",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "posted with wrong date 2026-03-18"
+    },
+    {
+      "after": "2026-04-02T09:59:00+05:00",
+      "before": "2026-03-30T09:59:00+05:00",
+      "field": "timestamp",
+      "key": "GL-S3-11759",
+      "op": "set",
+      "rng_stream": "inject.period.§I3",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-02 instead of 2026-03-30)"
+    },
+    {
+      "after": "2026-04-02T09:59:00+05:00",
+      "before": "2026-03-30T09:59:00+05:00",
+      "field": "timestamp",
+      "key": "GL-S3-11758",
+      "op": "set",
+      "rng_stream": "inject.period.§I3",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-02 instead of 2026-03-30)"
+    }
+  ],
+  "seed": 1002
+}

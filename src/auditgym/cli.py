@@ -62,9 +62,13 @@ def cmd_ui(args) -> int:
     from .env.adapters import make_http_server
     extra = {}
     for name in ("report.json", "trajectories.jsonl"):
-        p = os.path.join(ROOT, name)
-        if os.path.exists(p):
-            extra["/data/" + name] = p
+        for base in (os.getcwd(), ROOT):  # Docker writes them to /work (cwd); a checkout keeps them at the root
+            p = os.path.join(base, name)
+            if os.path.exists(p):
+                extra["/data/" + name] = p
+                break
+    for split in ("train", "dev"):
+        extra[f"/data/{split}.json"] = os.path.join(ROOT, "configs", f"{split}.json")
     srv, env = make_http_server(args.port, "open", ui=True, extra_files=extra, host=args.host)
     url = f"http://127.0.0.1:{args.port}/"
     print(f"AuditGym UI: {url}")

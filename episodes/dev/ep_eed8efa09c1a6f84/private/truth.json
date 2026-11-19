@@ -1,0 +1,125 @@
+{
+  "episode_id": "ep_eed8efa09c1a6f84",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-Y3-3923",
+          "IN-Y3-3925"
+        ]
+      ],
+      "affected_ids": [
+        "IN-Y3-3923",
+        "IN-Y3-3925"
+      ],
+      "conversions": 0,
+      "currency": "EUR",
+      "detectability_tier": "invoices",
+      "expected_amount_minor": 905000,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-Y3-3964",
+          "L-Y3-30304",
+          "PMT-Y3-3034"
+        ]
+      ],
+      "affected_ids": [
+        "IN-Y3-3964",
+        "PMT-Y3-3034"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+payments",
+      "expected_amount_minor": 1229658000,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "payment_allocation"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-06-04|EUR|KZT",
+          "IN-Y3-3961",
+          "L-Y3-30266"
+        ]
+      ],
+      "affected_ids": [
+        "IN-Y3-3961"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 1713117,
+      "interacts_with": [],
+      "issue_id": "I-03",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-Y3-3979",
+          "L-Y3-30455"
+        ]
+      ],
+      "affected_ids": [
+        "IN-Y3-3979"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+invoices",
+      "expected_amount_minor": 628878000,
+      "interacts_with": [],
+      "issue_id": "I-04",
+      "type": "period_classification"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-Y3-3974",
+          "IN-Y3-3980"
+        ]
+      ],
+      "affected_ids": [
+        "IN-Y3-3974",
+        "IN-Y3-3980"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 584246000,
+      "interacts_with": [
+        "I-06"
+      ],
+      "issue_id": "I-05",
+      "scenario": "B",
+      "type": "duplicate_invoice"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "IN-Y3-3980",
+          "L-Y3-30452"
+        ]
+      ],
+      "affected_ids": [
+        "IN-Y3-3980"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "interacting",
+      "expected_amount_minor": 584246000,
+      "interacts_with": [
+        "I-05"
+      ],
+      "issue_id": "I-06",
+      "scenario": "B",
+      "type": "period_classification"
+    }
+  ]
+}

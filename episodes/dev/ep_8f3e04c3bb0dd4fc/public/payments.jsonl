@@ -1,0 +1,48 @@
+{"doc_id": "SCAN-D4-5118", "payment_id": "PAY-D4-3233", "timestamp": "2026-04-06T14:38:00+05:00", "currency": "KZT", "amount_minor": 120927000, "invoice_refs": ["BILL-D4-3804"]}
+{"doc_id": "SCAN-D4-8891", "payment_id": "PAY-D4-3234", "timestamp": "2026-04-09T13:27:00+05:00", "currency": "KZT", "amount_minor": 920000000, "invoice_refs": ["BILL-D4-3808"]}
+{"doc_id": "SCAN-D4-1141", "payment_id": "PAY-D4-3235", "timestamp": "2026-04-14T09:12:00+05:00", "currency": "KZT", "amount_minor": 471122000, "invoice_refs": ["BILL-D4-3812"]}
+{"doc_id": "SCAN-D4-6233", "payment_id": "PAY-D4-3236", "timestamp": "2026-04-14T16:55:00+05:00", "currency": "KZT", "amount_minor": 167910360, "invoice_refs": ["BILL-D4-3806"]}
+{"doc_id": "SCAN-D4-7677", "payment_id": "PAY-D4-3237", "timestamp": "2026-04-15T13:17:00+05:00", "currency": "EUR", "amount_minor": 239000, "invoice_refs": ["BILL-D4-3813"]}
+{"doc_id": "SCAN-D4-3614", "payment_id": "PAY-D4-3238", "timestamp": "2026-04-15T17:37:00+05:00", "currency": "KZT", "amount_minor": 611708000, "invoice_refs": ["BILL-D4-3809"]}
+{"doc_id": "SCAN-D4-3097", "payment_id": "PAY-D4-3239", "timestamp": "2026-04-16T13:25:00+05:00", "currency": "KZT", "amount_minor": 297030420, "invoice_refs": ["BILL-D4-3816"]}
+{"doc_id": "SCAN-D4-7503", "payment_id": "PAY-D4-3240", "timestamp": "2026-04-18T10:52:00+05:00", "currency": "KZT", "amount_minor": 395268000, "invoice_refs": ["BILL-D4-3815"]}
+{"doc_id": "SCAN-D4-2759", "payment_id": "PAY-D4-3241", "timestamp": "2026-04-20T13:39:00+05:00", "currency": "KZT", "amount_minor": 79016640, "invoice_refs": ["BILL-D4-3806"]}
+{"doc_id": "SCAN-D4-8201", "payment_id": "PAY-D4-3242", "timestamp": "2026-04-21T09:08:00+05:00", "currency": "KZT", "amount_minor": 484628580, "invoice_refs": ["BILL-D4-3816"]}
+{"doc_id": "SCAN-D4-3802", "payment_id": "PAY-D4-3243", "timestamp": "2026-04-22T13:29:00+05:00", "currency": "KZT", "amount_minor": 156049000, "invoice_refs": ["BILL-D4-3819"]}
+{"doc_id": "SCAN-D4-7073", "payment_id": "PAY-D4-3244", "timestamp": "2026-04-23T13:47:00+05:00", "currency": "KZT", "amount_minor": 1465951000, "invoice_refs": ["BILL-D4-3811", "BILL-D4-3810"]}
+{"doc_id": "SCAN-D4-2967", "payment_id": "PAY-D4-3245", "timestamp": "2026-04-23T15:51:00+05:00", "currency": "KZT", "amount_minor": 89330560, "invoice_refs": ["BILL-D4-3807"]}
+{"doc_id": "SCAN-D4-7554", "payment_id": "PAY-D4-3246", "timestamp": "2026-04-25T13:39:00+05:00", "currency": "EUR", "amount_minor": 824000, "invoice_refs": ["BILL-D4-3805"]}
+{"doc_id": "SCAN-D4-3915", "payment_id": "PAY-D4-3247", "timestamp": "2026-04-29T10:39:00+05:00", "currency": "KZT", "amount_minor": 113693440, "invoice_refs": ["BILL-D4-3807"]}
+{"doc_id": "SCAN-D4-4458", "payment_id": "PAY-D4-3248", "timestamp": "2026-04-30T12:14:00+05:00", "currency": "KZT", "amount_minor": 382634000, "invoice_refs": ["BILL-D4-3820"]}
+{"doc_id": "SCAN-D4-4721", "payment_id": "PAY-D4-3249", "timestamp": "2026-05-02T11:14:00+05:00", "currency": "KZT", "amount_minor": 1127414000, "invoice_refs": ["BILL-D4-3814", "BILL-D4-3824"]}
+{"doc_id": "SCAN-D4-9756", "payment_id": "PAY-D4-3250", "timestamp": "2026-05-04T11:01:00+05:00", "currency": "KZT", "amount_minor": 221854000, "invoice_refs": null}
+{"doc_id": "SCAN-D4-9018", "payment_id": "PAY-D4-3251", "timestamp": "2026-05-06T17:59:00+05:00", "currency": "KZT", "amount_minor": 452342000, "invoice_refs": ["BILL-D4-3823"]}
+{"doc_id": "SCAN-D4-7812", "payment_id": "PAY-D4-3252", "timestamp": "2026-05-07T16:40:00+05:00", "currency": "KZT", "amount_minor": 339756000, "invoice_refs": ["BILL-D4-3817"]}
+{"doc_id": "SCAN-D4-8803", "payment_id": "PAY-D4-3253", "timestamp": "2026-05-12T10:14:00+05:00", "currency": "KZT", "amount_minor": 783734400, "invoice_refs": ["BILL-D4-3821"]}
+{"doc_id": "SCAN-D4-3424", "payment_id": "PAY-D4-3254", "timestamp": "2026-05-16T09:39:00+05:00", "currency": "KZT", "amount_minor": 202293000, "invoice_refs": ["BILL-D4-3831"]}
+{"doc_id": "SCAN-D4-1244", "payment_id": "PAY-D4-3255", "timestamp": "2026-05-16T17:51:00+05:00", "currency": "KZT", "amount_minor": 203024000, "invoice_refs": ["BILL-D4-3828"]}
+{"doc_id": "SCAN-D4-9124", "payment_id": "PAY-D4-3256", "timestamp": "2026-05-19T10:21:00+05:00", "currency": "KZT", "amount_minor": 585268000, "invoice_refs": ["BILL-D4-3822"]}
+{"doc_id": "SCAN-D4-5866", "payment_id": "PAY-D4-3257", "timestamp": "2026-05-19T15:39:00+05:00", "currency": "EUR", "amount_minor": 715000, "invoice_refs": ["BILL-D4-3826"]}
+{"doc_id": "SCAN-D4-2300", "payment_id": "PAY-D4-3258", "timestamp": "2026-05-23T10:52:00+05:00", "currency": "KZT", "amount_minor": 560536000, "invoice_refs": ["BILL-D4-3825"]}
+{"doc_id": "SCAN-D4-1238", "payment_id": "PAY-D4-3259", "timestamp": "2026-05-25T09:16:00+05:00", "currency": "KZT", "amount_minor": 299790150, "invoice_refs": ["BILL-D4-3832"]}
+{"doc_id": "SCAN-D4-1444", "payment_id": "PAY-D4-3260", "timestamp": "2026-05-26T16:10:00+05:00", "currency": "KZT", "amount_minor": 425463000, "invoice_refs": null}
+{"doc_id": "SCAN-D4-4564", "payment_id": "PAY-D4-3261", "timestamp": "2026-05-31T11:34:00+05:00", "currency": "KZT", "amount_minor": 245282850, "invoice_refs": ["BILL-D4-3832"]}
+{"doc_id": "SCAN-D4-7347", "payment_id": "PAY-D4-3262", "timestamp": "2026-06-01T15:26:00+05:00", "currency": "KZT", "amount_minor": 435854000, "invoice_refs": ["BILL-D4-3834"]}
+{"doc_id": "SCAN-D4-1571", "payment_id": "PAY-D4-3263", "timestamp": "2026-06-03T17:26:00+05:00", "currency": "KZT", "amount_minor": 218488000, "invoice_refs": ["BILL-D4-3836"]}
+{"doc_id": "SCAN-D4-5664", "payment_id": "PAY-D4-3264", "timestamp": "2026-06-07T11:33:00+05:00", "currency": "KZT", "amount_minor": 980830000, "invoice_refs": ["BILL-D4-3837", "BILL-D4-3838"]}
+{"doc_id": "SCAN-D4-9765", "payment_id": "PAY-D4-3265", "timestamp": "2026-06-08T10:39:00+05:00", "currency": "KZT", "amount_minor": 777121000, "invoice_refs": ["BILL-D4-3835"]}
+{"doc_id": "SCAN-D4-6336", "payment_id": "PAY-D4-3266", "timestamp": "2026-06-14T09:44:00+05:00", "currency": "KZT", "amount_minor": 855019110, "invoice_refs": ["BILL-D4-3839"]}
+{"doc_id": "SCAN-D4-8186", "payment_id": "PAY-D4-3267", "timestamp": "2026-06-20T13:31:00+05:00", "currency": "KZT", "amount_minor": 134585000, "invoice_refs": ["BILL-D4-3840"]}
+{"doc_id": "SCAN-D4-2986", "payment_id": "PAY-D4-3268", "timestamp": "2026-06-21T15:30:00+05:00", "currency": "KZT", "amount_minor": 15589900, "invoice_refs": ["BILL-D4-3844"]}
+{"doc_id": "SCAN-D4-8456", "payment_id": "PAY-D4-3269", "timestamp": "2026-06-22T13:32:00+05:00", "currency": "KZT", "amount_minor": 732342000, "invoice_refs": ["BILL-D4-3845"]}
+{"doc_id": "SCAN-D4-5376", "payment_id": "PAY-D4-3270", "timestamp": "2026-06-22T16:31:00+05:00", "currency": "EUR", "amount_minor": 504000, "invoice_refs": ["BILL-D4-3843"]}
+{"doc_id": "SCAN-D4-5672", "payment_id": "PAY-D4-3271", "timestamp": "2026-06-24T10:36:00+05:00", "currency": "KZT", "amount_minor": 1231024000, "invoice_refs": ["BILL-D4-3841", "BILL-D4-3849"]}
+{"doc_id": "SCAN-D4-1136", "payment_id": "PAY-D4-3272", "timestamp": "2026-06-26T09:28:00+05:00", "currency": "EUR", "amount_minor": 189000, "invoice_refs": ["BILL-D4-3842"]}
+{"doc_id": "SCAN-D4-7002", "payment_id": "PAY-D4-3273", "timestamp": "2026-06-27T17:56:00+05:00", "currency": "KZT", "amount_minor": 589171000, "invoice_refs": ["BILL-D4-3850"]}
+{"doc_id": "SCAN-D4-4781", "payment_id": "PAY-D4-3274", "timestamp": "2026-06-28T17:32:00+05:00", "currency": "KZT", "amount_minor": 474829000, "invoice_refs": ["BILL-D4-3847"]}
+{"doc_id": "SCAN-D4-7405", "payment_id": "PAY-D4-3275", "timestamp": "2026-07-01T13:03:00+05:00", "currency": "KZT", "amount_minor": 7485390, "invoice_refs": ["BILL-D4-3854"]}
+{"doc_id": "SCAN-D4-8848", "payment_id": "PAY-D4-3276", "timestamp": "2026-07-03T11:40:00+05:00", "currency": "KZT", "amount_minor": 143602550, "invoice_refs": ["BILL-D4-3846"]}
+{"doc_id": "SCAN-D4-9471", "payment_id": "PAY-D4-3277", "timestamp": "2026-07-03T13:47:00+05:00", "currency": "KZT", "amount_minor": 265756000, "invoice_refs": ["BILL-D4-3851"]}
+{"doc_id": "SCAN-D4-1868", "payment_id": "PAY-D4-3278", "timestamp": "2026-07-05T10:29:00+05:00", "currency": "KZT", "amount_minor": 77324450, "invoice_refs": ["BILL-D4-3846"]}
+{"doc_id": "SCAN-D4-8832", "payment_id": "PAY-D4-3279", "timestamp": "2026-07-06T11:41:00+05:00", "currency": "USD", "amount_minor": 1466000, "invoice_refs": ["BILL-D4-3853", "BILL-D4-3860"]}
+{"doc_id": "SCAN-D4-4849", "payment_id": "PAY-D4-3280", "timestamp": "2026-07-06T11:47:00+05:00", "currency": "KZT", "amount_minor": 15197610, "invoice_refs": ["BILL-D4-3854"]}

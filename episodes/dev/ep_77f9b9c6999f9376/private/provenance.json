@@ -1,0 +1,396 @@
+{
+  "clean_tables_sha256": "d0b33826e6bf646387097a5c49676d300b0c5e9c947306c7ad15316f74ba0268",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 2,
+      "duplicate_invoice": 2,
+      "payment_allocation": 2,
+      "period_classification": 2
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 300,
+    "n_invoices": 80,
+    "period_months": 3,
+    "period_start_month": 4,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_77f9b9c6999f9376",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "DOC-W5-6380",
+        "due_at": "2026-06-02T14:46:00+05:00",
+        "entity_id": "E-W5-765",
+        "invoice_id": "IN-W5-3431",
+        "issued_at": "2026-05-03T14:46:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 312252000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 63024000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "total_minor": 375276000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 9 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Marlow Textiles LLC",
+        "date": "2026-05-03",
+        "doc_id": "DOC-W5-6380",
+        "entity_id": "E-W5-765",
+        "invoice_id": "IN-W5-3431",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 312252000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 63024000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 375276000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 375276000,
+        "entity_id": "E-W5-765",
+        "invoice_id": "IN-W5-3431",
+        "payment_id": null,
+        "row_id": "GL-W5-39968",
+        "timestamp": "2026-05-03T14:46:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 375276000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "E-W5-765",
+        "invoice_id": "IN-W5-3431",
+        "payment_id": null,
+        "row_id": "GL-W5-39967",
+        "timestamp": "2026-05-03T14:46:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "DOC-W5-8290",
+        "due_at": "2026-06-03T16:26:00+05:00",
+        "entity_id": "E-W5-653",
+        "invoice_id": "IN-W5-3432",
+        "issued_at": "2026-05-04T16:26:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 230345000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 374000000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 326098000,
+            "description": "Customs brokerage",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "total_minor": 930443000
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "invoices",
+      "why": "duplicate of §I2 re-issued 10 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Silverbirch Clinics GmbH",
+        "date": "2026-05-04",
+        "doc_id": "DOC-W5-8290",
+        "entity_id": "E-W5-653",
+        "invoice_id": "IN-W5-3432",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 230345000,
+            "description": "Warehouse storage",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 374000000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          },
+          {
+            "amount_minor": 326098000,
+            "description": "Customs brokerage",
+            "service_period": {
+              "end": "2026-04-30",
+              "start": "2026-04-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 930443000
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 930443000,
+        "entity_id": "E-W5-653",
+        "invoice_id": "IN-W5-3432",
+        "payment_id": null,
+        "row_id": "GL-W5-39992",
+        "timestamp": "2026-05-04T16:26:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 930443000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "E-W5-653",
+        "invoice_id": "IN-W5-3432",
+        "payment_id": null,
+        "row_id": "GL-W5-39991",
+        "timestamp": "2026-05-04T16:26:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I2",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "GL-W5-40546",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I3"
+    },
+    {
+      "after": null,
+      "before": "IN-W5-3458",
+      "field": "invoice_id",
+      "key": "GL-W5-40546",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I3"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "GL-W5-40499",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P2",
+      "table": "ledger",
+      "why": "receipt §P2 not applied to §I4"
+    },
+    {
+      "after": null,
+      "before": "IN-W5-3454",
+      "field": "invoice_id",
+      "key": "GL-W5-40499",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P2",
+      "table": "ledger",
+      "why": "receipt §P2 not applied to §I4"
+    },
+    {
+      "after": 676824330,
+      "before": 675829245,
+      "field": "debit_minor",
+      "key": "GL-W5-39778",
+      "op": "set",
+      "rng_stream": "inject.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-04-24 used instead of 2026-04-21"
+    },
+    {
+      "after": 676824330,
+      "before": 675829245,
+      "field": "credit_minor",
+      "key": "GL-W5-39779",
+      "op": "set",
+      "rng_stream": "inject.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-04-24 used instead of 2026-04-21"
+    },
+    {
+      "after": 197713140,
+      "before": 199139992,
+      "field": "debit_minor",
+      "key": "GL-W5-40209",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "rate of 2026-05-18 used instead of 2026-05-20"
+    },
+    {
+      "after": 197713140,
+      "before": 199139992,
+      "field": "credit_minor",
+      "key": "GL-W5-40208",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "rate of 2026-05-18 used instead of 2026-05-20"
+    },
+    {
+      "after": "2026-05-18T15:23:00+05:00",
+      "before": "2026-05-20T15:23:00+05:00",
+      "field": "timestamp",
+      "key": "GL-W5-40209",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "posted with wrong date 2026-05-18"
+    },
+    {
+      "after": "2026-05-18T15:23:00+05:00",
+      "before": "2026-05-20T15:23:00+05:00",
+      "field": "timestamp",
+      "key": "GL-W5-40208",
+      "op": "set",
+      "rng_stream": "inject.fx.§I6",
+      "table": "ledger",
+      "why": "posted with wrong date 2026-05-18"
+    },
+    {
+      "after": "2026-07-01T09:25:00+05:00",
+      "before": "2026-06-30T09:25:00+05:00",
+      "field": "timestamp",
+      "key": "GL-W5-40773",
+      "op": "set",
+      "rng_stream": "inject.period.§I7",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-01 instead of 2026-06-30)"
+    },
+    {
+      "after": "2026-07-01T09:25:00+05:00",
+      "before": "2026-06-30T09:25:00+05:00",
+      "field": "timestamp",
+      "key": "GL-W5-40774",
+      "op": "set",
+      "rng_stream": "inject.period.§I7",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-07-01 instead of 2026-06-30)"
+    },
+    {
+      "after": "2026-06-28T13:15:00+05:00",
+      "before": "2026-07-02T13:15:00+05:00",
+      "field": "timestamp",
+      "key": "GL-W5-40740",
+      "op": "set",
+      "rng_stream": "inject.period.§I8",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-06-28 instead of 2026-07-02)"
+    },
+    {
+      "after": "2026-06-28T13:15:00+05:00",
+      "before": "2026-07-02T13:15:00+05:00",
+      "field": "timestamp",
+      "key": "GL-W5-40739",
+      "op": "set",
+      "rng_stream": "inject.period.§I8",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-06-28 instead of 2026-07-02)"
+    }
+  ],
+  "seed": 2008
+}

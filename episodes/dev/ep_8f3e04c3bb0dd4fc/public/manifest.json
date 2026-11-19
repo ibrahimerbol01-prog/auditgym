@@ -1,0 +1,19 @@
+{
+  "base_currency": "KZT",
+  "counts": {
+    "documents": 106,
+    "fx": 230,
+    "invoices": 58,
+    "ledger": 507,
+    "payments": 48
+  },
+  "episode_id": "ep_8f3e04c3bb0dd4fc",
+  "period_end": "2026-06-30",
+  "period_start": "2026-04-01",
+  "rounding": {
+    "applies_to": "conversion_to_base",
+    "mode": "half_even"
+  },
+  "schema_version": "1.0",
+  "timezone": "Asia/Tashkent"
+}

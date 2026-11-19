@@ -1,0 +1,406 @@
+{
+  "clean_tables_sha256": "a00711298ff4efb57589b5991d2b1662429395f9d56cee0d0b5d4187452bdf39",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [
+      "A",
+      "B"
+    ],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 60,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_a1e78cc8c40c1c86",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "DOC-Z2-1455",
+        "due_at": "2026-03-17T09:25:00+05:00",
+        "entity_id": "CUST-Z2-632",
+        "invoice_id": "BILL-Z2-1503",
+        "issued_at": "2026-02-15T09:25:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 368738000,
+            "description": "Equipment rental",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 115122000,
+            "description": "Maintenance contract",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 211561000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          }
+        ],
+        "total_minor": 695421000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 5 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Lumen Robotics Co",
+        "date": "2026-02-15",
+        "doc_id": "DOC-Z2-1455",
+        "entity_id": "CUST-Z2-632",
+        "invoice_id": "BILL-Z2-1503",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 368738000,
+            "description": "Equipment rental",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 115122000,
+            "description": "Maintenance contract",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          },
+          {
+            "amount_minor": 211561000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-02-28",
+              "start": "2026-02-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 695421000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 695421000,
+        "entity_id": "CUST-Z2-632",
+        "invoice_id": "BILL-Z2-1503",
+        "payment_id": null,
+        "row_id": "L-Z2-20031",
+        "timestamp": "2026-02-15T09:25:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 695421000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z2-632",
+        "invoice_id": "BILL-Z2-1503",
+        "payment_id": null,
+        "row_id": "L-Z2-20032",
+        "timestamp": "2026-02-15T09:25:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "L-Z2-20185",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": null,
+      "before": "BILL-Z2-1518",
+      "field": "invoice_id",
+      "key": "L-Z2-20185",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": 158082282,
+      "before": 158442086,
+      "field": "debit_minor",
+      "key": "L-Z2-20164",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-03-15 used instead of 2026-03-11"
+    },
+    {
+      "after": 158082282,
+      "before": 158442086,
+      "field": "credit_minor",
+      "key": "L-Z2-20165",
+      "op": "set",
+      "rng_stream": "inject.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-03-15 used instead of 2026-03-11"
+    },
+    {
+      "after": "2026-04-01T16:17:00+05:00",
+      "before": "2026-03-28T16:17:00+05:00",
+      "field": "timestamp",
+      "key": "L-Z2-20322",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-01 instead of 2026-03-28)"
+    },
+    {
+      "after": "2026-04-01T16:17:00+05:00",
+      "before": "2026-03-28T16:17:00+05:00",
+      "field": "timestamp",
+      "key": "L-Z2-20321",
+      "op": "set",
+      "rng_stream": "inject.period.§I4",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-01 instead of 2026-03-28)"
+    },
+    {
+      "after": 216607293,
+      "before": 215230932,
+      "field": "debit_minor",
+      "key": "L-Z2-20319",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-03-31 used instead of 2026-03-29"
+    },
+    {
+      "after": 216607293,
+      "before": 215230932,
+      "field": "credit_minor",
+      "key": "L-Z2-20320",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I5",
+      "table": "ledger",
+      "why": "rate of 2026-03-31 used instead of 2026-03-29"
+    },
+    {
+      "after": "2026-04-01T13:05:00+05:00",
+      "before": "2026-03-29T13:05:00+05:00",
+      "field": "timestamp",
+      "key": "L-Z2-20319",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I5",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-01 instead of 2026-03-29)"
+    },
+    {
+      "after": "2026-04-01T13:05:00+05:00",
+      "before": "2026-03-29T13:05:00+05:00",
+      "field": "timestamp",
+      "key": "L-Z2-20320",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I5",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-01 instead of 2026-03-29)"
+    },
+    {
+      "after": 52602440,
+      "before": 101158538,
+      "field": "credit_minor",
+      "key": "L-Z2-20340",
+      "op": "set",
+      "rng_stream": "inject.A.alloc.§P2",
+      "table": "ledger",
+      "why": "receipt §P2 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 48556098,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z2-589",
+        "invoice_id": null,
+        "payment_id": "PAY-Z2-1418",
+        "row_id": "L-Z2-20338",
+        "timestamp": "2026-04-03T16:59:00+05:00"
+      },
+      "rng_stream": "inject.A.alloc.§P2",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "DOC-Z2-6493",
+        "due_at": "2026-04-29T15:39:00+05:00",
+        "entity_id": "CUST-Z2-683",
+        "invoice_id": "BILL-Z2-1542",
+        "issued_at": "2026-03-30T15:39:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 405715000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          },
+          {
+            "amount_minor": 206537000,
+            "description": "Equipment rental",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          }
+        ],
+        "total_minor": 612252000
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "invoices",
+      "why": "duplicate of §I6 re-issued 7 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Brightwater Optics Ltd",
+        "date": "2026-03-30",
+        "doc_id": "DOC-Z2-6493",
+        "entity_id": "CUST-Z2-683",
+        "invoice_id": "BILL-Z2-1542",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 405715000,
+            "description": "Packaging supplies",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          },
+          {
+            "amount_minor": 206537000,
+            "description": "Equipment rental",
+            "service_period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 612252000
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 612252000,
+        "entity_id": "CUST-Z2-683",
+        "invoice_id": "BILL-Z2-1542",
+        "payment_id": null,
+        "row_id": "L-Z2-20343",
+        "timestamp": "2026-03-30T15:39:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 612252000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-Z2-683",
+        "invoice_id": "BILL-Z2-1542",
+        "payment_id": null,
+        "row_id": "L-Z2-20344",
+        "timestamp": "2026-03-30T15:39:00+05:00"
+      },
+      "rng_stream": "inject.B.dup.§I6",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2026-04-04T15:39:00+05:00",
+      "before": "2026-03-30T15:39:00+05:00",
+      "field": "timestamp",
+      "key": "L-Z2-20343",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I68",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-30)"
+    },
+    {
+      "after": "2026-04-04T15:39:00+05:00",
+      "before": "2026-03-30T15:39:00+05:00",
+      "field": "timestamp",
+      "key": "L-Z2-20344",
+      "op": "set",
+      "rng_stream": "inject.B.period.§I68",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-04 instead of 2026-03-30)"
+    }
+  ],
+  "seed": 1006
+}

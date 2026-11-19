@@ -1,0 +1,41 @@
+{"doc_id": "ATT-W6-8954", "payment_id": "PAY-W6-2181", "timestamp": "2026-04-14T10:27:00+09:00", "currency": "USD", "amount_minor": 1787000, "invoice_refs": ["INV-W6-2358", "INV-W6-2353"]}
+{"doc_id": "ATT-W6-4315", "payment_id": "PAY-W6-2182", "timestamp": "2026-04-17T11:49:00+09:00", "currency": "USD", "amount_minor": 1181000, "invoice_refs": ["INV-W6-2356"]}
+{"doc_id": "ATT-W6-5691", "payment_id": "PAY-W6-2183", "timestamp": "2026-04-18T17:14:00+09:00", "currency": "JPY", "amount_minor": 1203180, "invoice_refs": ["INV-W6-2357"]}
+{"doc_id": "ATT-W6-6512", "payment_id": "PAY-W6-2184", "timestamp": "2026-04-19T14:25:00+09:00", "currency": "JPY", "amount_minor": 2223490, "invoice_refs": ["INV-W6-2359"]}
+{"doc_id": "ATT-W6-2822", "payment_id": "PAY-W6-2185", "timestamp": "2026-04-20T09:03:00+09:00", "currency": "JPY", "amount_minor": 2062303, "invoice_refs": ["INV-W6-2368"]}
+{"doc_id": "ATT-W6-6188", "payment_id": "PAY-W6-2186", "timestamp": "2026-04-20T14:10:00+09:00", "currency": "USD", "amount_minor": 573000, "invoice_refs": ["INV-W6-2369"]}
+{"doc_id": "ATT-W6-9592", "payment_id": "PAY-W6-2187", "timestamp": "2026-04-20T14:44:00+09:00", "currency": "JPY", "amount_minor": 1735910, "invoice_refs": ["INV-W6-2354"]}
+{"doc_id": "ATT-W6-3419", "payment_id": "PAY-W6-2188", "timestamp": "2026-04-21T11:17:00+09:00", "currency": "USD", "amount_minor": 1679000, "invoice_refs": ["INV-W6-2367"]}
+{"doc_id": "ATT-W6-9328", "payment_id": "PAY-W6-2189", "timestamp": "2026-04-22T09:01:00+09:00", "currency": "USD", "amount_minor": 1513000, "invoice_refs": ["INV-W6-2355"]}
+{"doc_id": "ATT-W6-6977", "payment_id": "PAY-W6-2190", "timestamp": "2026-04-23T14:28:00+09:00", "currency": "JPY", "amount_minor": 49550, "invoice_refs": ["INV-W6-2361"]}
+{"doc_id": "ATT-W6-7899", "payment_id": "PAY-W6-2191", "timestamp": "2026-04-25T12:04:00+09:00", "currency": "JPY", "amount_minor": 1668640, "invoice_refs": ["INV-W6-2352"]}
+{"doc_id": "ATT-W6-9689", "payment_id": "PAY-W6-2192", "timestamp": "2026-04-25T16:54:00+09:00", "currency": "JPY", "amount_minor": 1870310, "invoice_refs": ["INV-W6-2362"]}
+{"doc_id": "ATT-W6-5676", "payment_id": "PAY-W6-2193", "timestamp": "2026-04-26T10:14:00+09:00", "currency": "USD", "amount_minor": 470000, "invoice_refs": ["INV-W6-2364"]}
+{"doc_id": "ATT-W6-2488", "payment_id": "PAY-W6-2194", "timestamp": "2026-04-27T10:22:00+09:00", "currency": "JPY", "amount_minor": 3190150, "invoice_refs": ["INV-W6-2363"]}
+{"doc_id": "ATT-W6-4346", "payment_id": "PAY-W6-2195", "timestamp": "2026-04-28T15:16:00+09:00", "currency": "JPY", "amount_minor": 2759090, "invoice_refs": ["INV-W6-2372"]}
+{"doc_id": "ATT-W6-7731", "payment_id": "PAY-W6-2196", "timestamp": "2026-05-01T14:29:00+09:00", "currency": "JPY", "amount_minor": 2027680, "invoice_refs": ["INV-W6-2365"]}
+{"doc_id": "ATT-W6-2103", "payment_id": "PAY-W6-2197", "timestamp": "2026-05-01T15:47:00+09:00", "currency": "USD", "amount_minor": 513000, "invoice_refs": ["INV-W6-2375"]}
+{"doc_id": "ATT-W6-4660", "payment_id": "PAY-W6-2198", "timestamp": "2026-05-03T17:40:00+09:00", "currency": "USD", "amount_minor": 672000, "invoice_refs": ["INV-W6-2366"]}
+{"doc_id": "ATT-W6-6737", "payment_id": "PAY-W6-2199", "timestamp": "2026-05-04T09:01:00+09:00", "currency": "JPY", "amount_minor": 1451210, "invoice_refs": ["INV-W6-2376"]}
+{"doc_id": "ATT-W6-4692", "payment_id": "PAY-W6-2200", "timestamp": "2026-05-07T14:08:00+09:00", "currency": "USD", "amount_minor": 2186000, "invoice_refs": ["INV-W6-2371", "INV-W6-2377"]}
+{"doc_id": "ATT-W6-3892", "payment_id": "PAY-W6-2201", "timestamp": "2026-05-09T11:22:00+09:00", "currency": "USD", "amount_minor": 1447000, "invoice_refs": ["INV-W6-2370"]}
+{"doc_id": "ATT-W6-8029", "payment_id": "PAY-W6-2202", "timestamp": "2026-05-17T16:49:00+09:00", "currency": "USD", "amount_minor": 1150000, "invoice_refs": ["INV-W6-2384"]}
+{"doc_id": "ATT-W6-3358", "payment_id": "PAY-W6-2203", "timestamp": "2026-05-23T11:33:00+09:00", "currency": "JPY", "amount_minor": 1191360, "invoice_refs": ["INV-W6-2382"]}
+{"doc_id": "ATT-W6-6815", "payment_id": "PAY-W6-2204", "timestamp": "2026-05-24T13:25:00+09:00", "currency": "JPY", "amount_minor": 608630, "invoice_refs": ["INV-W6-2379"]}
+{"doc_id": "ATT-W6-2170", "payment_id": "PAY-W6-2205", "timestamp": "2026-05-28T11:31:00+09:00", "currency": "JPY", "amount_minor": 2251360, "invoice_refs": ["INV-W6-2385"]}
+{"doc_id": "ATT-W6-4435", "payment_id": "PAY-W6-2206", "timestamp": "2026-05-28T15:41:00+09:00", "currency": "JPY", "amount_minor": 1702570, "invoice_refs": ["INV-W6-2380"]}
+{"doc_id": "ATT-W6-2815", "payment_id": "PAY-W6-2207", "timestamp": "2026-06-01T15:00:00+09:00", "currency": "JPY", "amount_minor": 2677870, "invoice_refs": ["INV-W6-2381"]}
+{"doc_id": "ATT-W6-1215", "payment_id": "PAY-W6-2208", "timestamp": "2026-06-02T16:51:00+09:00", "currency": "USD", "amount_minor": 269280, "invoice_refs": ["INV-W6-2389"]}
+{"doc_id": "ATT-W6-8506", "payment_id": "PAY-W6-2209", "timestamp": "2026-06-04T11:33:00+09:00", "currency": "USD", "amount_minor": 497960, "invoice_refs": ["INV-W6-2383"]}
+{"doc_id": "ATT-W6-9417", "payment_id": "PAY-W6-2210", "timestamp": "2026-06-05T10:46:00+09:00", "currency": "USD", "amount_minor": 342720, "invoice_refs": ["INV-W6-2389"]}
+{"doc_id": "ATT-W6-2679", "payment_id": "PAY-W6-2211", "timestamp": "2026-06-05T13:00:00+09:00", "currency": "JPY", "amount_minor": 1396820, "invoice_refs": ["INV-W6-2388"]}
+{"doc_id": "ATT-W6-4240", "payment_id": "PAY-W6-2212", "timestamp": "2026-06-05T14:53:00+09:00", "currency": "USD", "amount_minor": 346040, "invoice_refs": ["INV-W6-2383"]}
+{"doc_id": "ATT-W6-2101", "payment_id": "PAY-W6-2213", "timestamp": "2026-06-12T15:25:00+09:00", "currency": "USD", "amount_minor": 1320000, "invoice_refs": ["INV-W6-2391"]}
+{"doc_id": "ATT-W6-8267", "payment_id": "PAY-W6-2214", "timestamp": "2026-06-13T10:31:00+09:00", "currency": "USD", "amount_minor": 754000, "invoice_refs": ["INV-W6-2393"]}
+{"doc_id": "ATT-W6-1821", "payment_id": "PAY-W6-2215", "timestamp": "2026-06-13T11:16:00+09:00", "currency": "USD", "amount_minor": 1845000, "invoice_refs": ["INV-W6-2390"]}
+{"doc_id": "ATT-W6-1948", "payment_id": "PAY-W6-2216", "timestamp": "2026-06-15T17:34:00+09:00", "currency": "USD", "amount_minor": 1647000, "invoice_refs": ["INV-W6-2394"]}
+{"doc_id": "ATT-W6-4987", "payment_id": "PAY-W6-2217", "timestamp": "2026-06-17T17:36:00+09:00", "currency": "USD", "amount_minor": 67000, "invoice_refs": null}
+{"doc_id": "ATT-W6-9185", "payment_id": "PAY-W6-2218", "timestamp": "2026-06-21T17:46:00+09:00", "currency": "JPY", "amount_minor": 1355460, "invoice_refs": ["INV-W6-2392"]}
+{"doc_id": "ATT-W6-1194", "payment_id": "PAY-W6-2219", "timestamp": "2026-06-26T16:57:00+09:00", "currency": "JPY", "amount_minor": 2988170, "invoice_refs": ["INV-W6-2396", "INV-W6-2397"]}
+{"doc_id": "ATT-W6-1707", "payment_id": "PAY-W6-2220", "timestamp": "2026-07-04T11:35:00+09:00", "currency": "JPY", "amount_minor": 1174390, "invoice_refs": ["INV-W6-2404"]}
+{"doc_id": "ATT-W6-6657", "payment_id": "PAY-W6-2221", "timestamp": "2026-07-04T13:40:00+09:00", "currency": "JPY", "amount_minor": 646520, "invoice_refs": ["INV-W6-2398"]}

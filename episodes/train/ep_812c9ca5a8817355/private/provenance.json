@@ -1,0 +1,226 @@
+{
+  "clean_tables_sha256": "efa96250a0ac85f05cd90a8ddf3fe5b42d9f19ecfa9ef46ac5976c0e74b73766",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 0,
+      "period_classification": 0
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [
+      "A"
+    ],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_812c9ca5a8817355",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "doc_id": "DOC-F4-3045",
+        "due_at": "2026-02-12T14:14:00+05:00",
+        "entity_id": "CUST-F4-640",
+        "invoice_id": "INV-F4-3929",
+        "issued_at": "2026-01-13T14:14:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 613000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 43000,
+            "description": "Training workshop",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "total_minor": 656000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 3 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "USD",
+        "customer": "Yarrow Motors Ltd",
+        "date": "2026-01-13",
+        "doc_id": "DOC-F4-3045",
+        "entity_id": "CUST-F4-640",
+        "invoice_id": "INV-F4-3929",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 613000,
+            "description": "Data processing",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 43000,
+            "description": "Training workshop",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 656000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 324619632,
+        "entity_id": "CUST-F4-640",
+        "invoice_id": "INV-F4-3929",
+        "payment_id": null,
+        "row_id": "GL-F4-37536",
+        "timestamp": "2026-01-13T14:14:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 324619632,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-F4-640",
+        "invoice_id": "INV-F4-3929",
+        "payment_id": null,
+        "row_id": "GL-F4-37535",
+        "timestamp": "2026-01-13T14:14:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": 334148324,
+      "before": 331605720,
+      "field": "debit_minor",
+      "key": "GL-F4-37640",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "rate of 2026-01-27 used instead of 2026-01-31"
+    },
+    {
+      "after": 334148324,
+      "before": 331605720,
+      "field": "credit_minor",
+      "key": "GL-F4-37639",
+      "op": "set",
+      "rng_stream": "inject.fx.§I2",
+      "table": "ledger",
+      "why": "rate of 2026-01-27 used instead of 2026-01-31"
+    },
+    {
+      "after": 357784792,
+      "before": 357359986,
+      "field": "debit_minor",
+      "key": "GL-F4-37956",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-03-26 used instead of 2026-03-28"
+    },
+    {
+      "after": 357784792,
+      "before": 357359986,
+      "field": "credit_minor",
+      "key": "GL-F4-37955",
+      "op": "set",
+      "rng_stream": "inject.A.fx.§I3",
+      "table": "ledger",
+      "why": "rate of 2026-03-26 used instead of 2026-03-28"
+    },
+    {
+      "after": "2026-04-01T11:21:00+05:00",
+      "before": "2026-03-28T11:21:00+05:00",
+      "field": "timestamp",
+      "key": "GL-F4-37956",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I3",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-01 instead of 2026-03-28)"
+    },
+    {
+      "after": "2026-04-01T11:21:00+05:00",
+      "before": "2026-03-28T11:21:00+05:00",
+      "field": "timestamp",
+      "key": "GL-F4-37955",
+      "op": "set",
+      "rng_stream": "inject.A.period.§I3",
+      "table": "ledger",
+      "why": "posted in the wrong period (2026-04-01 instead of 2026-03-28)"
+    },
+    {
+      "after": 56498614,
+      "before": 182253593,
+      "field": "credit_minor",
+      "key": "GL-F4-37959",
+      "op": "set",
+      "rng_stream": "inject.A.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 only partly applied"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "2350",
+        "credit_minor": 125754979,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "CUST-F4-471",
+        "invoice_id": null,
+        "payment_id": "RCPT-F4-2038",
+        "row_id": "GL-F4-37960",
+        "timestamp": "2026-04-02T13:56:00+05:00"
+      },
+      "rng_stream": "inject.A.alloc.§P1",
+      "table": "ledger",
+      "why": "unapplied remainder"
+    }
+  ],
+  "seed": 1004
+}

@@ -1,0 +1,157 @@
+{
+  "clean_tables_sha256": "2a0bea64eae620f1ec77a03f42ca9420ff5419984b4bc4ac72fc995a6097f3de",
+  "config": {
+    "base_currency": "KZT",
+    "clean": false,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 0,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 0
+    },
+    "foreign_currencies": [
+      "USD",
+      "EUR"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tashkent"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_808238fa653d5d60",
+  "operations": [
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "doc_id": "ATT-U6-8744",
+        "due_at": "2026-02-18T11:17:00+05:00",
+        "entity_id": "E-U6-329",
+        "invoice_id": "IN-U6-2724",
+        "issued_at": "2026-01-19T11:17:00+05:00",
+        "line_items": [
+          {
+            "amount_minor": 313221000,
+            "description": "Customs brokerage",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 214683000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "total_minor": 527904000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "invoices",
+      "why": "duplicate of §I1 re-issued 10 days later"
+    },
+    {
+      "op": "add",
+      "record": {
+        "currency": "KZT",
+        "customer": "Redstone Optics SA",
+        "date": "2026-01-19",
+        "doc_id": "ATT-U6-8744",
+        "entity_id": "E-U6-329",
+        "invoice_id": "IN-U6-2724",
+        "issuer": "Company",
+        "kind": "invoice",
+        "line_items": [
+          {
+            "amount_minor": 313221000,
+            "description": "Customs brokerage",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          },
+          {
+            "amount_minor": 214683000,
+            "description": "Freight forwarding",
+            "service_period": {
+              "end": "2026-01-31",
+              "start": "2026-01-01"
+            }
+          }
+        ],
+        "memo": "",
+        "total_minor": 527904000
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "documents",
+      "why": "document of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "1200",
+        "credit_minor": 0,
+        "currency": "KZT",
+        "debit_minor": 527904000,
+        "entity_id": "E-U6-329",
+        "invoice_id": "IN-U6-2724",
+        "payment_id": null,
+        "row_id": "GL-U6-28770",
+        "timestamp": "2026-01-19T11:17:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "op": "add",
+      "record": {
+        "account": "4000",
+        "credit_minor": 527904000,
+        "currency": "KZT",
+        "debit_minor": 0,
+        "entity_id": "E-U6-329",
+        "invoice_id": "IN-U6-2724",
+        "payment_id": null,
+        "row_id": "GL-U6-28769",
+        "timestamp": "2026-01-19T11:17:00+05:00"
+      },
+      "rng_stream": "inject.dup.§I1",
+      "table": "ledger",
+      "why": "posting of the duplicate"
+    },
+    {
+      "after": "2350",
+      "before": "1200",
+      "field": "account",
+      "key": "GL-U6-28803",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    },
+    {
+      "after": null,
+      "before": "IN-U6-2726",
+      "field": "invoice_id",
+      "key": "GL-U6-28803",
+      "op": "set",
+      "rng_stream": "inject.alloc.§P1",
+      "table": "ledger",
+      "why": "receipt §P1 not applied to §I2"
+    }
+  ],
+  "seed": 1001
+}

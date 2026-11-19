@@ -1,0 +1,76 @@
+{
+  "accounts": {
+    "1010": "Bank",
+    "1200": "Accounts receivable",
+    "2100": "Accounts payable",
+    "2350": "Unapplied cash",
+    "4000": "Revenue",
+    "4100": "Sales returns and allowances",
+    "6100": "Freight costs",
+    "6200": "Rent",
+    "6300": "Software",
+    "6400": "Utilities",
+    "6500": "Contractors",
+    "7810": "FX gain/loss"
+  },
+  "base_currency": "KZT",
+  "entities": {
+    "E-U6-126": "Oakridge Ceramics AS",
+    "E-U6-129": "Saffron Optics LLP",
+    "E-U6-146": "Yarrow Motors Co",
+    "E-U6-329": "Redstone Optics SA",
+    "E-U6-336": "Stellar Ceramics LLC",
+    "E-U6-354": "Pinecrest Motors Co",
+    "E-U6-365": "Lumen Labs GmbH",
+    "E-U6-534": "Brightwater Ceramics AS",
+    "E-U6-646": "Nordvik Robotics Co",
+    "E-U6-681": "Juniper Optics Co",
+    "E-U6-764": "Oakridge Media AS",
+    "E-U6-819": "Northgate Foods Co",
+    "E-U6-867": "Northgate Foods SA",
+    "E-U6-902": "Yarrow Media SA",
+    "E-U6-938": "Brightwater Textiles AS",
+    "E-U6-961": "Amberfield Farms LLC",
+    "E-U6-966": "Cobalt Ceramics AS",
+    "E-U6-988": "Northgate Optics GmbH"
+  },
+  "fx": {
+    "direction": "1 source_currency = rate target_currency; target is always the base currency",
+    "partial_payments": "each payment settles at its own date's rate; differences go to account 7810",
+    "rate_date": "the policy date of the record, in the company time zone (spot rate of that day)",
+    "rounding": "half_even, once, when converting to base minor units"
+  },
+  "legitimate_patterns": [
+    "split payments and lump-sum payments covering several invoices",
+    "short payment with a documented deduction and a credit note (accounts 4100/1200)",
+    "advance payments with no invoice reference held in 2350 Unapplied cash",
+    "recurring invoices with the same lines and amount but a different service period",
+    "timestamps written with other UTC offsets; always convert to the company time zone"
+  ],
+  "period": {
+    "end": "2026-03-31",
+    "rule": "A record belongs to the period of its policy date, taken in the company time zone.",
+    "start": "2026-01-01"
+  },
+  "policy_date": {
+    "invoice": "issued_at",
+    "note": "If a ledger posting and the document disagree on a date, the document date wins.",
+    "payment": "timestamp"
+  },
+  "rounding": {
+    "applies_to": "conversion_to_base",
+    "mode": "half_even"
+  },
+  "schema_version": "1.0",
+  "timezone": "Asia/Tashkent",
+  "timezone_offset": "+05:00",
+  "tolerance": {
+    "conversions": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 0,
+      "payment_allocation": "1 if the payment is foreign else 0",
+      "period_classification": "1 if the invoice is foreign else 0"
+    },
+    "rule": "|claimed - expected| <= 1 + conversions (minor units of the claimed currency)"
+  }
+}

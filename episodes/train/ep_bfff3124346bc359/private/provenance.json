@@ -1,0 +1,33 @@
+{
+  "clean_tables_sha256": "ada40ce529be62a05f30cae973351d463d128d76210dc857dfdfb9d0df1f7778",
+  "config": {
+    "base_currency": "USD",
+    "clean": true,
+    "config_version": "1",
+    "distractor_level": 1,
+    "errors": {
+      "date_or_fx": 1,
+      "duplicate_invoice": 1,
+      "payment_allocation": 1,
+      "period_classification": 1
+    },
+    "foreign_currencies": [
+      "EUR",
+      "JPY"
+    ],
+    "foreign_share": 0.4,
+    "id_seed": 0,
+    "interactions": [],
+    "layout_seed": 0,
+    "n_expenses": 80,
+    "n_invoices": 50,
+    "period_months": 3,
+    "period_start_month": 1,
+    "period_year": 2026,
+    "timezone": "Asia/Tokyo"
+  },
+  "env_version": "1.0.0",
+  "episode_id": "ep_bfff3124346bc359",
+  "operations": [],
+  "seed": 1007
+}

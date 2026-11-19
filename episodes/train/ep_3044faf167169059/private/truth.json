@@ -1,0 +1,63 @@
+{
+  "episode_id": "ep_3044faf167169059",
+  "issues": [
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-03-03|USD|KZT",
+          "GL-S3-11615",
+          "INV-S3-3280"
+        ]
+      ],
+      "affected_ids": [
+        "INV-S3-3280"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 3627636,
+      "interacts_with": [],
+      "issue_id": "I-01",
+      "type": "date_or_fx",
+      "variant": "a"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "2026-03-16|EUR|KZT",
+          "GL-S3-11677",
+          "INV-S3-3289"
+        ]
+      ],
+      "affected_ids": [
+        "INV-S3-3289"
+      ],
+      "conversions": 1,
+      "currency": "KZT",
+      "detectability_tier": "ledger+fx",
+      "expected_amount_minor": 3876064,
+      "interacts_with": [],
+      "issue_id": "I-02",
+      "type": "date_or_fx",
+      "variant": "b"
+    },
+    {
+      "acceptable_evidence_sets": [
+        [
+          "GL-S3-11759",
+          "INV-S3-3295"
+        ]
+      ],
+      "affected_ids": [
+        "INV-S3-3295"
+      ],
+      "conversions": 0,
+      "currency": "KZT",
+      "detectability_tier": "ledger+invoices",
+      "expected_amount_minor": 217024000,
+      "interacts_with": [],
+      "issue_id": "I-03",
+      "type": "period_classification"
+    }
+  ]
+}
