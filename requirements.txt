@@ -1,0 +1,2 @@
+# Runtime dependencies: none. AuditGym uses the Python 3.11 standard library only.
+# Tests use unittest (stdlib). The Docker image pins the Python base image by digest.
