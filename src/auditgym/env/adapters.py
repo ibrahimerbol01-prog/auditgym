@@ -24,6 +24,12 @@ CTYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=
 BAD = {"ok": False, "error": {"code": "bad_arguments", "message": "invalid request"}}
 
 
+def _loads_strict(text: str) -> Any:
+    def _bad(const: str) -> Any:
+        raise ValueError(f"invalid JSON constant: {const}")
+    return json.loads(text, parse_constant=_bad)
+
+
 def handle_request(env: AuditEnv, req: Dict[str, Any]) -> Dict[str, Any]:
     try:
         return _handle(env, req)
@@ -50,13 +56,13 @@ def serve_stdio(mode: str = "open") -> None:
         if not line.strip():
             continue
         try:
-            req = json.loads(line)
+            req = _loads_strict(line)
         except (ValueError, RecursionError):  # bad JSON, >4300-digit ints, absurd nesting
             resp: Dict[str, Any] = {"ok": False, "error": {"code": "bad_arguments", "message": "invalid JSON"}}
         else:
             resp = handle_request(env, req)
         try:
-            out = json.dumps(resp)
+            out = json.dumps(resp, allow_nan=False)
         except (TypeError, ValueError, RecursionError):
             out = json.dumps(BAD)
         sys.stdout.write(out + "\n")
@@ -87,7 +93,7 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
 
         def _json(self, obj: Any, code: int = 200) -> None:
             try:
-                data = json.dumps(obj).encode()
+                data = json.dumps(obj, allow_nan=False).encode()
             except (TypeError, ValueError, RecursionError):
                 data, code = json.dumps(BAD).encode(), 500
             self._send(code, data, "application/json")
@@ -106,11 +112,13 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
                 fp = os.path.join(STATIC_DIR, STATIC_WHITELIST[path])
                 with open(fp, "rb") as fh:
                     return self._send(200, fh.read(), CTYPES[os.path.splitext(fp)[1]])
-            if ui and path.startswith("/fonts/") and "/" not in path[7:] and os.path.splitext(path)[1] in FONT_EXT:
-                fp = os.path.join(STATIC_DIR, "fonts", path[7:])
-                if os.path.isfile(fp):
-                    with open(fp, "rb") as fh:
-                        return self._send(200, fh.read(), FONT_EXT[".woff2"])
+            if ui and path.startswith("/fonts/"):
+                fname = path[7:]
+                if "/" not in fname and "\\" not in fname and ".." not in fname and os.path.splitext(fname)[1] in FONT_EXT:
+                    fp = os.path.join(STATIC_DIR, "fonts", fname)
+                    if os.path.isfile(fp):
+                        with open(fp, "rb") as fh:
+                            return self._send(200, fh.read(), FONT_EXT[".woff2"])
             return self._json({"ok": False, "error": {"code": "not_found", "message": "not found"}}, 404)
 
         def _host_ok(self) -> bool:
@@ -139,12 +147,13 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
             if n > 1_000_000:
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "body too large"}}, 413)
             try:
-                body = json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+                body = _loads_strict(self.rfile.read(n).decode("utf-8") or "{}")
             except (ValueError, RecursionError, UnicodeDecodeError):
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "invalid JSON"}}, 400)
             with lock:
                 if path == "/reset":
-                    return self._json(handle_request(env, {"op": "reset", **(body if isinstance(body, dict) else {})}))
+                    b = body if isinstance(body, dict) else {}
+                    return self._json(handle_request(env, {"op": "reset", "seed": b.get("seed"), "config": b.get("config")}))
                 if path == "/step":
                     return self._json(handle_request(env, {"op": "step", "action": body.get("action") if isinstance(body, dict) else None}))
             return self._json({"ok": False, "error": {"code": "not_found", "message": "not found"}}, 404)
