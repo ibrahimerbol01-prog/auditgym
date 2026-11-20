@@ -29,7 +29,10 @@
         $sums = Join-Path $Tmp 'SHA256SUMS.txt'
         $gh = Get-Command gh -ErrorAction SilentlyContinue
         $ghReady = $false
-        if ($gh -and -not $env:AUDITGYM_BASE_URL) { & gh auth status *> $null; $ghReady = ($LASTEXITCODE -eq 0) }
+        if ($gh -and -not $env:AUDITGYM_BASE_URL -and -not $env:AUDITGYM_ZIP) {
+            & gh auth status *> $null
+            $ghReady = ($LASTEXITCODE -eq 0)
+        }
 
         if ($env:AUDITGYM_ZIP) {
             Say "installing local build $($env:AUDITGYM_ZIP)"
@@ -80,6 +83,9 @@
         Say 'the app is not code-signed: if SmartScreen asks, choose More info, then Run anyway'
         if (-not $env:AUDITGYM_NO_LAUNCH) { Start-Process -FilePath $exe -WorkingDirectory $dest }
         Say 'done'
+        # Success: do not leave a native command's exit code (e.g. "gh auth status" = 1 when logged out) behind
+        # for the caller; CI steps and scripts read $LASTEXITCODE.
+        $global:LASTEXITCODE = 0
     } finally {
         Remove-Item -Recurse -Force $Tmp -ErrorAction SilentlyContinue
     }
