@@ -1,0 +1,1227 @@
+{
+ "episode": "ep_266dd8359c7dadbf",
+ "steps": [
+  {
+   "step": 1,
+   "tool": "list_records",
+   "table": "fx",
+   "rows": 50,
+   "remaining": 99,
+   "sample": [
+    {
+     "date": "2026-10-20",
+     "rate": "1.08471",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    },
+    {
+     "date": "2026-10-21",
+     "rate": "1.08604",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    },
+    {
+     "date": "2026-10-22",
+     "rate": "1.08237",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    },
+    {
+     "date": "2026-10-23",
+     "rate": "1.08877",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "tool": "list_records",
+   "table": "fx",
+   "rows": 4,
+   "remaining": 98,
+   "sample": [
+    {
+     "date": "2026-12-09",
+     "rate": "1.12447",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    },
+    {
+     "date": "2026-12-10",
+     "rate": "1.12571",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    },
+    {
+     "date": "2026-12-11",
+     "rate": "1.12144",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    },
+    {
+     "date": "2026-12-12",
+     "rate": "1.12197",
+     "source_currency": "EUR",
+     "target_currency": "USD"
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "tool": "list_records",
+   "table": "invoices",
+   "rows": 50,
+   "remaining": 97,
+   "sample": [
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-8202",
+     "due_at": "2026-11-27T14:32:00+00:00",
+     "entity_id": "PRT-W6-732",
+     "invoice_id": "INV-W6-1676",
+     "issued_at": "2026-10-28T14:32:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 62000,
+       "description": "Freight forwarding",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      },
+      {
+       "amount_minor": 414000,
+       "description": "Training workshop",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      },
+      {
+       "amount_minor": 105000,
+       "description": "Data processing",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      }
+     ],
+     "total_minor": 581000
+    },
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-9558",
+     "due_at": "2026-11-27T15:17:00+00:00",
+     "entity_id": "PRT-W6-267",
+     "invoice_id": "INV-W6-1677",
+     "issued_at": "2026-10-28T15:17:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 521000,
+       "description": "Equipment rental",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      },
+      {
+       "amount_minor": 884000,
+       "description": "Customs brokerage",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      },
+      {
+       "amount_minor": 521000,
+       "description": "Maintenance contract",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      }
+     ],
+     "total_minor": 1926000
+    },
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-2228",
+     "due_at": "2026-11-28T14:39:00+00:00",
+     "entity_id": "PRT-W6-738",
+     "invoice_id": "INV-W6-1678",
+     "issued_at": "2026-10-29T14:39:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 334000,
+       "description": "Freight forwarding",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      }
+     ],
+     "total_minor": 334000
+    },
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-3469",
+     "due_at": "2026-11-29T09:14:00+00:00",
+     "entity_id": "PRT-W6-858",
+     "invoice_id": "INV-W6-1679",
+     "issued_at": "2026-10-30T09:14:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 322000,
+       "description": "Training workshop",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      },
+      {
+       "amount_minor": 675000,
+       "description": "Warehouse storage",
+       "service_period": {
+        "end": "2026-10-31",
+        "start": "2026-10-01"
+       }
+      }
+     ],
+     "total_minor": 997000
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "tool": "list_records",
+   "table": "invoices",
+   "rows": 7,
+   "remaining": 96,
+   "sample": [
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-5460",
+     "due_at": "2026-12-31T13:49:00+00:00",
+     "entity_id": "PRT-W6-267",
+     "invoice_id": "INV-W6-1726",
+     "issued_at": "2026-12-01T13:49:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 251000,
+       "description": "Data processing",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      },
+      {
+       "amount_minor": 734000,
+       "description": "Design services",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      },
+      {
+       "amount_minor": 550000,
+       "description": "Maintenance contract",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      }
+     ],
+     "total_minor": 1535000
+    },
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-1271",
+     "due_at": "2026-12-31T17:27:00+00:00",
+     "entity_id": "PRT-W6-732",
+     "invoice_id": "INV-W6-1727",
+     "issued_at": "2026-12-01T17:27:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 810000,
+       "description": "Warehouse storage",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      },
+      {
+       "amount_minor": 654000,
+       "description": "Packaging supplies",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      },
+      {
+       "amount_minor": 605000,
+       "description": "Customs brokerage",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      }
+     ],
+     "total_minor": 2069000
+    },
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-9478",
+     "due_at": "2027-01-01T12:29:00+00:00",
+     "entity_id": "PRT-W6-732",
+     "invoice_id": "INV-W6-1728",
+     "issued_at": "2026-12-02T12:29:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 900000,
+       "description": "Warehouse storage",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      },
+      {
+       "amount_minor": 353000,
+       "description": "Software licence",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      }
+     ],
+     "total_minor": 1253000
+    },
+    {
+     "currency": "USD",
+     "doc_id": "SCAN-W6-2479",
+     "due_at": "2027-01-02T10:37:00+00:00",
+     "entity_id": "PRT-W6-445",
+     "invoice_id": "INV-W6-1729",
+     "issued_at": "2026-12-03T10:37:00+00:00",
+     "line_items": [
+      {
+       "amount_minor": 288000,
+       "description": "Freight forwarding",
+       "service_period": {
+        "end": "2026-12-31",
+        "start": "2026-12-01"
+       }
+      }
+     ],
+     "total_minor": 288000
+    }
+   ]
+  },
+  {
+   "step": 5,
+   "tool": "list_records",
+   "table": "payments",
+   "rows": 39,
+   "remaining": 95,
+   "sample": [
+    {
+     "amount_minor": 1926000,
+     "currency": "USD",
+     "doc_id": "SCAN-W6-1404",
+     "invoice_refs": [
+      "INV-W6-1677"
+     ],
+     "payment_id": "PMT-W6-1259",
+     "timestamp": "2026-11-05T12:58:00+00:00"
+    },
+    {
+     "amount_minor": 1552000,
+     "currency": "USD",
+     "doc_id": "SCAN-W6-5135",
+     "invoice_refs": [
+      "INV-W6-1684"
+     ],
+     "payment_id": "PMT-W6-1260",
+     "timestamp": "2026-11-06T14:37:00+00:00"
+    },
+    {
+     "amount_minor": 34000,
+     "currency": "USD",
+     "doc_id": "SCAN-W6-8968",
+     "invoice_refs": [
+      "INV-W6-1683"
+     ],
+     "payment_id": "PMT-W6-1261",
+     "timestamp": "2026-11-10T10:35:00+00:00"
+    },
+    {
+     "amount_minor": 1719000,
+     "currency": "USD",
+     "doc_id": "SCAN-W6-9404",
+     "invoice_refs": [
+      "INV-W6-1694"
+     ],
+     "payment_id": "PMT-W6-1262",
+     "timestamp": "2026-11-10T13:13:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 6,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 94,
+   "sample": [
+    {
+     "account": "2100",
+     "credit_minor": 155000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-872",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17287",
+     "timestamp": "2026-10-28T09:51:00+00:00"
+    },
+    {
+     "account": "6100",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 155000,
+     "entity_id": "PRT-W6-872",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17288",
+     "timestamp": "2026-10-28T09:51:00+00:00"
+    },
+    {
+     "account": "6300",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 113000,
+     "entity_id": "PRT-W6-800",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17289",
+     "timestamp": "2026-10-28T10:58:00+00:00"
+    },
+    {
+     "account": "2100",
+     "credit_minor": 113000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-800",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17290",
+     "timestamp": "2026-10-28T10:58:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 7,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 93,
+   "sample": [
+    {
+     "account": "2100",
+     "credit_minor": 180666,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-488",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17337",
+     "timestamp": "2026-11-03T09:52:00+00:00"
+    },
+    {
+     "account": "6500",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 180666,
+     "entity_id": "PRT-W6-488",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17338",
+     "timestamp": "2026-11-03T09:52:00+00:00"
+    },
+    {
+     "account": "4000",
+     "credit_minor": 57000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-445",
+     "invoice_id": "INV-W6-1687",
+     "payment_id": null,
+     "row_id": "JE-W6-17339",
+     "timestamp": "2026-11-03T12:43:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 57000,
+     "entity_id": "PRT-W6-445",
+     "invoice_id": "INV-W6-1687",
+     "payment_id": null,
+     "row_id": "JE-W6-17340",
+     "timestamp": "2026-11-03T12:43:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 8,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 92,
+   "sample": [
+    {
+     "account": "4000",
+     "credit_minor": 1719000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-882",
+     "invoice_id": "INV-W6-1694",
+     "payment_id": null,
+     "row_id": "JE-W6-17387",
+     "timestamp": "2026-11-07T16:42:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 1719000,
+     "entity_id": "PRT-W6-882",
+     "invoice_id": "INV-W6-1694",
+     "payment_id": null,
+     "row_id": "JE-W6-17388",
+     "timestamp": "2026-11-07T16:42:00+00:00"
+    },
+    {
+     "account": "4000",
+     "credit_minor": 1278544,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": "INV-W6-1695",
+     "payment_id": null,
+     "row_id": "JE-W6-17389",
+     "timestamp": "2026-11-08T10:15:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 1278544,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": "INV-W6-1695",
+     "payment_id": null,
+     "row_id": "JE-W6-17390",
+     "timestamp": "2026-11-08T10:15:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 9,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 91,
+   "sample": [
+    {
+     "account": "1200",
+     "credit_minor": 81200,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-143",
+     "invoice_id": "INV-W6-1691",
+     "payment_id": null,
+     "row_id": "JE-W6-17437",
+     "timestamp": "2026-11-13T09:35:00+00:00"
+    },
+    {
+     "account": "1010",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 1542800,
+     "entity_id": "PRT-W6-143",
+     "invoice_id": null,
+     "payment_id": "PMT-W6-1265",
+     "row_id": "JE-W6-17438",
+     "timestamp": "2026-11-13T09:35:00+00:00"
+    },
+    {
+     "account": "2100",
+     "credit_minor": 112333,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-872",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17439",
+     "timestamp": "2026-11-13T09:35:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 1542800,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-143",
+     "invoice_id": "INV-W6-1691",
+     "payment_id": "PMT-W6-1265",
+     "row_id": "JE-W6-17440",
+     "timestamp": "2026-11-13T09:35:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 10,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 90,
+   "sample": [
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 674000,
+     "entity_id": "PRT-W6-445",
+     "invoice_id": "INV-W6-1705",
+     "payment_id": null,
+     "row_id": "JE-W6-17487",
+     "timestamp": "2026-11-16T17:18:00+00:00"
+    },
+    {
+     "account": "2100",
+     "credit_minor": 33666,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-556",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17488",
+     "timestamp": "2026-11-17T09:55:00+00:00"
+    },
+    {
+     "account": "6400",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 33666,
+     "entity_id": "PRT-W6-556",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17489",
+     "timestamp": "2026-11-17T09:55:00+00:00"
+    },
+    {
+     "account": "1010",
+     "credit_minor": 157666,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-488",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17490",
+     "timestamp": "2026-11-17T11:21:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 11,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 89,
+   "sample": [
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 1138000,
+     "entity_id": "PRT-W6-143",
+     "invoice_id": "INV-W6-1710",
+     "payment_id": null,
+     "row_id": "JE-W6-17537",
+     "timestamp": "2026-11-20T11:53:00+00:00"
+    },
+    {
+     "account": "4000",
+     "credit_minor": 1541000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-143",
+     "invoice_id": "INV-W6-1711",
+     "payment_id": null,
+     "row_id": "JE-W6-17538",
+     "timestamp": "2026-11-20T12:12:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 1541000,
+     "entity_id": "PRT-W6-143",
+     "invoice_id": "INV-W6-1711",
+     "payment_id": null,
+     "row_id": "JE-W6-17539",
+     "timestamp": "2026-11-20T12:12:00+00:00"
+    },
+    {
+     "account": "4000",
+     "credit_minor": 1200283,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-332",
+     "invoice_id": "INV-W6-1712",
+     "payment_id": null,
+     "row_id": "JE-W6-17540",
+     "timestamp": "2026-11-20T12:36:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 12,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 88,
+   "sample": [
+    {
+     "account": "7810",
+     "credit_minor": 5900,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": null,
+     "payment_id": "PMT-W6-1280",
+     "row_id": "JE-W6-17587",
+     "timestamp": "2026-11-25T16:42:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 834407,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": "INV-W6-1697",
+     "payment_id": "PMT-W6-1280",
+     "row_id": "JE-W6-17588",
+     "timestamp": "2026-11-25T16:42:00+00:00"
+    },
+    {
+     "account": "4100",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 25806,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": "INV-W6-1697",
+     "payment_id": null,
+     "row_id": "JE-W6-17589",
+     "timestamp": "2026-11-25T16:42:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 501000,
+     "entity_id": "PRT-W6-858",
+     "invoice_id": "INV-W6-1715",
+     "payment_id": null,
+     "row_id": "JE-W6-17590",
+     "timestamp": "2026-11-26T10:58:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 13,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 87,
+   "sample": [
+    {
+     "account": "2100",
+     "credit_minor": 246666,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-556",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17637",
+     "timestamp": "2026-11-29T10:39:00+00:00"
+    },
+    {
+     "account": "6200",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 246666,
+     "entity_id": "PRT-W6-556",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17638",
+     "timestamp": "2026-11-29T10:39:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 824000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-267",
+     "invoice_id": "INV-W6-1717",
+     "payment_id": "PMT-W6-1286",
+     "row_id": "JE-W6-17639",
+     "timestamp": "2026-11-29T12:15:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 1309000,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-267",
+     "invoice_id": "INV-W6-1702",
+     "payment_id": "PMT-W6-1286",
+     "row_id": "JE-W6-17640",
+     "timestamp": "2026-11-29T12:15:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 14,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 50,
+   "remaining": 86,
+   "sample": [
+    {
+     "account": "2350",
+     "credit_minor": 312035,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": null,
+     "payment_id": "PMT-W6-1291",
+     "row_id": "JE-W6-17687",
+     "timestamp": "2026-12-02T14:09:00+00:00"
+    },
+    {
+     "account": "1010",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 542120,
+     "entity_id": "PRT-W6-574",
+     "invoice_id": null,
+     "payment_id": "PMT-W6-1291",
+     "row_id": "JE-W6-17688",
+     "timestamp": "2026-12-02T14:09:00+00:00"
+    },
+    {
+     "account": "2350",
+     "credit_minor": 41800,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-732",
+     "invoice_id": null,
+     "payment_id": "PMT-W6-1292",
+     "row_id": "JE-W6-17689",
+     "timestamp": "2026-12-02T15:31:00+00:00"
+    },
+    {
+     "account": "1200",
+     "credit_minor": 53200,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-732",
+     "invoice_id": "INV-W6-1716",
+     "payment_id": "PMT-W6-1292",
+     "row_id": "JE-W6-17690",
+     "timestamp": "2026-12-02T15:31:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 15,
+   "tool": "list_records",
+   "table": "ledger",
+   "rows": 29,
+   "remaining": 85,
+   "sample": [
+    {
+     "account": "1010",
+     "credit_minor": 180333,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-488",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17737",
+     "timestamp": "2026-12-06T16:24:00+00:00"
+    },
+    {
+     "account": "1010",
+     "credit_minor": 195333,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-872",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17738",
+     "timestamp": "2026-12-08T09:23:00+00:00"
+    },
+    {
+     "account": "2100",
+     "credit_minor": 0,
+     "currency": "USD",
+     "debit_minor": 195333,
+     "entity_id": "PRT-W6-872",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17739",
+     "timestamp": "2026-12-08T09:23:00+00:00"
+    },
+    {
+     "account": "1010",
+     "credit_minor": 203333,
+     "currency": "USD",
+     "debit_minor": 0,
+     "entity_id": "PRT-W6-945",
+     "invoice_id": null,
+     "payment_id": null,
+     "row_id": "JE-W6-17740",
+     "timestamp": "2026-12-08T17:04:00+00:00"
+    }
+   ]
+  },
+  {
+   "step": 16,
+   "tool": "submit",
+   "findings": [
+    {
+     "affected_ids": [
+      "INV-W6-1720"
+     ],
+     "claimed_amount_minor": 994,
+     "currency": "USD",
+     "evidence_ids": [
+      "2026-11-29|EUR|USD",
+      "INV-W6-1720",
+      "JE-W6-17683"
+     ],
+     "explanation": "Booked at a rate other than the policy-date rate.",
+     "type": "date_or_fx"
+    },
+    {
+     "affected_ids": [
+      "INV-W6-1697",
+      "INV-W6-1708"
+     ],
+     "claimed_amount_minor": 768000,
+     "currency": "EUR",
+     "evidence_ids": [
+      "INV-W6-1697",
+      "INV-W6-1708"
+     ],
+     "explanation": "Same entity, line items and service period invoiced twice.",
+     "type": "duplicate_invoice"
+    },
+    {
+     "affected_ids": [
+      "INV-W6-1716",
+      "PMT-W6-1292"
+     ],
+     "claimed_amount_minor": 41800,
+     "currency": "USD",
+     "evidence_ids": [
+      "INV-W6-1716",
+      "JE-W6-17689",
+      "PMT-W6-1292"
+     ],
+     "explanation": "Receipt references the invoice but was left in unapplied cash.",
+     "type": "payment_allocation"
+    },
+    {
+     "affected_ids": [
+      "INV-W6-1720",
+      "PMT-W6-1291"
+     ],
+     "claimed_amount_minor": 312035,
+     "currency": "USD",
+     "evidence_ids": [
+      "INV-W6-1720",
+      "JE-W6-17687",
+      "PMT-W6-1291"
+     ],
+     "explanation": "Receipt references the invoice but was left in unapplied cash.",
+     "type": "payment_allocation"
+    },
+    {
+     "affected_ids": [
+      "INV-W6-1720"
+     ],
+     "claimed_amount_minor": 1251148,
+     "currency": "USD",
+     "evidence_ids": [
+      "2026-11-29|EUR|USD",
+      "INV-W6-1720",
+      "JE-W6-17683"
+     ],
+     "explanation": "Posted outside the period of its issue date.",
+     "type": "period_classification"
+    }
+   ],
+   "report": {
+    "f1": 1.0,
+    "fn": 0,
+    "fp": 0,
+    "inspection_steps": 15,
+    "per_finding": [
+     {
+      "index": 0,
+      "matched": true
+     },
+     {
+      "index": 1,
+      "matched": true
+     },
+     {
+      "index": 2,
+      "matched": true
+     },
+     {
+      "index": 3,
+      "matched": true
+     },
+     {
+      "index": 4,
+      "matched": true
+     }
+    ],
+    "precision": 1.0,
+    "recall": 1.0,
+    "reward": 0.97,
+    "status": "scored",
+    "tp": 5
+   },
+   "remaining": 84,
+   "reward": 0.97
+  }
+ ],
+ "policy_summary": [
+  {
+   "policy": "oracle",
+   "clean": 1.0,
+   "mixed": 1.0,
+   "interacting": 1.0
+  },
+  {
+   "policy": "reconcile",
+   "clean": 0.9673333333333334,
+   "mixed": 0.9620000000000001,
+   "interacting": 0.9659999999999999
+  },
+  {
+   "policy": "random",
+   "clean": -1.0,
+   "mixed": -1.0,
+   "interacting": -1.0
+  },
+  {
+   "policy": "flag_all",
+   "clean": -1.0,
+   "mixed": -1.0,
+   "interacting": -1.0
+  }
+ ],
+ "failure_analysis": {
+  "reconcile_rules_recall_by_type": {
+   "duplicate_invoice": {
+    "issues": 22,
+    "found": 22
+   },
+   "payment_allocation": {
+    "issues": 19,
+    "found": 19
+   },
+   "date_or_fx": {
+    "issues": 25,
+    "found": 25
+   },
+   "period_classification": {
+    "issues": 23,
+    "found": 23
+   }
+  },
+  "reconcile_false_positives": 0,
+  "issues_by_tier": {
+   "invoices": {
+    "issues": 19
+   },
+   "ledger+payments": {
+    "issues": 14
+   },
+   "ledger+fx": {
+    "issues": 20
+   },
+   "ledger+invoices": {
+    "issues": 15
+   },
+   "interacting": {
+    "issues": 21
+   }
+  },
+  "naive_tricks": {
+   "duplicates_by_amount_only": {
+    "tp": 89,
+    "fp": 47,
+    "fn": 0,
+    "mean_reward": 0.2259126984126984
+   },
+   "utc_dates_instead_of_company_tz": {
+    "tp": 89,
+    "fp": 5,
+    "fn": 0,
+    "mean_reward": 0.9184047531415953
+   },
+   "any_unapplied_cash_is_an_error": {
+    "tp": 89,
+    "fp": 25,
+    "fn": 0,
+    "mean_reward": 0.3411398061862458
+   },
+   "findings_without_evidence": {
+    "tp": 22,
+    "fp": 67,
+    "fn": 67,
+    "mean_reward": -0.14815079365079367
+   },
+   "careful_rules (reference)": {
+    "tp": 89,
+    "fp": 0,
+    "fn": 0,
+    "mean_reward": 0.9600000000000005
+   }
+  },
+  "note": "Measured on the 20 hidden-style episodes with full information; rewards assume 20 inspection steps."
+ },
+ "versions": {
+  "env": "1.0.0",
+  "schema": "1.0",
+  "config": "1",
+  "python": "3.11.18",
+  "platform": "Linux-6.18.44-fc-v653-x86_64-with-glibc2.39",
+  "runtime_dependencies": []
+ },
+ "estimated_score": {
+  "contract_isolation": 25.0,
+  "data_reference": 25.0,
+  "reward_reliability": 25.0,
+  "reproducibility": 15.0,
+  "engineering": 10,
+  "total": 100.0
+ },
+ "reconcile_runs": [
+  {
+   "episode": "ep_f8c7b9244dcfcd07",
+   "steps": 19,
+   "reward": 0.964,
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 1.0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_20d69fdb9de72dde",
+   "steps": 17,
+   "reward": 0.968,
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 1.0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_4544b2aaf71575cc",
+   "steps": 16,
+   "reward": 0.97,
+   "p": 0.0,
+   "r": 0.0,
+   "f1": 1.0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_1435dbc96dff3c84",
+   "steps": 21,
+   "reward": 0.96,
+   "p": 1.0,
+   "r": 1.0,
+   "f1": 1.0,
+   "tp": 9,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_266dd8359c7dadbf",
+   "steps": 16,
+   "reward": 0.97,
+   "p": 1.0,
+   "r": 1.0,
+   "f1": 1.0,
+   "tp": 5,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_1b72be333bd96fa3",
+   "steps": 17,
+   "reward": 0.968,
+   "p": 1.0,
+   "r": 1.0,
+   "f1": 1.0,
+   "tp": 5,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_d3438db371871199",
+   "steps": 24,
+   "reward": 0.954,
+   "p": 1.0,
+   "r": 1.0,
+   "f1": 1.0,
+   "tp": 8,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_86732a6318daafa8",
+   "steps": 18,
+   "reward": 0.966,
+   "p": 1.0,
+   "r": 1.0,
+   "f1": 1.0,
+   "tp": 5,
+   "fp": 0,
+   "fn": 0
+  },
+  {
+   "episode": "ep_a2c0dce1f3ce8e10",
+   "steps": 18,
+   "reward": 0.966,
+   "p": 1.0,
+   "r": 1.0,
+   "f1": 1.0,
+   "tp": 3,
+   "fp": 0,
+   "fn": 0
+  }
+ ]
+}
