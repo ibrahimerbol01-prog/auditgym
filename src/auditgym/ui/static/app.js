@@ -12,7 +12,8 @@ const SVGNS = "http://www.w3.org/2000/svg";
 const tm = (kind, label, cls = "") => { const s = document.createElementNS(SVGNS, "svg"); s.setAttribute("class", `tm ${cls} ${kind === "exc" ? "exc" : ""}`.trim()); s.setAttribute("viewBox", "0 0 16 16"); if (label) { s.setAttribute("role", "img"); s.setAttribute("aria-label", label); } else s.setAttribute("aria-hidden", "true"); const u = document.createElementNS(SVGNS, "use"); u.setAttribute("href", "#tm-" + kind); s.append(u); return s; };
 const REF = { ledger: "A-1", invoices: "A-2", payments: "A-3", fx: "A-4" };
 // Theme: graphite by default, warm paper on request; remembered when storage is available.
-(() => { const b = document.getElementById("theme"); if (!b) return; const sync = () => b.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "light"));
+(() => { const b = document.getElementById("theme"); if (!b) return; const tc = document.querySelector('meta[name="theme-color"]'); const lbl = b.querySelector("span");
+  const sync = () => { const light = document.documentElement.dataset.theme === "light"; b.setAttribute("aria-pressed", String(light)); b.setAttribute("aria-label", light ? "Тёмная тема «графит»" : "Светлая тема «бумага»"); if (lbl) lbl.textContent = light ? "Графит" : "Бумага"; if (tc) tc.setAttribute("content", light ? "#f1ece1" : "#131210"); };
   sync(); b.addEventListener("click", () => { const light = document.documentElement.dataset.theme !== "light"; if (light) document.documentElement.dataset.theme = "light"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", light ? "light" : "dark"); } catch { /* private mode */ } sync(); }); })();
 const EXP = { KZT: 2, USD: 2, EUR: 2, UZS: 2, GBP: 2, CNY: 2, JPY: 0, KWD: 3 };
 const fmt = (minor, ccy) => { const e = EXP[ccy] ?? 2; const s = minor < 0 ? "-" : ""; const a = Math.abs(minor); if (!e) return s + a.toLocaleString("ru-RU"); return s + Math.floor(a / 10 ** e).toLocaleString("ru-RU") + "." + String(a % 10 ** e).padStart(e, "0"); };
@@ -314,7 +315,7 @@ async function renderBench(reward) {
   const rows = [["Вы · этот эпизод", "you", reward], ...(r.policy_summary || []).map((p) => [(POL[p.policy] || [0, p.policy])[1], p.policy, meanOf(p)])];
   for (const [name, code, v] of rows) b.append(el("div", { class: "bn" + (code === "you" ? " you" : "") }, el("span", { class: "nm" }, name, code === "you" ? "" : el("code", { class: "muted small" }, code)), divBar(v), el("span", { class: "vv " + (v > 0 ? "ok" : v < 0 ? "bad" : "") }, sign(v))));
 }
-$("again").addEventListener("click", () => { $("result").classList.add("hidden"); $("start").classList.remove("hidden"); window.scrollTo(0, 0); });
+$("again").addEventListener("click", () => { $("result").classList.add("hidden"); $("start").classList.remove("hidden"); document.title = "AuditGym — тренажёр аудита для ИИ-агентов"; window.scrollTo(0, 0); });
 loadSplit("train").then(async () => {
   // Deep link for demos and the video: /?ep=train-5&table=ledger
   const q = new URLSearchParams(location.search); const ep = q.get("ep");
