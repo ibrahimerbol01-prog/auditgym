@@ -1,0 +1,522 @@
+{
+  "note": "AI interaction pattern catalogs collected Nov 20, 2026. Descriptions are short paraphrases or the source's own one-liners; see each source for full text.",
+  "shape_of_ai": {
+    "source": "https://www.shapeof.ai/",
+    "count": 55,
+    "patterns": [
+      {
+        "category": "Wayfinders",
+        "name": "Example gallery",
+        "description": "Share sample generations, prompts, and parameters to educate and inspire users.",
+        "url": "https://www.shapeof.ai/patterns/gallery"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Follow up",
+        "description": "Get more information from the user when the initial prompt isn't sufficiently clear.",
+        "url": "https://www.shapeof.ai/patterns/follow-up"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Initial CTA",
+        "description": "Large, open-ended input inviting the user to start their first interaction with the AI.",
+        "url": "https://www.shapeof.ai/patterns/cta"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Nudges",
+        "description": "Alert users to actions they can take to use AI, especially if they are just getting started.",
+        "url": "https://www.shapeof.ai/patterns/nudges"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Prompt details",
+        "description": "Show users what is actually happening behind the scenes.",
+        "url": "https://www.shapeof.ai/patterns/prompt-details"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Randomize",
+        "description": "Kickstart the prompting experience with a low bar and fun results",
+        "url": "https://www.shapeof.ai/patterns/randomize"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Suggestions",
+        "description": "Solves the blank canvas dilemma with clues for how to prompt.",
+        "url": "https://www.shapeof.ai/patterns/suggestions"
+      },
+      {
+        "category": "Wayfinders",
+        "name": "Templates",
+        "description": "Structured templates that can be filled by the user or pre-filled by the AI.",
+        "url": "https://www.shapeof.ai/patterns/templates"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Auto-fill",
+        "description": "Extend a prompt to multiple fields or inputs at once.",
+        "url": "https://www.shapeof.ai/patterns/auto-fill"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Describe",
+        "description": "Decomposes the course into its fundamental tokens and suggested prompt.",
+        "url": "https://www.shapeof.ai/patterns/describe"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Expand",
+        "description": "Lengthen the underlying content or add depth and details.",
+        "url": "https://www.shapeof.ai/patterns/expand"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Inline Action",
+        "description": "Ask or interact with AI contextually based on something already available on the page.",
+        "url": "https://www.shapeof.ai/patterns/inline-action"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Inpainting",
+        "description": "Target specific areas of the AI's result to regenerate or remix.",
+        "url": "https://www.shapeof.ai/patterns/inpainting"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Madlibs",
+        "description": "Repeatedly run generative tasks without compromising on the format or accuracy.",
+        "url": "https://www.shapeof.ai/patterns/madlibs"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Open input",
+        "description": "Open ended prompt inputs that can be used in AI conversations and other natural language prompting",
+        "url": "https://www.shapeof.ai/patterns/open-input"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Regenerate",
+        "description": "Have the AI reproduce its response to the prompt without additional input",
+        "url": "https://www.shapeof.ai/patterns/regenerate"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Restructure",
+        "description": "Use existing content as the starting point for prompting.",
+        "url": "https://www.shapeof.ai/patterns/restructure"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Restyle",
+        "description": "Transfer styles without changing the underlying structure of a generation.",
+        "url": "https://www.shapeof.ai/patterns/restyle"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Summary",
+        "description": "Have AI distill a topic or resource down to its essence.",
+        "url": "https://www.shapeof.ai/patterns/summary"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Synthesis",
+        "description": "Distill or reorganize complicated information into simple structure.",
+        "url": "https://www.shapeof.ai/patterns/synthesis"
+      },
+      {
+        "category": "Prompt actions",
+        "name": "Transform",
+        "description": "Use AI to change the modality of content.",
+        "url": "https://www.shapeof.ai/patterns/change-form"
+      },
+      {
+        "category": "Tuners",
+        "name": "Attachments",
+        "description": "Give the AI a specific reference to anchor its response.",
+        "url": "https://www.shapeof.ai/patterns/attachments"
+      },
+      {
+        "category": "Tuners",
+        "name": "Connectors",
+        "description": "Allow AI to reference external data and context.",
+        "url": "https://www.shapeof.ai/patterns/connectors"
+      },
+      {
+        "category": "Tuners",
+        "name": "Filters",
+        "description": "Constrain the inputs or the outputs of the AI by source, type, modality, etc.",
+        "url": "https://www.shapeof.ai/patterns/filters"
+      },
+      {
+        "category": "Tuners",
+        "name": "Model management",
+        "description": "Let users specify what model to use for their prompts.",
+        "url": "https://www.shapeof.ai/patterns/model-management"
+      },
+      {
+        "category": "Tuners",
+        "name": "Modes",
+        "description": "Adjust the underlying training, constraints, and persona to a specific context of use.",
+        "url": "https://www.shapeof.ai/patterns/modes"
+      },
+      {
+        "category": "Tuners",
+        "name": "Parameters",
+        "description": "Include constraints with your prompt for the AI to reference when generating its result.",
+        "url": "https://www.shapeof.ai/patterns/parameters"
+      },
+      {
+        "category": "Tuners",
+        "name": "Preset styles",
+        "description": "Provide default options to change the texture, aesthetic, or tone of generative media.",
+        "url": "https://www.shapeof.ai/patterns/preset-styles"
+      },
+      {
+        "category": "Tuners",
+        "name": "Saved styles",
+        "description": "Allow users to define their own style presets for re-use.",
+        "url": "https://www.shapeof.ai/patterns/saved-styles"
+      },
+      {
+        "category": "Tuners",
+        "name": "Voice and tone",
+        "description": "Ensure outputs match your voice, tone, and preferences in a consistent way.",
+        "url": "https://www.shapeof.ai/patterns/voice-and-tone"
+      },
+      {
+        "category": "Governors",
+        "name": "Action plan",
+        "description": "Have the AI show the steps it will take to respond to the user's prompt before it executes its response",
+        "url": "https://www.shapeof.ai/patterns/action-plan"
+      },
+      {
+        "category": "Governors",
+        "name": "Branches",
+        "description": "Support iterative prompting while retaining footprints band visibility back to the original",
+        "url": "https://www.shapeof.ai/patterns/branches"
+      },
+      {
+        "category": "Governors",
+        "name": "Citations",
+        "description": "Lets the AI give inline annotations to cite its sources",
+        "url": "https://www.shapeof.ai/patterns/citations"
+      },
+      {
+        "category": "Governors",
+        "name": "Controls",
+        "description": "Manage the flow of information or pause a request mid-stream to adjust the prompt",
+        "url": "https://www.shapeof.ai/patterns/controls"
+      },
+      {
+        "category": "Governors",
+        "name": "Cost estimates",
+        "description": "Help users proactively modulate compute power through transparent cost estimates for actions",
+        "url": "https://www.shapeof.ai/patterns/cost-estimates"
+      },
+      {
+        "category": "Governors",
+        "name": "Draft mode",
+        "description": "Support exploration and iterative prompting while reducing compute costs until a final form is ready",
+        "url": "https://www.shapeof.ai/patterns/draft-mode"
+      },
+      {
+        "category": "Governors",
+        "name": "Memory",
+        "description": "Control what details the AI knows about you",
+        "url": "https://www.shapeof.ai/patterns/memory"
+      },
+      {
+        "category": "Governors",
+        "name": "References",
+        "description": "See and manage what additional sources the AI references to generate its response",
+        "url": "https://www.shapeof.ai/patterns/references"
+      },
+      {
+        "category": "Governors",
+        "name": "Sample response",
+        "description": "Confirm the user's intent for complicated prompts",
+        "url": "https://www.shapeof.ai/patterns/sample-response"
+      },
+      {
+        "category": "Governors",
+        "name": "Shared vision",
+        "description": "Live visibility into the AI's action in a shared canvas or workspace",
+        "url": "https://www.shapeof.ai/patterns/shared-vision"
+      },
+      {
+        "category": "Governors",
+        "name": "Stream of Thought",
+        "description": "Reveals the AI's logic thought process, tool use, and decisions for oversight and auditability",
+        "url": "https://www.shapeof.ai/patterns/stream-of-thought"
+      },
+      {
+        "category": "Governors",
+        "name": "Variations",
+        "description": "Trace through multiple variations of a result to choose the one that works best for them",
+        "url": "https://www.shapeof.ai/patterns/variations"
+      },
+      {
+        "category": "Governors",
+        "name": "Verification",
+        "description": "Allow users to confirm AI decisions and actions before proceeding",
+        "url": "https://www.shapeof.ai/patterns/verification"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Caveat",
+        "description": "Inform users about shortcomings or risks in the model or the technology overall",
+        "url": "https://www.shapeof.ai/patterns/caveat"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Consent",
+        "description": "Only capture data from others with their knowledge and permission",
+        "url": "https://www.shapeof.ai/patterns/consent"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Data ownership",
+        "description": "Control how the model remembers and uses your data",
+        "url": "https://www.shapeof.ai/patterns/data-ownership"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Disclosure",
+        "description": "Clearly mark content and interactions guided or delivered by AI",
+        "url": "https://www.shapeof.ai/patterns/disclosure"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Footprints",
+        "description": "Let users trace the AI's steps from prompt to result",
+        "url": "https://www.shapeof.ai/patterns/footprints"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Incognito Mode",
+        "description": "Interact with the AI outside of its memory",
+        "url": "https://www.shapeof.ai/patterns/incognito-mode"
+      },
+      {
+        "category": "Trust builders",
+        "name": "Watermark",
+        "description": "Identifiers on AI Generative content that humans, software, or programs can read",
+        "url": "https://www.shapeof.ai/patterns/watermark"
+      },
+      {
+        "category": "Identifiers",
+        "name": "Avatar",
+        "description": "Visual identifier of the AI itself to help it be recognizable, memorable, and on-brand.",
+        "url": "https://www.shapeof.ai/patterns/avatar"
+      },
+      {
+        "category": "Identifiers",
+        "name": "Color",
+        "description": "Visual cues to help users identify AI features or content.",
+        "url": "https://www.shapeof.ai/patterns/color"
+      },
+      {
+        "category": "Identifiers",
+        "name": "Iconography",
+        "description": "Images that represent AI-powered actions throughout the interface.",
+        "url": "https://www.shapeof.ai/patterns/iconography"
+      },
+      {
+        "category": "Identifiers",
+        "name": "Name",
+        "description": "How the AI is referred to through the product and across the overall customer experience.",
+        "url": "https://www.shapeof.ai/patterns/name"
+      },
+      {
+        "category": "Identifiers",
+        "name": "Personality",
+        "description": "Characteristics that distinguish the AI's personality and vibe.",
+        "url": "https://www.shapeof.ai/patterns/personality"
+      }
+    ]
+  },
+  "microsoft_hax": {
+    "source": "https://www.microsoft.com/en-us/haxtoolkit/library/",
+    "note": "Names and one-line descriptions as shown on the HAX Design Library page; phases other than G1 not confirmed from the page.",
+    "count": 18,
+    "guidelines": [
+      {
+        "id": "G1",
+        "name": "Make clear what the system can do",
+        "description": "Help the user understand what the AI system is capable of doing."
+      },
+      {
+        "id": "G2",
+        "name": "Make clear how well the system can do what it can do",
+        "description": "Help the user understand how often the AI system may make mistakes."
+      },
+      {
+        "id": "G3",
+        "name": "Time services based on context",
+        "description": "Time when to act or interrupt based on the user's current task and environment."
+      },
+      {
+        "id": "G4",
+        "name": "Show contextually relevant information",
+        "description": "Display information relevant to the user's current task and environment."
+      },
+      {
+        "id": "G5",
+        "name": "Match relevant social norms",
+        "description": "Ensure the experience is delivered in a way that users would expect, given their social and cultural context."
+      },
+      {
+        "id": "G6",
+        "name": "Mitigate social biases",
+        "description": "Ensure the AI system's language and behaviors do not reinforce undesirable and unfair stereotypes and biases."
+      },
+      {
+        "id": "G7",
+        "name": "Support efficient invocation",
+        "description": "Make it easy to invoke or request the AI system's services when needed."
+      },
+      {
+        "id": "G8",
+        "name": "Support efficient dismissal",
+        "description": "Make it easy to dismiss or ignore undesired AI system services."
+      },
+      {
+        "id": "G9",
+        "name": "Support efficient correction",
+        "description": "Make it easy to edit, refine, or recover when the AI system is wrong."
+      },
+      {
+        "id": "G10",
+        "name": "Scope services when in doubt",
+        "description": "Engage in disambiguation or gracefully degrade the AI system's services when uncertain about a user's goals."
+      },
+      {
+        "id": "G11",
+        "name": "Make clear why the system did what it did",
+        "description": "Enable the user to access an explanation of why the AI system behaved as it did."
+      },
+      {
+        "id": "G12",
+        "name": "Remember recent interactions",
+        "description": "Maintain short-term memory and allow the user to make efficient references to that memory."
+      },
+      {
+        "id": "G13",
+        "name": "Learn from user behavior",
+        "description": "Personalize the user's experience by learning from their actions over time."
+      },
+      {
+        "id": "G14",
+        "name": "Update and adapt cautiously",
+        "description": "Limit disruptive changes when updating and adapting the AI system's behaviors."
+      },
+      {
+        "id": "G15",
+        "name": "Encourage granular feedback",
+        "description": "Enable the user to provide feedback indicating their preferences during regular interaction with the AI system."
+      },
+      {
+        "id": "G16",
+        "name": "Convey the consequences of user actions",
+        "description": "Immediately update or convey how user actions will impact future behaviors of the AI system."
+      },
+      {
+        "id": "G17",
+        "name": "Provide global controls",
+        "description": "Allow the user to globally customize what the AI system monitors and how it behaves."
+      },
+      {
+        "id": "G18",
+        "name": "Notify users about changes",
+        "description": "Inform the user when the AI system adds or updates its capabilities."
+      }
+    ]
+  },
+  "smashing_transparency": {
+    "sources": [
+      "https://www.smashingmagazine.com/2026/05/practical-interface-patterns-ai-transparency/",
+      "https://www.smashingmagazine.com/2026/04/identifying-necessary-transparency-moments-agentic-ai-part1/"
+    ],
+    "count": 16,
+    "patterns": [
+      {
+        "name": "Living Breadcrumb",
+        "description": "Small status line that cycles short updates for low-priority background work."
+      },
+      {
+        "name": "Dynamic Checklist",
+        "description": "Lists every planned step: done, current, pending. For high-stakes multi-step tasks (example: Devin)."
+      },
+      {
+        "name": "Thinking Toggle",
+        "description": "A 'View logs' control that expands a status into a sanitized log of calls."
+      },
+      {
+        "name": "Partial Success",
+        "description": "Per-item outcome (success / failed + reason) instead of one binary failure banner."
+      },
+      {
+        "name": "Disentangling the Tool",
+        "description": "Errors name the external service that failed and the retry plan, instead of blaming the AI."
+      },
+      {
+        "name": "Audit Trail / Show Work",
+        "description": "A link or history on the result that replays how it was produced."
+      },
+      {
+        "name": "Agentic Update Formula",
+        "description": "Status copy = action word + specific item + limits/rules."
+      },
+      {
+        "name": "Real-time activity list",
+        "description": "Activities listed and ticked as they complete (example: Perplexity)."
+      },
+      {
+        "name": "Intent Preview",
+        "description": "Pause before an irreversible action, explain intent, require confirmation."
+      },
+      {
+        "name": "Action Audit and Undo",
+        "description": "Act, notify, offer immediate undo."
+      },
+      {
+        "name": "Passive Toast / Log",
+        "description": "Subtle notice for low-impact reversible actions."
+      },
+      {
+        "name": "Review trail",
+        "description": "Notification plus review for high-impact reversible actions."
+      },
+      {
+        "name": "Reviewing Logic state",
+        "description": "Pause above a threshold and show the deciding factors first."
+      },
+      {
+        "name": "Proof of Work",
+        "description": "Show the rationale before or as the system acts."
+      },
+      {
+        "name": "Named step status",
+        "description": "Specific step names instead of a generic 'Calculating…'."
+      },
+      {
+        "name": "Status bar above the document",
+        "description": "Specific message tied to the document being reviewed."
+      }
+    ],
+    "anti_patterns": [
+      "Generic spinner for AI thinking time",
+      "Generic 'Loading'/'Working' text",
+      "Vague status without object or reason",
+      "Binary 'Request failed' for partial failures",
+      "Blaming the AI for an external tool failure",
+      "Playful personified tone on high-stakes tasks",
+      "Unsanitized raw logs",
+      "Opaque memory with no audit",
+      "Black box (hide everything)",
+      "Data dump (every log line)",
+      "Developer-speak errors"
+    ]
+  }
+}

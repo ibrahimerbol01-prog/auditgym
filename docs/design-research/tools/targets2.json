@@ -1,0 +1,22 @@
+[
+ ["playground","Claude Console eval tool docs","https://docs.claude.com/en/docs/test-and-evaluate/eval-tool"],
+ ["playground","Claude Console","https://console.anthropic.com/"],
+ ["playground","OpenAI Playground","https://platform.openai.com/playground"],
+ ["playground","Google AI Studio","https://aistudio.google.com/"],
+ ["playground","OpenRouter chat","https://openrouter.ai/chat"],
+ ["playground","Hugging Face Playground","https://huggingface.co/playground"],
+ ["playground","AI SDK Playground","https://ai-sdk.dev/playground"],
+ ["playground","Groq Playground","https://console.groq.com/playground"],
+ ["playground","Mistral Console","https://console.mistral.ai/"],
+ ["playground","Together Playground","https://api.together.ai/playground"],
+ ["playground","Ollama model page","https://ollama.com/library/qwen2.5"],
+ ["playground","LM Studio docs","https://lmstudio.ai/docs/app"],
+ ["playground","Open WebUI features","https://docs.openwebui.com/features/"],
+ ["playground","Promptfoo","https://www.promptfoo.dev/"],
+ ["playground","Promptfoo web viewer docs","https://www.promptfoo.dev/docs/usage/web-ui/"],
+ ["playground","PromptLayer","https://www.promptlayer.com/"],
+ ["playground","Vellum","https://www.vellum.ai/"],
+ ["playground","Langfuse playground docs","https://langfuse.com/docs/playground"],
+ ["playground","Braintrust playground docs","https://www.braintrust.dev/docs/guides/playground"],
+ ["playground","W&B Weave playground docs","https://weave-docs.wandb.ai/guides/tools/playground"]
+]

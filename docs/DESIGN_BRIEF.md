@@ -4,6 +4,54 @@ The UI is the jury's first impression. It must look like a design studio made it
 AI-generated SaaS template. The concept is **"auditor's working papers"**: dark graphite paper, ivory ink, one brass
 accent, a red pen for exceptions.
 
+## Layout decision (Мади, Nov 20)
+**The UI is a Claude-style chat with a sidebar of big graphs of the training process and telemetry.**
+
+- **Centre: the chat.** A calm, centred conversation thread with a composer at the bottom, in the manner of Claude's
+  chat. An episode reads as a conversation: each agent step is one turn (action → observation), shown as a compact
+  tool-call row that expands on click; the last turn is the submitted findings (C-1) and the evaluator's conclusion
+  (C-2).
+- **Sidebar: big graphs.**
+  - *Training process*: reward against training iteration from `train/curve.json` (task T10/D1), with the held-out
+    (dev) curve and the reconcile baseline drawn on the same axes.
+  - *Telemetry of the current run*: steps used of 100, P, R, F1, return (reward), steps and agent time (the
+    diagnostics the case PDF asks for), plus tokens when an LLM agent runs.
+- **Proposed panel codes:** L-2 run thread, T-1 training curve, T-2 run telemetry.
+- **Open question:** what the person types in the composer — tool actions (play mode) or instructions to an LLM agent
+  (needs T12 and a local Ollama). Decide before building the composer.
+
+### Two audiences, two interfaces (Мади, Nov 20)
+Both run on the same environment and evaluator, so they can never show different results.
+
+| | **Web app: for newcomers** | **Terminal: for specialists** |
+|---|---|---|
+| Who | Jury members, auditors, students, anyone seeing an RL environment for the first time | RL/ML engineers who train or benchmark agents |
+| Goal | Understand what the environment does and why the score is fair, in a few minutes, without reading docs | Run, script and compare agents fast and reproducibly |
+| Shape | The chat + graphs layout above | Commands with compact tables, every option as a flag, `--json` output for scripts |
+| Defaults | Everything pre-filled; one obvious next action per screen; plain-language labels with hover help for terms (invoice, allocation, period, FX rate, evidence, F1) | Nothing hidden: seeds, configs, splits, closed/open mode, and agent settings (temperature, top-p, max tokens, token budget, max steps ≤ 100) as flags |
+| Advanced settings | Behind an "Advanced" disclosure, closed by default | Always available |
+
+- **Bridge between them:** every run in the web app shows the exact terminal command that reproduces it, with a copy
+  button. Newcomers see where the specialist path starts; specialists can reproduce any demo run.
+- **Terminal constraints:** `src/` is standard library only and CI runs on Windows, so no `curses`, `rich` or
+  `textual`. The terminal interface is a well-formatted command line (aligned tables, tick marks with a legend,
+  colour only as an extra signal and switchable off), not a full-screen TUI. It extends the existing `cli.py`
+  commands and the planned `run-agent` (T12).
+
+### Rules from the case PDF that this layout must respect
+- **Not a chatbot** (§01: "среда для возможного дообучения модели, а не платёжное приложение, чат-бот или один
+  аудиторский отчёт"). The chat is the *view of an episode*, not a general assistant: every message is an
+  environment step or its result.
+- **Inspired by Claude, not copied.** Take the structure and the calm; no Anthropic colours, fonts or logo (see the
+  never-list below); the thread uses the working-papers identity.
+- **Training graphs need a held-out comparison** (§01: improvement may not be claimed "без контролируемого сравнения
+  на отложенных данных"). Always show the dev curve and a baseline next to the training curve.
+- **No hints during an episode; closed mode hides reward** (§04: reward and diagnostics stay with the evaluator until
+  the run ends). In closed mode the telemetry panel shows steps and time only, and fills in the scores after submit.
+- **Show P, R, F1, return, steps and agent time as diagnostics** (§10) — the telemetry panel is where they live.
+- **A scripted policy is enough for the demo; a local model is optional** (§07, §09). The UI must work fully with
+  the scripted agents and no LLM installed.
+
 ## Keep (this is the identity)
 - **Tick marks** (inline SVG symbols `#tm-agree`, `#tm-foot`, `#tm-trace`, `#tm-exc`): ✓ agreed to document, Σ footed,
   ↔ traced, ⊗ exception. Use them for verification states, always with the legend nearby.
