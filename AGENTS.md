@@ -4,7 +4,7 @@ FinTech case of Genesis Hackathon 2026: an RL environment + evaluator for audit 
 scores the environment, not an agent. Deadline Nov 22, 23:59 Astana (UTC+5); freeze 18:00.
 
 ## Before you change anything
-- Run `PYTHONPATH=src python -m unittest discover -s tests -q` (46 tests; the 5 browser tests run when Playwright is installed, CI always runs them) and
+- Run `PYTHONPATH=src python -m unittest discover -s tests -q` (50 tests; the 5 browser tests run when Playwright is installed, CI always runs them) and
   `PYTHONPATH=src python -m auditgym.verify` (must end with every check passing). Both must stay green.
 - Read DESIGN.md (how it works, published rules) and docs/TASKS.md (your task).
 

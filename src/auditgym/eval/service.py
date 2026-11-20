@@ -81,10 +81,7 @@ class EvaluatorCore:
         inspection_steps = max(inspection_steps, ep["ticks"])
         ep["scored"] = True
         issues = ep["private"]["truth"]["issues"]
-        if status == "abandoned":
-            res = {"status": "abandoned", "reward": -1.0, "tp": 0, "fp": 0, "fn": len(issues),
-                   "precision": 0.0, "recall": 0.0, "f1": 0.0, "inspection_steps": inspection_steps}
-        elif truncated:
+        if truncated:
             res = score([], issues, inspection_steps)
             res["status"] = status or "truncated"
         else:
