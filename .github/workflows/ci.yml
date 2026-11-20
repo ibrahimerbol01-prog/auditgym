@@ -66,3 +66,19 @@ jobs:
         run: docker run --rm --network none --cpus=2 --memory=4g auditgym
       - name: Demo
         run: docker run --rm --network none auditgym demo
+  gymnasium-adapter:
+    name: Gymnasium adapter (check_env)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: src
+      AUDITGYM_GYM: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install gymnasium (optional adapter test only, never imported by src/)
+        run: python -m pip install gymnasium
+      - name: Run gymnasium.utils.env_checker.check_env
+        run: python -m unittest tests.test_gymnasium_env -v
