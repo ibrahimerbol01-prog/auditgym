@@ -5,7 +5,8 @@ const AREAS = [["contract", "Контракт и изоляция", 25, "про�
 const RANK = { oracle: ["Эталон", "gold"], reconcile: ["Сверщик", "lime"], random: ["Стажёр", "dim"], flag_all: ["Паникёр", "pink"] };
 const SVGNS = "http://www.w3.org/2000/svg";
 const tm = (kind, label, cls = "") => { const s = document.createElementNS(SVGNS, "svg"); s.setAttribute("class", `tm ${cls} ${kind === "exc" ? "exc" : ""}`.trim()); s.setAttribute("viewBox", "0 0 16 16"); if (label) { s.setAttribute("role", "img"); s.setAttribute("aria-label", label); } else s.setAttribute("aria-hidden", "true"); const u = document.createElementNS(SVGNS, "use"); u.setAttribute("href", "#tm-" + kind); s.append(u); return s; };
-(() => { const b = document.getElementById("theme"); if (!b) return; const sync = () => b.setAttribute("aria-pressed", String(document.documentElement.dataset.theme === "light"));
+(() => { const b = document.getElementById("theme"); if (!b) return; const tc = document.querySelector('meta[name="theme-color"]'); const lbl = b.querySelector("span");
+  const sync = () => { const light = document.documentElement.dataset.theme === "light"; b.setAttribute("aria-pressed", String(light)); b.setAttribute("aria-label", light ? "Тёмная тема «графит»" : "Светлая тема «бумага»"); if (lbl) lbl.textContent = light ? "Графит" : "Бумага"; if (tc) tc.setAttribute("content", light ? "#f1ece1" : "#131210"); };
   sync(); b.addEventListener("click", () => { const light = document.documentElement.dataset.theme !== "light"; if (light) document.documentElement.dataset.theme = "light"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", light ? "light" : "dark"); } catch { /* private mode */ } sync(); }); })();
 const sgn = (x) => (x >= 0 ? "+" : "−") + Math.abs(x).toFixed(3);
 const divBar = (v) => el("div", { class: "dv", "aria-hidden": "true" }, el("i", { class: v >= 0 ? "up" : "dn", style: `width:${Math.min(1, Math.abs(v)) * 50}%` }));
@@ -70,7 +71,13 @@ function fillEps() {
   const p = $("pick-pol").value; const eps = [...new Set(T.filter((x) => (x.policy || "policy") === p).map((x) => x.episode_id))];
   $("pick-ep").replaceChildren(...eps.map((e) => el("option", { value: e }, e))); select();
 }
+function stopPlay() {
+  if (timer) { clearInterval(timer); timer = null; }
+  $("b-play").textContent = "▶";
+  $("b-play").setAttribute("aria-label", "Воспроизвести");
+}
 function select() {
+  stopPlay();
   const p = $("pick-pol").value, e = $("pick-ep").value;
   view = T.filter((x) => (x.policy || "policy") === p && x.episode_id === e).sort((a, b) => a.step - b.step);
   pos = 0; $("scrub").max = Math.max(view.length - 1, 0); render();
@@ -119,6 +126,8 @@ function render() {
     ol.append(li); });
   const cur = ol.querySelector('[aria-current="step"]'); if (cur && ol.scrollHeight > ol.clientHeight) ol.scrollTop = Math.max(0, cur.offsetTop - ol.offsetTop - ol.clientHeight / 2);
   $("scrub").value = pos;
+  $("b-prev").disabled = pos <= 0;
+  $("b-next").disabled = pos >= view.length - 1;
   const s = view[pos]; const obs = $("obs"); obs.textContent = "";
   if (!s) { $("obs-meta").textContent = ""; obs.append(el("div", { class: "muted small" }, "Нет траекторий: запустите python -m auditgym.verify")); return; }
   $("obs-meta").replaceChildren(el("b", {}, `#${s.step} ${s.action.tool}`), el("span", {}, `reward ${s.reward}`), el("span", {}, s.terminated ? "завершён" : s.truncated ? "обрезан" : `осталось ${(s.observation || {}).remaining_steps ?? "—"}`));
@@ -130,5 +139,5 @@ $("pick-pol").addEventListener("change", fillEps); $("pick-ep").addEventListener
 $("scrub").addEventListener("input", (e) => { pos = +e.target.value; render(); });
 $("b-prev").addEventListener("click", () => { pos = Math.max(0, pos - 1); render(); });
 $("b-next").addEventListener("click", () => { pos = Math.min(view.length - 1, pos + 1); render(); });
-$("b-play").addEventListener("click", () => { if (timer) { clearInterval(timer); timer = null; $("b-play").textContent = "▶"; return; } $("b-play").textContent = "❚❚"; timer = setInterval(() => { if (pos >= view.length - 1) { clearInterval(timer); timer = null; $("b-play").textContent = "▶"; return; } pos += 1; render(); }, 700); });
+$("b-play").addEventListener("click", () => { if (timer) { stopPlay(); return; } if (pos >= view.length - 1) pos = 0; $("b-play").textContent = "❚❚"; $("b-play").setAttribute("aria-label", "Пауза"); timer = setInterval(() => { if (pos >= view.length - 1) { stopPlay(); return; } pos += 1; render(); }, 700); });
 main();
