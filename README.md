@@ -56,6 +56,14 @@ obs, reward, terminated, truncated, info = env.step(
 # tools: list_records, get_record, get_document, calculator, submit
 ```
 
+**3 lines to use with your RL framework (Gymnasium):**
+
+```python
+from examples.gymnasium_env import AuditGymEnv
+env = AuditGymEnv(mode="open", action_mode="discrete")   # or action_mode="text" for JSON tool calls
+obs, info = env.reset(seed=1); obs, reward, terminated, truncated, info = env.step(0)
+```
+
 - Episode = one fictional company, one reporting period, 200–2,000 ledger rows, 0–12 issues.
 - Open files per episode (`episodes/<split>/<episode_id>/public/`): `manifest.json`, `ledger.csv`, `invoices.jsonl`, `payments.jsonl`, `fx.csv`, `policy.json`, `documents.jsonl`. Empty CSV cells are `null`.
 - Evaluator-only files (`private/`): `truth.json`, `provenance.json` (replayable), `clean/` (books before injection).
