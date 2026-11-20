@@ -8,9 +8,11 @@ environment is good is that **something actually learns on it**. Every task belo
 1. *The environment is correct* (contract, data, reward, reproducibility) — mostly done.
 2. *The environment trains* — learning curves on held-out episodes (new: T10–T14).
 
-**Team:** A = **Мади** (Claude Code, Pro: Sonnet by default, Opus only for reviews) · C = **Ерназар** (Google Antigravity / Gemini) ·
+**Team:** A = **Мади** — main coder (Claude Code, Pro: Sonnet by default, Opus only for reviews) ·
+C = **Ерназар** — small and medium tasks (Google Antigravity / Gemini) ·
 B, D = humans without an agent (video, Docker, clean clone) · lead = owner + the lead Claude (reviews, merges, design).
-Ерназар starts with **T3 → T13 → T14**. Мади starts with **T10 → T12 → T2**, T11 if time allows.
+Мади (core, hardest first): **T10 → T12 → T11 → T2 → T15**.
+Ерназар (small/medium, one PR each): **T1 digest pin → T14 → T13 → T3 → docs fixes** (README steps, VIDEO_SCRIPT numbers).
 
 Rules for every task: branch `task/<id>-<short>`, PR to `main`, paste the outputs, AGENTS.md applies.
 Training code lives in `train/` or `examples/`, **never in `src/`** (src stays standard-library only).
