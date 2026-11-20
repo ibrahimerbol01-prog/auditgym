@@ -547,7 +547,19 @@ def estimate(areas: Dict[str, List[Dict[str, Any]]]) -> Dict[str, float]:
     return est
 
 
+def utf8_output() -> None:
+    """Print UTF-8 even where stdout is a pipe with a legacy code page (Windows CI defaults to cp1252).
+
+    The report uses tick marks and rules that cp1252 cannot encode; without this, verify crashes on Windows.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        enc = (getattr(stream, "encoding", None) or "").lower().replace("-", "").replace("_", "")
+        if enc != "utf8" and hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def main(argv: List[str] | None = None) -> int:
+    utf8_output()
     ap = argparse.ArgumentParser(description="AuditGym verification")
     ap.add_argument("--out", default="report.json")
     ap.add_argument("--trajectories", default="trajectories.jsonl")

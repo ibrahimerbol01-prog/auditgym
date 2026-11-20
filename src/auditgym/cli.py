@@ -132,9 +132,17 @@ def cmd_evaluate(args) -> int:
 
 
 def main(argv=None) -> int:
+    from .verify import utf8_output
+    utf8_output()
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ["verify"]:
+        # Hand every remaining argument to verify itself: argparse.REMAINDER cannot capture options such as
+        # `--out` (it made the Docker default `verify --out ... --trajectories ...` fail).
+        from .verify import main as vmain
+        return vmain(argv[1:])
     ap = argparse.ArgumentParser(prog="auditgym")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("verify").add_argument("rest", nargs=argparse.REMAINDER)
+    sub.add_parser("verify", help="the one verification command (options: --out, --trajectories, --fuzz)")
     sub.add_parser("demo")
     s = sub.add_parser("serve")
     g = s.add_mutually_exclusive_group(required=True)
@@ -157,9 +165,6 @@ def main(argv=None) -> int:
     ev.add_argument("--findings", required=True)
     ev.add_argument("--steps", type=int, required=True)
     args = ap.parse_args(argv)
-    if args.cmd == "verify":
-        from .verify import main as vmain
-        return vmain(args.rest)
     return {"demo": cmd_demo, "serve": cmd_serve, "ui": cmd_ui, "generate": cmd_generate,
             "build-suite": cmd_build_suite, "evaluate": cmd_evaluate}[args.cmd](args)
 
