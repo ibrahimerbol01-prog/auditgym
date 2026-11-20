@@ -25,7 +25,7 @@
 /* ---------- tokens ----------
    Dark "graphite" is the default (projector-safe); [data-theme=light] is warm paper with graphite ink.
    One accent (brass pencil) for ticks and actions, one red pen for exceptions. Every colour lives here. */
-:root{
+:root{--t-fast:120ms;--t:200ms;--t-slow:320ms;--ease-std:cubic-bezier(.4,0,.2,1);
   --bg:#131210;--s1:#191816;--s2:#1f1e1b;--s3:#282622;--deep:#0f0e0c;
   --line:#2c2a26;--line2:#3d3a34;--rule:#5a554c;
   --txt:#efe9dc;--txt2:#aea797;--txt3:#958d7f;
@@ -111,7 +111,7 @@ header.top .wrap{display:flex;align-items:center;gap:32px;height:60px}
 .brand .bl{stroke:var(--txt);stroke-width:1.4;stroke-linecap:round}
 .brand:hover{color:var(--txt)}
 nav.main{display:flex;gap:2px;font-size:14px}
-nav.main a{position:relative;color:var(--txt2);text-decoration:none;padding:8px 12px;transition:color .2s}
+nav.main a{position:relative;color:var(--txt2);text-decoration:none;padding:8px 12px;transition:color var(--t)}
 nav.main a:hover{color:var(--txt)}
 nav.main a[aria-current=page]{color:var(--txt)}
 nav.main a[aria-current=page]::after{content:"";position:absolute;left:12px;right:12px;bottom:-11px;height:2px;background:var(--gold)}
@@ -124,13 +124,13 @@ nav.main a[aria-current=page]::after{content:"";position:absolute;left:12px;righ
 .theme-t i{width:12px;height:12px;border-radius:50%;border:1px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
 
 /* ---------- buttons & controls ---------- */
-.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 20px;border-radius:var(--r);font:inherit;font-weight:500;font-size:14px;cursor:pointer;text-decoration:none;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s;white-space:nowrap}
-.btn span[aria-hidden]{transition:transform .2s var(--ease)}
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 20px;border-radius:var(--r);font:inherit;font-weight:500;font-size:14px;cursor:pointer;text-decoration:none;border:1px solid transparent;transition:background var(--t-fast),border-color var(--t-fast),color var(--t-fast);white-space:nowrap}
+.btn span[aria-hidden]{transition:transform var(--t) var(--ease)}
 .btn:hover span[aria-hidden]{transform:translateX(2px)}
 .btn.lg{min-height:48px;padding:12px 24px;font-size:15px}
 .btn.primary{background:var(--gold);color:var(--gold-ink);border-color:var(--gold);font-weight:600}
 .btn.primary:hover{background:var(--gold2);border-color:var(--gold2);color:var(--gold-ink)}
-.btn.primary:active{transform:translateY(1px)}
+.btn.primary:active{filter:brightness(.94)}
 .btn.ghost,.btn.outline{background:transparent;color:var(--txt);border-color:var(--line2)}
 .btn.ghost:hover,.btn.outline:hover{border-color:var(--rule);background:var(--hair);color:var(--txt)}
 .btn.soft{background:transparent;color:var(--gold2);border-color:var(--gold-line)}
@@ -140,7 +140,7 @@ nav.main a[aria-current=page]::after{content:"";position:absolute;left:12px;righ
 .btn.block{width:100%}
 .btn:disabled,.btn[aria-disabled=true]{opacity:.4;cursor:not-allowed;transform:none}
 .btn:disabled span[aria-hidden]{transform:none}
-input,select,textarea{font:inherit;font-size:14px;color:var(--txt);background:var(--deep);border:1px solid var(--line2);border-radius:var(--r);padding:8px 11px;min-height:40px;width:100%;transition:border-color .15s,box-shadow .15s}
+input,select,textarea{font:inherit;font-size:14px;color:var(--txt);background:var(--deep);border:1px solid var(--line2);border-radius:var(--r);padding:8px 11px;min-height:40px;width:100%;transition:border-color var(--t-fast),box-shadow var(--t-fast)}
 input::placeholder,textarea::placeholder{color:var(--txt3);opacity:.85}
 input:hover,select:hover,textarea:hover{border-color:var(--rule)}
 input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
@@ -153,7 +153,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--
 
 /* tabs: index tabs of a working-paper binder */
 .tabs{display:flex;gap:0;flex-wrap:wrap}
-.tab{position:relative;border:0;background:transparent;color:var(--txt2);padding:10px 14px;font:inherit;font-size:14px;min-height:44px;cursor:pointer;transition:color .15s;display:inline-flex;align-items:baseline;gap:7px}
+.tab{position:relative;border:0;background:transparent;color:var(--txt2);padding:10px 14px;font:inherit;font-size:14px;min-height:44px;cursor:pointer;transition:color var(--t-fast);display:inline-flex;align-items:baseline;gap:7px}
 .tab::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .25s var(--ease)}
 .tab:hover{color:var(--txt)}
 .tab.on,.tab[aria-selected=true]{color:var(--txt)}
@@ -314,15 +314,6 @@ h2 .wpref,h3 .wpref{margin-right:10px;vertical-align:2px}
 .flow{display:none}
 
 /* ---------- error types: an audit programme ---------- */
-.err-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line2);border-radius:var(--r-l);background:var(--s1)}
-.err{padding:20px;display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--line)}
-.err:first-child{border-left:0}
-.err-ic{color:var(--gold);height:24px}
-.err-ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
-.err h3{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--txt)}
-.err p{margin:0;color:var(--txt2);font-size:14px;flex:1}
-.trap{font-size:12.5px;color:var(--txt2);border-top:1px solid var(--line);padding-top:10px}
-.trap b{color:var(--neg);font-weight:500;margin-right:4px}
 
 /* ---------- tables ---------- */
 table.grid{width:100%;border-collapse:collapse;font-size:14px}
@@ -331,7 +322,7 @@ table.grid th.num{text-align:right}
 table.grid td{padding:10px 14px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums lining-nums}
 table.grid tbody tr:first-child td{border-top:0}
 table.grid td.mono{white-space:nowrap;font-size:12.5px}
-table.grid tbody tr{cursor:pointer;transition:background .12s}
+table.grid tbody tr{cursor:pointer;transition:background var(--t-fast)}
 table.grid tbody tr:hover td{background:var(--hair)}
 table.grid tbody tr:focus-visible{outline:1px solid var(--gold);outline-offset:-1px}
 table.grid tr.sel td{background:var(--gold-soft)}
@@ -528,7 +519,7 @@ dl.kv dd.wide{grid-column:1/-1;padding-top:0}
 .replay-b{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.15fr);gap:14px}
 .replay-b>*{min-width:0}
 #steps{max-height:480px;border-top:1px solid var(--line)}
-#steps li{display:flex;gap:10px;flex-wrap:nowrap;padding:5px 8px;cursor:pointer;transition:background .12s}
+#steps li{display:flex;gap:10px;flex-wrap:nowrap;padding:5px 8px;cursor:pointer;transition:background var(--t-fast)}
 #steps li:hover{background:var(--hair)}
 #steps li[aria-current=step]{background:var(--gold-soft);box-shadow:inset 2px 0 0 var(--gold);color:var(--txt)}
 #steps .sn{color:var(--txt3);width:28px;flex:none}#steps .st{width:92px;flex:none;color:var(--txt);font-size:11.5px}#steps .sa{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt3)}
@@ -572,7 +563,7 @@ dialog.modal p{color:var(--txt2);margin:0 0 22px}
 
 /* ---------- responsive ---------- */
 @media (max-width:1200px){.hero{grid-template-columns:1fr;gap:48px;padding-top:56px}.case{max-width:660px}.hero h1{font-size:58px}.areas>.card{padding:16px}.areas .av{font-size:32px}}
-@media (max-width:1100px){.zones{grid-template-columns:1fr}.zone{border-left:0;border-top:1px solid var(--line)}.zone:first-child{border-top:0}.err-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.err:nth-child(3){border-left:0}.err:nth-child(n+3){border-top:1px solid var(--line)}.layout{grid-template-columns:1fr}.side-col{position:static;max-height:none;overflow:visible;padding:0}.epbar{position:static}.rec-scroll{max-height:560px}.rec-body{max-height:none}.res-top{grid-template-columns:1fr}.rep-two{grid-template-columns:1fr}.dock{position:static;margin:14px 0 0;padding:0;background:none}}
+@media (max-width:1100px){.zones{grid-template-columns:1fr}.zone{border-left:0;border-top:1px solid var(--line)}.zone:first-child{border-top:0}.layout{grid-template-columns:1fr}.side-col{position:static;max-height:none;overflow:visible;padding:0}.epbar{position:static}.rec-scroll{max-height:560px}.rec-body{max-height:none}.res-top{grid-template-columns:1fr}.rep-two{grid-template-columns:1fr}.dock{position:static;margin:14px 0 0;padding:0;background:none}}
 @media (max-width:900px){.meta-top{display:none}}
 @media (max-width:860px){.rep-head{grid-template-columns:1fr}.rep-head h1{font-size:40px}.replay-b{grid-template-columns:minmax(0,1fr)}.areas{grid-template-columns:repeat(2,minmax(0,1fr))}.areas>.card{border-left:1px solid var(--line);border-top:1px solid var(--line)}.areas>.card:nth-child(odd){border-left:0}.areas>.card:nth-child(-n+2){border-top:0}.areas>.card:nth-child(5){grid-column:1/-1;border-left:0}.epbar-in{flex-wrap:wrap;gap:14px}.budget-box{margin-left:0;flex:1 1 100%}.sched .note{display:none}}
 @media (max-width:760px){
@@ -589,11 +580,11 @@ dialog.modal p{color:var(--txt2);margin:0 0 22px}
   .sec-h{margin-bottom:16px;padding-top:20px}.sec-h h2{font-size:28px}.sec-h p{font-size:14px}
   .how,.errs{padding-top:30px;padding-bottom:0}.pick{padding-top:30px;padding-bottom:48px}
   /* the diagram and the error programme become snap-scroll rows */
-  .zones,.err-grid{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:2px 18px 12px;scrollbar-width:none;overscroll-behavior-x:contain;border:0;background:none}
-  .zones::-webkit-scrollbar,.err-grid::-webkit-scrollbar{display:none}
-  .zone,.err{flex:0 0 84%;scroll-snap-align:start;border:1px solid var(--line2)!important;border-radius:var(--r-l);background:var(--s1)}
-  .zone{padding:16px;gap:8px}.err{flex-basis:76%;padding:16px;gap:8px}
-  .err-grid .err.agent-z,.zone.agent-z{background:var(--s2)}
+  .zones{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px;padding:2px 18px 12px;scrollbar-width:none;overscroll-behavior-x:contain;border:0;background:none}
+  .zones::-webkit-scrollbar{display:none}
+  .zone{flex:0 0 84%;scroll-snap-align:start;border:1px solid var(--line2)!important;border-radius:var(--r-l);background:var(--s1)}
+  .zone{padding:16px;gap:8px}
+  .zone.agent-z{background:var(--s2)}
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tiles>.card:nth-child(n){border-left:1px solid var(--line);border-top:1px solid var(--line)}.tiles>.card:nth-child(odd){border-left:0}.tiles>.card:nth-child(-n+2){border-top:0}
   .reward>.inner{padding:20px}.reward .big{font-size:72px}
   .bn{grid-template-columns:120px minmax(0,1fr) 64px;gap:10px;font-size:12.5px}
@@ -613,3 +604,22 @@ dialog.modal p{color:var(--txt2);margin:0 0 22px}
 }
 @media (max-width:420px){.hero h1{font-size:38px}.cta .btn{flex:1 1 100%}.areas{grid-template-columns:1fr}.areas>.card{border-left:0!important;border-top:1px solid var(--line)!important;display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px 12px;padding:14px 18px}.areas>.card:first-child{border-top:0!important}.areas .an{min-height:0}.areas .av{font-size:28px;grid-column:2;grid-row:1}.areas .cells,.areas .au{grid-column:1/-1}.rec-actions{grid-template-columns:1fr}.case-t .dt{display:none}.sched .bar{display:none}}
 @media (forced-colors:active){.btn,.card,.window,.zone,.case,.seal,.paper{border:1px solid CanvasText}.tm{stroke:CanvasText}}
+
+/* classification schedule (replaces icon cards) */
+table.cls td{vertical-align:top;font-size:14px}
+table.cls td.dim{color:var(--txt3);white-space:nowrap}
+table.cls td.twin{color:var(--txt2)}
+table.cls td:nth-child(4){white-space:nowrap}
+/* hero: invite to play the real episode */
+.case-open{display:inline-flex;gap:6px;margin-top:10px;font-weight:500;color:var(--gold);text-decoration:none;border-bottom:1px solid transparent;transition:border-color var(--t-fast) var(--ease-std),color var(--t-fast) var(--ease-std)}
+.case-open:hover{color:var(--gold2);border-bottom-color:currentColor}
+
+[tabindex="-1"]:focus{outline:none}
+@media (max-width:640px){
+  table.cls,table.cls tbody,table.cls tr,table.cls td{display:block;width:100%}
+  table.cls thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  table.cls tr{padding:12px 14px;border-top:1px solid var(--line)}
+  table.cls td{border:0!important;padding:2px 0!important;white-space:normal!important}
+  table.cls td:nth-child(4)::before{content:"меняется: ";color:var(--txt3)}
+  table.cls td.twin::before{content:"двойник: ";color:var(--txt3)}
+}

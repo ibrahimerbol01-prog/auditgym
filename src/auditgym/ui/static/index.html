@@ -76,7 +76,7 @@
         <div class="cl total sq c6"><span>Расхождение, книга − расчёт</span><b><span class="cnt" data-count="4386160" aria-hidden="true">(43 861.60)</span><span class="sr-only">минус 43 861.60</span><svg class="ring" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" vector-effect="non-scaling-stroke" d="M8 23C6 11 30 4 55 4.5c24 .6 41 6 40 16-1 11-25 15-49 14.5C22 34.5 4 31 7 18"/></svg><u>KZT</u></b><span></span></div>
       </div>
       <div class="case-f sq c7"><span class="k">C-1</span><code>date_or_fx · 4386160 · KZT</code><span class="refs">доказательства: A-2 INV-S3-3287 · A-4 13.03 USD→KZT · A-1 GL-S3-11663</span></div>
-      <figcaption id="case-cap" class="sq c8"><ul class="legend" aria-label="Пометки проверяющего"><li><svg class="tm sm" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-agree"/></svg>сверено с документом</li><li><svg class="tm sm" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-foot"/></svg>просуммировано</li><li><svg class="tm sm" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-trace"/></svg>прослежено</li><li><svg class="tm sm exc" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-exc"/></svg>расхождение</li></ul><span>Настоящий фрагмент эпизода train-03: курс взят за другой день. Всё видно из публичных таблиц — нужно только сверить.</span></figcaption>
+      <figcaption id="case-cap" class="sq c8"><ul class="legend" aria-label="Пометки проверяющего"><li><svg class="tm sm" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-agree"/></svg>сверено с документом</li><li><svg class="tm sm" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-foot"/></svg>просуммировано</li><li><svg class="tm sm" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-trace"/></svg>прослежено</li><li><svg class="tm sm exc" viewBox="0 0 16 16" aria-hidden="true"><use href="#tm-exc"/></svg>расхождение</li></ul><span>Настоящий фрагмент эпизода train-03: курс взят за другой день. Всё видно из публичных таблиц — нужно только сверить.</span><a class="case-open" href="/?ep=train-3&amp;table=invoices&amp;row=INV-S3-3287">Проверить самому в train-03 <span aria-hidden="true">→</span></a></figcaption>
     </figure>
   </section>
 
@@ -112,12 +112,17 @@
   </section>
 
   <section class="errs wrap" aria-labelledby="err-h">
-    <div class="sec-h"><h2 id="err-h">Четыре типа ошибок</h2><p>Вперемешку, с взаимодействиями и законными двойниками.</p></div>
-    <div class="err-grid">
-      <article class="err"><div class="err-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="11" height="14" rx="1.5"/><rect x="9" y="6.5" width="11" height="14" rx="1.5"/><path d="M12 11h5M12 14h5M12 17h3"/></svg></div><h3>duplicate_invoice</h3><p>Тот же счёт проведён второй раз под новым номером.</p><div class="trap"><b>Ловушка:</b>регулярные счета с другим сервисным периодом</div></article>
-      <article class="err"><div class="err-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 12h7M10.5 12c3 0 3-5.5 6-5.5h4M10.5 12c3 0 3 5.5 6 5.5h4"/><path d="M18 4l2.5 2.5L18 9M18 15l2.5 2.5L18 20"/></svg></div><h3>payment_allocation</h3><p>Оплата застряла на счёте 2350 «нераспределённые» вместо счёта клиента.</p><div class="trap"><b>Ловушка:</b>честные авансы, сплит- и общие платежи</div></article>
-      <article class="err"><div class="err-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><path d="M8.5 15.5h7M13.5 13.5l2 2-2 2"/></svg></div><h3>date_or_fx</h3><p>Курс взят не за тот день или дата не та — сумма в книге неверна.</p><div class="trap"><b>Ловушка:</b>законные расхождения: кредит-ноты и короткие оплаты</div></article>
-      <article class="err"><div class="err-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18" stroke-dasharray="2 2.2"/><rect x="3.5" y="6" width="6" height="12" rx="1.2"/><rect x="14.5" y="6" width="6" height="12" rx="1.2"/><path d="M7 10.5h-.01M17.5 12h-.01" stroke-width="2.4"/></svg></div><h3>period_classification</h3><p>Сумма верна, но проводка попала не в тот отчётный период.</p><div class="trap"><b>Ловушка:</b>время записано в UTC у границы периода</div></article>
+    <div class="sec-h"><h2 id="err-h">Классификатор расхождений</h2><p>Четыре типа вперемешку, с взаимодействиями. У каждого есть законный двойник — его обвинять нельзя.</p></div>
+    <div class="paper">
+      <div class="wp-head"><div class="wp-code">K-1<small>W/P</small></div><div class="wp-title">Типы ошибок, которые среда вносит в книги</div><dl class="wp-meta"><div><dt>Источник</dt><dd>DESIGN.md · записанные инъекции</dd></div></dl></div>
+      <div class="scroll"><table class="sched cls"><caption class="sr-only">Четыре типа ошибок, что в них меняется и их законные двойники</caption>
+        <thead><tr><th scope="col">Код</th><th scope="col">Тип</th><th scope="col">Что не так</th><th scope="col">Что меняется в книге</th><th scope="col">Законный двойник</th></tr></thead>
+        <tbody>
+          <tr><td class="mono dim">K-1.1</td><td class="mono">duplicate_invoice</td><td>Тот же счёт проведён второй раз под новым номером</td><td>лишняя запись</td><td class="twin">регулярные счета с другим сервисным периодом</td></tr>
+          <tr><td class="mono dim">K-1.2</td><td class="mono">payment_allocation</td><td>Оплата застряла на счёте 2350 «нераспределённые»</td><td>счёт проводки</td><td class="twin">честные авансы, сплит- и общие платежи</td></tr>
+          <tr><td class="mono dim">K-1.3</td><td class="mono">date_or_fx</td><td>Курс взят не за тот день или дата не та</td><td>сумма</td><td class="twin">кредит-ноты и короткие оплаты</td></tr>
+          <tr><td class="mono dim">K-1.4</td><td class="mono">period_classification</td><td>Сумма верна, но проводка не в том периоде</td><td>дата проводки</td><td class="twin">время в UTC у границы периода</td></tr>
+        </tbody></table></div>
     </div>
   </section>
 

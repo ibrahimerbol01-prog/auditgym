@@ -323,4 +323,6 @@ loadSplit("train").then(async () => {
   const item = spec.episodes[Number(n) - 1]; if (!item) return;
   await start(item.seed, item.config);
   if (q.get("table")) await openTable(q.get("table"));
+  const want = q.get("row"); // a deep link from the hero case: select the cited row (free, no step)
+  if (want && S.table) { const row = ((S.pages[S.table] && S.pages[S.table].list[S.pages[S.table].i] || {}).rows || []).find((r) => rowId(S.table, r) === want); if (row) { select(S.table, row); const tr = document.querySelector(`#records tr[data-id="${CSS.escape(want)}"]`); if (tr) tr.scrollIntoView({ block: "center" }); } }
 });

@@ -150,6 +150,12 @@ class TestUIBrowser(unittest.TestCase):
         pg.goto(self.base + "/?ep=train-3&table=invoices")
         pg.wait_for_selector("#records tbody tr")
         self.assertTrue(pg.is_visible("#play"))
+        # the hero's "check it yourself" link opens train-03 with the cited invoice selected, at no step cost
+        pg.goto(self.base + "/")
+        pg.click(".case-open")
+        pg.wait_for_selector("#records tr.sel")
+        self.assertEqual(pg.get_attribute("#records tr.sel", "data-id"), "INV-S3-3287")
+        self.assertIn("99", pg.inner_text("#budget-n"))
         pg.goto(self.base + "/report.html")
         pg.wait_for_selector("#areas .card")
         self.assertEqual(pg.locator("#areas .card").count(), 5)
