@@ -1,0 +1,108 @@
+#!/bin/sh
+# AuditGym one-line installer for macOS and Linux.
+#
+#   Private repo (team, GitHub CLI logged in):
+#     gh release download -R ibrahimerbol01-prog/auditgym -p install.sh -O - | sh
+#   Public repo:
+#     curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
+#
+# Installs into your home folder (no sudo), checks the download against the release's SHA256SUMS.txt, and adds
+# the app to Applications (macOS) or to the desktop menu (Linux).
+# Options (environment variables): AUDITGYM_VERSION=v1.0.0 (default: latest release), AUDITGYM_NO_LAUNCH=1,
+# AUDITGYM_ZIP=/path/AuditGym-<os>-<arch>.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
+set -eu
+
+REPO="ibrahimerbol01-prog/auditgym"
+VERSION="${AUDITGYM_VERSION:-latest}"
+
+say() { printf '%s\n' "AuditGym installer: $*"; }
+fail() { printf '%s\n' "AuditGym installer: error: $*" >&2; exit 1; }
+
+case "$(uname -s)" in
+  Darwin) OS=macos ;;
+  Linux) OS=linux ;;
+  *) fail "this script is for macOS and Linux; on Windows use install.ps1" ;;
+esac
+case "$(uname -m)" in
+  x86_64|amd64) ARCH=x64 ;;
+  arm64|aarch64) ARCH=arm64 ;;
+  *) fail "unsupported processor $(uname -m)" ;;
+esac
+ASSET="AuditGym-$OS-$ARCH.zip"
+if [ "$OS" = macos ] && [ "$ARCH" = x64 ]; then
+  fail "no build for Intel Macs yet; run from source instead: see desktop/README.md"
+fi
+if [ "$OS" = linux ] && [ "$ARCH" = arm64 ]; then
+  fail "no build for Linux on ARM yet; run from source instead: see desktop/README.md"
+fi
+command -v unzip >/dev/null 2>&1 || fail "please install unzip first"
+
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT INT TERM
+
+sha256() {
+  if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d' ' -f1
+  else shasum -a 256 "$1" | cut -d' ' -f1; fi
+}
+
+if [ -n "${AUDITGYM_ZIP:-}" ]; then
+  say "installing local build $AUDITGYM_ZIP"
+  cp "$AUDITGYM_ZIP" "$TMP/$ASSET"
+elif [ -z "${AUDITGYM_BASE_URL:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  say "downloading $ASSET ($VERSION) with the GitHub CLI"
+  if [ "$VERSION" = latest ]; then
+    gh release download -R "$REPO" -p "$ASSET" -p SHA256SUMS.txt -D "$TMP"
+  else
+    gh release download "$VERSION" -R "$REPO" -p "$ASSET" -p SHA256SUMS.txt -D "$TMP"
+  fi
+else
+  if [ -n "${AUDITGYM_BASE_URL:-}" ]; then BASE="$AUDITGYM_BASE_URL"
+  elif [ "$VERSION" = latest ]; then BASE="https://github.com/$REPO/releases/latest/download"
+  else BASE="https://github.com/$REPO/releases/download/$VERSION"; fi
+  say "downloading $ASSET ($VERSION)"
+  curl -fsSL "$BASE/$ASSET" -o "$TMP/$ASSET" || fail "download failed (a private repo needs: gh auth login)"
+  curl -fsSL "$BASE/SHA256SUMS.txt" -o "$TMP/SHA256SUMS.txt" || fail "could not download SHA256SUMS.txt"
+fi
+
+if [ -f "$TMP/SHA256SUMS.txt" ]; then
+  want="$(grep " $ASSET\$" "$TMP/SHA256SUMS.txt" | cut -d' ' -f1)"
+  [ -n "$want" ] || fail "$ASSET is not listed in SHA256SUMS.txt"
+  [ "$(sha256 "$TMP/$ASSET")" = "$want" ] || fail "checksum mismatch for $ASSET; not installing"
+  say "checksum OK"
+fi
+
+unzip -q "$TMP/$ASSET" -d "$TMP/x"
+
+if [ "$OS" = macos ]; then
+  DEST="$HOME/Applications"
+  mkdir -p "$DEST"
+  rm -rf "$DEST/AuditGym.app"
+  mv "$TMP/x/AuditGym.app" "$DEST/AuditGym.app"
+  APP="$DEST/AuditGym.app"
+  say "installed $APP"
+  say "it is not notarised: if macOS blocks it, right-click AuditGym in Applications and choose Open once"
+  [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || open "$APP"
+else
+  DEST="${XDG_DATA_HOME:-$HOME/.local/share}/auditgym"
+  BIN="$HOME/.local/bin"
+  mkdir -p "$DEST" "$BIN"
+  rm -rf "$DEST/AuditGym"
+  mv "$TMP/x/AuditGym" "$DEST/AuditGym"
+  chmod +x "$DEST/AuditGym/AuditGym"
+  ln -sf "$DEST/AuditGym/AuditGym" "$BIN/auditgym-app"
+  APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
+  mkdir -p "$APPS"
+  cat > "$APPS/auditgym.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=AuditGym
+Comment=RL environment for audit agents (offline)
+Exec=$DEST/AuditGym/AuditGym
+Terminal=false
+Categories=Education;Development;
+EOF
+  say "installed $DEST/AuditGym (command: auditgym-app)"
+  case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH to use the auditgym-app command" ;; esac
+  [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || (nohup "$DEST/AuditGym/AuditGym" >/dev/null 2>&1 &)
+fi
+say "done"

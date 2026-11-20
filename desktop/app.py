@@ -138,23 +138,33 @@ def main(argv: list[str] | None = None) -> int:
 
     srv, env, url = start_server()
     try:
-        if args.browser:
-            raise ImportError("browser requested")
-        import webview  # pywebview: optional, installed only for the desktop build
-    except ImportError:
+        if not args.browser and open_native_window(url):
+            return 0
         import webbrowser
         webbrowser.open(url)
-        print(f"{APP_NAME} is running at {url} (close this window or press Ctrl+C to stop)")
+        if sys.stdout:
+            print(f"{APP_NAME} is running at {url} (press Ctrl+C or close this terminal to stop)")
         try:
             threading.Event().wait()
         except KeyboardInterrupt:
             pass
-    else:
-        webview.create_window(APP_NAME, url, width=1440, height=900, min_size=(390, 640))
-        webview.start()  # returns when the window is closed
+        return 0
     finally:
         stop_server(srv, env)
-    return 0
+
+
+def open_native_window(url: str) -> bool:
+    """Show the UI in a native window; False if no native window is possible (no pywebview or no GUI backend)."""
+    try:
+        import webview  # pywebview: optional, installed only for the desktop build
+    except ImportError:
+        return False
+    try:
+        webview.create_window(APP_NAME, url, width=1440, height=900, min_size=(390, 640))
+        webview.start()  # returns when the window is closed
+        return True
+    except Exception:  # noqa: BLE001 - e.g. Linux without GTK/Qt: fall back to the browser
+        return False
 
 
 if __name__ == "__main__":

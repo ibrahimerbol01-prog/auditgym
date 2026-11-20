@@ -4,7 +4,8 @@ Usage (from the repository root, in a virtual environment):
     python -m pip install -r desktop/requirements-desktop.txt
     python desktop/build.py
 
-Output: dist/AuditGym/ (a folder with the AuditGym executable) and dist/AuditGym-<os>.zip to hand out.
+Output: dist/AuditGym/ (or dist/AuditGym.app on macOS) and dist/AuditGym-<os>-<arch>.zip, the file the
+one-line installers (desktop/install.ps1, desktop/install.sh) download from a GitHub Release.
 Nothing here is imported by src/ or by the official verification.
 """
 from __future__ import annotations
@@ -12,6 +13,7 @@ from __future__ import annotations
 import os
 import platform
 import shutil
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,11 +48,23 @@ def main() -> int:
         args += ["--icon", icon]
     PyInstaller.__main__.run(args)
 
-    system = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux")
-    archive = os.path.join(ROOT, "dist", f"AuditGym-{system}-{platform.machine().lower()}")
-    shutil.make_archive(archive, "zip", os.path.join(ROOT, "dist"), "AuditGym")
-    print(f"built {archive}.zip")
+    archive = os.path.join(ROOT, "dist", asset_name())
+    dist = os.path.join(ROOT, "dist")
+    if sys.platform == "darwin":
+        # ditto keeps the .app bundle's symlinks and permissions, which a plain zip would break
+        subprocess.run(["ditto", "-c", "-k", "--keepParent", os.path.join(dist, "AuditGym.app"), archive], check=True)
+    else:
+        shutil.make_archive(archive[: -len(".zip")], "zip", dist, "AuditGym")
+    print(f"built {archive}")
     return 0
+
+
+def asset_name() -> str:
+    """Stable release file names the installers look for: AuditGym-<os>-<arch>.zip."""
+    system = {"win32": "windows", "darwin": "macos"}.get(sys.platform, "linux")
+    machine = platform.machine().lower()
+    arch = {"amd64": "x64", "x86_64": "x64", "arm64": "arm64", "aarch64": "arm64"}.get(machine, machine)
+    return f"AuditGym-{system}-{arch}.zip"
 
 
 if __name__ == "__main__":

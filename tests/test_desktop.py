@@ -39,6 +39,19 @@ class DesktopAppTests(unittest.TestCase):
     def test_smoke_plays_one_episode_through_the_ui_server(self):
         self.assertEqual(self.app.smoke(), 0)
 
+    def test_installers_download_the_files_the_build_produces(self):
+        spec = importlib.util.spec_from_file_location("auditgym_desktop_build", os.path.join(ROOT, "desktop", "build.py"))
+        build = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(build)  # PyInstaller is only imported inside build.main()
+        self.assertRegex(build.asset_name(), r"^AuditGym-(windows|macos|linux)-(x64|arm64)\.zip$")
+        with open(os.path.join(ROOT, "desktop", "install.ps1"), encoding="utf-8") as fh:
+            self.assertIn("'AuditGym-windows-x64.zip'", fh.read())
+        with open(os.path.join(ROOT, "desktop", "install.sh"), encoding="utf-8") as fh:
+            sh = fh.read()
+        self.assertIn('ASSET="AuditGym-$OS-$ARCH.zip"', sh)
+        for os_name in ("macos", "linux"):
+            self.assertIn(f"OS={os_name}", sh)
+
     def test_desktop_code_never_reads_truth(self):
         with open(os.path.join(ROOT, "desktop", "app.py"), encoding="utf-8") as fh:
             text = fh.read()

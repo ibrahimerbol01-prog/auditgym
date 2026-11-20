@@ -6,14 +6,50 @@ like the rest of AuditGym.
 This is an optional extra. The official verification (`python -m auditgym.verify`, Docker, `--network none`) never
 uses it, and `src/` stays standard-library only. The two build tools below are needed only to build the app.
 
-## Download
+## Install in one line
 
-Every change to `desktop/` or the UI builds the app on GitHub Actions (workflow **Desktop app**). Open the latest
-run and download `AuditGym-Windows` or `AuditGym-macOS` from **Artifacts**, unzip, and start:
+While the repository is **private**, use the GitHub CLI (after `gh auth login`):
 
-- **Windows:** `AuditGym\AuditGym.exe` (uses the Edge WebView2 runtime that ships with Windows 10 and 11).
-  The build is not code-signed, so Windows SmartScreen may ask for confirmation the first time.
-- **macOS:** `AuditGym.app` (not notarised: right-click → Open the first time).
+```powershell
+gh release download -R ibrahimerbol01-prog/auditgym -p install.ps1 -O - | Out-String | iex    # Windows (PowerShell)
+```
+```bash
+gh release download -R ibrahimerbol01-prog/auditgym -p install.sh -O - | sh                  # macOS / Linux
+```
+
+Once the repository is **public**, no GitHub CLI is needed:
+
+```powershell
+irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex
+```
+```bash
+curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
+```
+
+The installer downloads the build for your system from the latest GitHub Release, checks it against
+`SHA256SUMS.txt`, installs it in your user folder (no admin rights) and starts it:
+
+| System | Installed to | Shortcut |
+|---|---|---|
+| Windows 10/11 (x64) | `%LOCALAPPDATA%\Programs\AuditGym` | Start menu → AuditGym |
+| macOS (Apple silicon) | `~/Applications/AuditGym.app` | Applications |
+| Linux (x64) | `~/.local/share/auditgym` | app menu, and the `auditgym-app` command |
+
+Options (environment variables): `AUDITGYM_VERSION=v1.0.0` for a specific release, `AUDITGYM_NO_LAUNCH=1` to
+not start it, `AUDITGYM_ZIP=<file>` to install a local build. Intel Macs and Linux on ARM have no build yet: run
+from source. The builds are not code-signed, so Windows SmartScreen or macOS may ask for confirmation once.
+
+To uninstall, delete the folder above (and the Start menu shortcut or `~/.local/share/applications/auditgym.desktop`).
+
+## Publish a release (maintainers)
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+The **Release desktop app** workflow builds Windows, macOS and Linux, self-tests each build and the installer,
+then publishes the release with the zips, `install.ps1`, `install.sh` and `SHA256SUMS.txt`. Every change to
+`desktop/` or the UI also builds test copies (workflow **Desktop app**, downloadable from the run's Artifacts).
 
 ## Run from source
 

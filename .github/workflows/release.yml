@@ -1,0 +1,120 @@
+name: Release desktop app
+# Push a tag like v1.0.0 to build the desktop app for Windows, macOS and Linux, self-test each build, and publish
+# them with the one-line installers and SHA256SUMS.txt as a GitHub Release. The official verification never
+# depends on this.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create, e.g. v1.0.0"
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-22.04]   # 22.04: older glibc, so the Linux build runs on more distros
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install the desktop build tools (pinned)
+        run: python -m pip install -r desktop/requirements-desktop.txt
+      - name: Build
+        run: python desktop/build.py
+      - name: Self-test the built app (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist/AuditGym/AuditGym.exe -ArgumentList '--smoke','--smoke-out','smoke.txt' -Wait -PassThru
+          Get-Content smoke.txt
+          if ($p.ExitCode -ne 0) { exit 1 }
+      - name: Self-test the built app (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          dist/AuditGym.app/Contents/MacOS/AuditGym --smoke --smoke-out smoke.txt; code=$?
+          cat smoke.txt; exit $code
+      - name: Self-test the built app (Linux)
+        if: runner.os == 'Linux'
+        run: dist/AuditGym/AuditGym --smoke
+      - name: Test the one-line installer with this build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:AUDITGYM_ZIP = (Resolve-Path dist/AuditGym-windows-x64.zip).Path
+          $env:AUDITGYM_NO_LAUNCH = '1'
+          Get-Content desktop/install.ps1 -Raw | Invoke-Expression    # the same way the one-liner runs it
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs/AuditGym/AuditGym.exe'
+          if (-not (Test-Path (Join-Path $env:APPDATA 'Microsoft/Windows/Start Menu/Programs/AuditGym.lnk'))) { throw 'no Start menu shortcut' }
+          $p = Start-Process -FilePath $exe -ArgumentList '--smoke','--smoke-out','installed.txt' -Wait -PassThru
+          Get-Content installed.txt
+          if ($p.ExitCode -ne 0) { exit 1 }
+      - name: Test the one-line installer with this build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          AUDITGYM_ZIP="$(ls dist/AuditGym-macos-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
+          ~/Applications/AuditGym.app/Contents/MacOS/AuditGym --smoke
+      - name: Test the one-line installer with this build (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          AUDITGYM_ZIP="$(ls dist/AuditGym-linux-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
+          test -f ~/.local/share/applications/auditgym.desktop
+          ~/.local/bin/auditgym-app --smoke
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ runner.os }}
+          path: dist/AuditGym-*.zip
+          if-no-files-found: error
+
+  release:
+    name: publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: out
+          merge-multiple: true
+      - name: Collect installers and checksums
+        run: |
+          cp desktop/install.sh desktop/install.ps1 out/
+          cd out && sha256sum AuditGym-*.zip install.sh install.ps1 > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+        run: |
+          cat > notes.md <<'EOF'
+          ## Install in one line
+
+          **Windows (PowerShell):**
+          ```
+          irm https://github.com/${{ github.repository }}/releases/latest/download/install.ps1 | iex
+          ```
+          **macOS / Linux:**
+          ```
+          curl -fsSL https://github.com/${{ github.repository }}/releases/latest/download/install.sh | sh
+          ```
+          While the repository is private, use the GitHub CLI instead (after `gh auth login`):
+          ```
+          gh release download -R ${{ github.repository }} -p install.ps1 -O - | Out-String | iex
+          gh release download -R ${{ github.repository }} -p install.sh -O - | sh
+          ```
+          The installers check every download against `SHA256SUMS.txt`. The builds are not code-signed.
+          EOF
+          gh release create "$TAG" out/* --target "$GITHUB_SHA" --title "AuditGym $TAG" --notes-file notes.md

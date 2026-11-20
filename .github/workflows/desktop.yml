@@ -43,6 +43,23 @@ jobs:
         run: |
           dist/AuditGym.app/Contents/MacOS/AuditGym --smoke --smoke-out smoke.txt; code=$?
           cat smoke.txt; exit $code
+      - name: Test the one-line installer with this build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:AUDITGYM_ZIP = (Resolve-Path dist/AuditGym-windows-x64.zip).Path
+          $env:AUDITGYM_NO_LAUNCH = '1'
+          Get-Content desktop/install.ps1 -Raw | Invoke-Expression    # the same way the one-liner runs it
+          $exe = Join-Path $env:LOCALAPPDATA 'Programs/AuditGym/AuditGym.exe'
+          if (-not (Test-Path (Join-Path $env:APPDATA 'Microsoft/Windows/Start Menu/Programs/AuditGym.lnk'))) { throw 'no Start menu shortcut' }
+          $p = Start-Process -FilePath $exe -ArgumentList '--smoke','--smoke-out','installed.txt' -Wait -PassThru
+          Get-Content installed.txt
+          if ($p.ExitCode -ne 0) { exit 1 }
+      - name: Test the one-line installer with this build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          AUDITGYM_ZIP="$(ls dist/AuditGym-macos-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
+          ~/Applications/AuditGym.app/Contents/MacOS/AuditGym --smoke
       - uses: actions/upload-artifact@v4
         with:
           name: AuditGym-${{ runner.os }}
