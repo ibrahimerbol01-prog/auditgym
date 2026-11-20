@@ -4,10 +4,13 @@
 #     gh release download -R ibrahimerbol01-prog/auditgym -p install.ps1 -O - | Out-String | iex
 #   Public repo:
 #     irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex
+#   Newest build of a branch (no release needed; GitHub CLI logged in):
+#     $env:AUDITGYM_BRANCH='main'; gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.ps1?ref=main" -H "Accept: application/vnd.github.raw" | Out-String | iex
 #
 # Installs into %LOCALAPPDATA%\Programs\AuditGym (no admin rights), checks the download against the release's
 # SHA256SUMS.txt, adds a Start menu shortcut and starts the app.
 # Options (environment variables): AUDITGYM_VERSION=v1.0.0 (default: latest release), AUDITGYM_NO_LAUNCH=1,
+# AUDITGYM_BRANCH=<branch> (the newest successful "Desktop app" CI build of that branch instead of a release),
 # AUDITGYM_ZIP=C:\path\AuditGym-windows-x64.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
 & {
     # Scoped to this block, so running the one-liner does not change the caller's session settings.
@@ -27,9 +30,11 @@
     try {
         $zip = Join-Path $Tmp $Asset
         $sums = Join-Path $Tmp 'SHA256SUMS.txt'
+        $stamp = Join-Path $Tmp 'BUILD.txt'
+        $Branch = $env:AUDITGYM_BRANCH
         $gh = Get-Command gh -ErrorAction SilentlyContinue
         $ghReady = $false
-        if ($gh -and -not $env:AUDITGYM_BASE_URL -and -not $env:AUDITGYM_ZIP) {
+        if ($gh -and -not $env:AUDITGYM_BASE_URL -and -not $env:AUDITGYM_ZIP) {  # also needed for AUDITGYM_BRANCH
             & gh auth status *> $null
             $ghReady = ($LASTEXITCODE -eq 0)
         }
@@ -37,6 +42,13 @@
         if ($env:AUDITGYM_ZIP) {
             Say "installing local build $($env:AUDITGYM_ZIP)"
             Copy-Item $env:AUDITGYM_ZIP $zip
+        } elseif ($Branch) {
+            if (-not $ghReady) { Fail 'installing a branch build needs the GitHub CLI, logged in (gh auth login)' }
+            $runId = & gh run list -R $Repo --workflow desktop.yml --branch $Branch --status success --limit 1 --json databaseId --jq '.[0].databaseId'
+            if ($LASTEXITCODE -ne 0 -or -not $runId) { Fail "no successful desktop build of branch '$Branch' yet (see the Actions tab)" }
+            Say "downloading $Asset from the newest build of branch '$Branch' (run $runId)"
+            & gh run download $runId -R $Repo -n ($Asset -replace '\.zip$', '') -D $Tmp
+            if ($LASTEXITCODE -ne 0 -or -not (Test-Path $zip)) { Fail "run $runId has no $Asset (it may have expired; push again or run the workflow)" }
         } elseif ($ghReady) {
             Say "downloading $Asset ($Version) with the GitHub CLI"
             $tagArgs = @(); if ($Version -ne 'latest') { $tagArgs = @($Version) }
@@ -80,6 +92,7 @@
         $lnk.Save()
 
         Say "installed $dest (Start menu: AuditGym)"
+        if (Test-Path $stamp) { Say "version: $((Get-Content $stamp -Raw).Trim())" } elseif (-not $env:AUDITGYM_ZIP) { Say "version: $Version release" }
         Say 'the app is not code-signed: if SmartScreen asks, choose More info, then Run anyway'
         if (-not $env:AUDITGYM_NO_LAUNCH) { Start-Process -FilePath $exe -WorkingDirectory $dest }
         Say 'done'

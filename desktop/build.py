@@ -10,6 +10,8 @@ Nothing here is imported by src/ or by the official verification.
 """
 from __future__ import annotations
 
+import datetime
+import hashlib
 import os
 import platform
 import shutil
@@ -18,6 +20,21 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SEP = os.pathsep  # PyInstaller --add-data uses ';' on Windows and ':' elsewhere
+
+
+def build_stamp() -> str:
+    """One line that says exactly what was built: tag or branch, commit, UTC time (CI sets the GITHUB_* values)."""
+    ref = os.environ.get("GITHUB_REF_NAME") or _git("rev-parse", "--abbrev-ref", "HEAD") or "local"
+    sha = (os.environ.get("GITHUB_SHA") or _git("rev-parse", "HEAD") or "unknown")[:7]
+    when = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    return f"{ref} @ {sha} · built {when}"
+
+
+def _git(*args: str) -> str:
+    try:
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ""
 
 
 def main() -> int:
@@ -40,6 +57,11 @@ def main() -> int:
     ]
     args += add("src/auditgym/ui/static", "auditgym/ui/static")
     args += add("configs", "data/configs")
+    os.makedirs(os.path.join(ROOT, "build"), exist_ok=True)
+    stamp_file = os.path.join(ROOT, "build", "BUILD.txt")
+    with open(stamp_file, "w", encoding="utf-8") as fh:
+        fh.write(build_stamp() + "\n")
+    args += ["--add-data", f"{stamp_file}{SEP}data"]
     for name in ("report.json", "trajectories.jsonl"):
         if os.path.exists(os.path.join(ROOT, name)):
             args += add(name, "data")
@@ -55,7 +77,12 @@ def main() -> int:
         subprocess.run(["ditto", "-c", "-k", "--keepParent", os.path.join(dist, "AuditGym.app"), archive], check=True)
     else:
         shutil.make_archive(archive[: -len(".zip")], "zip", dist, "AuditGym")
-    print(f"built {archive}")
+    shutil.copy(stamp_file, os.path.join(dist, "BUILD.txt"))
+    with open(archive, "rb") as fh:
+        digest = hashlib.sha256(fh.read()).hexdigest()
+    with open(os.path.join(dist, "SHA256SUMS.txt"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(f"{digest}  {os.path.basename(archive)}\n")
+    print(f"built {archive} ({build_stamp()})")
     return 0
 
 

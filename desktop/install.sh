@@ -5,10 +5,13 @@
 #     gh release download -R ibrahimerbol01-prog/auditgym -p install.sh -O - | sh
 #   Public repo:
 #     curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
+#   Newest build of a branch (no release needed; GitHub CLI logged in):
+#     gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.sh?ref=main" -H "Accept: application/vnd.github.raw" | AUDITGYM_BRANCH=main sh
 #
 # Installs into your home folder (no sudo), checks the download against the release's SHA256SUMS.txt, and adds
 # the app to Applications (macOS) or to the desktop menu (Linux).
 # Options (environment variables): AUDITGYM_VERSION=v1.0.0 (default: latest release), AUDITGYM_NO_LAUNCH=1,
+# AUDITGYM_BRANCH=<branch> (the newest successful "Desktop app" CI build of that branch instead of a release),
 # AUDITGYM_ZIP=/path/AuditGym-<os>-<arch>.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
 set -eu
 
@@ -48,6 +51,12 @@ sha256() {
 if [ -n "${AUDITGYM_ZIP:-}" ]; then
   say "installing local build $AUDITGYM_ZIP"
   cp "$AUDITGYM_ZIP" "$TMP/$ASSET"
+elif [ -n "${AUDITGYM_BRANCH:-}" ]; then
+  command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1 || fail "installing a branch build needs the GitHub CLI, logged in (gh auth login)"
+  RUN="$(gh run list -R "$REPO" --workflow desktop.yml --branch "$AUDITGYM_BRANCH" --status success --limit 1 --json databaseId --jq '.[0].databaseId')" || RUN=""
+  [ -n "$RUN" ] || fail "no successful desktop build of branch '$AUDITGYM_BRANCH' yet (see the Actions tab)"
+  say "downloading $ASSET from the newest build of branch '$AUDITGYM_BRANCH' (run $RUN)"
+  gh run download "$RUN" -R "$REPO" -n "${ASSET%.zip}" -D "$TMP" && [ -f "$TMP/$ASSET" ] || fail "run $RUN has no $ASSET (it may have expired; push again or run the workflow)"
 elif [ -z "${AUDITGYM_BASE_URL:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   say "downloading $ASSET ($VERSION) with the GitHub CLI"
   if [ "$VERSION" = latest ]; then
@@ -105,4 +114,5 @@ EOF
   case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH to use the auditgym-app command" ;; esac
   [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || (nohup "$DEST/AuditGym/AuditGym" >/dev/null 2>&1 &)
 fi
+if [ -f "$TMP/BUILD.txt" ]; then say "version: $(cat "$TMP/BUILD.txt")"; elif [ -z "${AUDITGYM_ZIP:-}" ]; then say "version: $VERSION release"; fi
 say "done"

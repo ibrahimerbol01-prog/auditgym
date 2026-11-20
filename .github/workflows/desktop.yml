@@ -1,13 +1,16 @@
 name: Desktop app
-# Builds the optional desktop app (desktop/) and checks it headlessly. Separate from CI: the official
-# verification never depends on it.
+# Builds the optional desktop app (desktop/) on Windows, macOS and Linux, checks it headlessly, tests the one-line
+# installer with it, and keeps each build as an artifact named like the installer's file (AuditGym-<os>-<arch>).
+# `AUDITGYM_BRANCH=<branch>` makes the installers take the newest successful build of that branch from here, so a
+# pushed change is installable without cutting a release. Separate from CI: the official verification never
+# depends on it.
 on:
   workflow_dispatch:
   pull_request:
-    paths: ["desktop/**", "src/auditgym/ui/**", "src/auditgym/env/adapters.py", ".github/workflows/desktop.yml"]
+    paths: ["desktop/**", "src/**", "configs/**", ".github/workflows/desktop.yml"]
   push:
-    branches: [main]
-    paths: ["desktop/**", "src/auditgym/ui/**", "src/auditgym/env/adapters.py", ".github/workflows/desktop.yml"]
+    branches: [main, "task/**"]
+    paths: ["desktop/**", "src/**", "configs/**", "report.json", "trajectories.jsonl", ".github/workflows/desktop.yml"]
 permissions:
   contents: read
 concurrency:
@@ -21,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-22.04]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -55,13 +58,31 @@ jobs:
           $p = Start-Process -FilePath $exe -ArgumentList '--smoke','--smoke-out','installed.txt' -Wait -PassThru
           Get-Content installed.txt
           if ($p.ExitCode -ne 0) { exit 1 }
+      - name: Headless smoke test of the built app (Linux)
+        if: runner.os == 'Linux'
+        run: dist/AuditGym/AuditGym --smoke
       - name: Test the one-line installer with this build (macOS)
         if: runner.os == 'macOS'
         run: |
           AUDITGYM_ZIP="$(ls dist/AuditGym-macos-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
           ~/Applications/AuditGym.app/Contents/MacOS/AuditGym --smoke
+      - name: Test the one-line installer with this build (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          AUDITGYM_ZIP="$(ls dist/AuditGym-linux-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
+          ~/.local/bin/auditgym-app --smoke
+      - name: Name the artifact after the installer's file
+        shell: bash
+        run: |
+          f=$(cd dist && ls AuditGym-*.zip)
+          echo "ASSET=${f%.zip}" >> "$GITHUB_ENV"
+          cat dist/BUILD.txt dist/SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: AuditGym-${{ runner.os }}
-          path: dist/AuditGym-*.zip
+          name: ${{ env.ASSET }}
+          path: |
+            dist/${{ env.ASSET }}.zip
+            dist/SHA256SUMS.txt
+            dist/BUILD.txt
+          retention-days: 30
           if-no-files-found: error

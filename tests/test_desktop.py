@@ -51,6 +51,14 @@ class DesktopAppTests(unittest.TestCase):
         self.assertIn('ASSET="AuditGym-$OS-$ARCH.zip"', sh)
         for os_name in ("macos", "linux"):
             self.assertIn(f"OS={os_name}", sh)
+        # Branch builds: CI names each artifact after the zip, and both installers ask for exactly that name.
+        with open(os.path.join(ROOT, ".github", "workflows", "desktop.yml"), encoding="utf-8") as fh:
+            wf = fh.read()
+        self.assertIn('echo "ASSET=${f%.zip}"', wf)
+        self.assertIn("name: ${{ env.ASSET }}", wf)
+        self.assertIn('-n "${ASSET%.zip}"', sh)
+        with open(os.path.join(ROOT, "desktop", "install.ps1"), encoding="utf-8") as fh:
+            self.assertIn("-n ($Asset -replace '\\.zip$', '')", fh.read())
 
     def test_desktop_code_never_reads_truth(self):
         with open(os.path.join(ROOT, "desktop", "app.py"), encoding="utf-8") as fh:

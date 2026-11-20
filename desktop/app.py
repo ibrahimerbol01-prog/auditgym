@@ -33,6 +33,15 @@ if not FROZEN:
 CHILD_MODULES = ("auditgym.eval.service",)
 
 
+def build_stamp() -> str:
+    """What this build is (written by desktop/build.py); 'source checkout' when run from the repository."""
+    try:
+        with open(os.path.join(BASE, "data", "BUILD.txt"), encoding="utf-8") as fh:
+            return fh.read().strip()
+    except OSError:
+        return "source checkout"
+
+
 def run_child_if_requested(argv: list[str]) -> bool:
     """Frozen builds only: act as `python -m <module>` for the evaluator service. Returns True if it ran."""
     if len(argv) >= 3 and argv[1] == "-m":
@@ -110,6 +119,20 @@ def smoke() -> int:
         done = json.loads(_request(url + "step", {"action": {"tool": "submit", "args": {
             "findings": {"episode_id": episode_id, "findings": []}}}})[1])
         assert done["terminated"] is True and isinstance(done["reward"], (int, float)), f"submit: {str(done)[:200]}"
+        # The runs page: one closed-mode episode through the harness (its own evaluator process), into a temp folder.
+        assert _request(url + "runs.html")[0] == 200, "runs page"
+        import tempfile
+        import time
+        os.environ["AUDITGYM_RUNS"] = tempfile.mkdtemp(prefix="auditgym-smoke-")
+        started = json.loads(_request(url + "api/runs", {"policy": "reconcile", "split": "dev", "limit": 1})[1])
+        assert started.get("ok"), f"start run: {started}"
+        run = {}
+        for _ in range(300):
+            run = json.loads(_request(url + "api/runs/" + started["run"])[1]).get("run") or {}
+            if run.get("status") not in (None, "running"):
+                break
+            time.sleep(0.1)
+        assert run.get("status") == "done" and run["summary"]["reward"] > 0.5, f"run: {str(run)[:300]}"
     finally:
         stop_server(srv, env)
     return 0
@@ -123,12 +146,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--browser", action="store_true", help="open in the default browser instead of a native window")
     ap.add_argument("--smoke", action="store_true", help="headless self-check, exit code 0 on success")
     ap.add_argument("--smoke-out", help="also write the smoke result to this file (windowed builds have no console)")
+    ap.add_argument("--version", action="store_true", help="print which build this is and exit")
     args = ap.parse_args(argv[1:])
+    if args.version:
+        if sys.stdout:
+            print(f"{APP_NAME} {build_stamp()}")
+        return 0
 
     if args.smoke:
         try:
             code = smoke()
-            msg = "AuditGym desktop smoke: OK"
+            msg = f"AuditGym desktop smoke: OK ({build_stamp()})"
         except Exception as exc:  # noqa: BLE001 - report any failure as a non-zero exit
             code, msg = 1, f"AuditGym desktop smoke: FAILED: {exc!r}"
         if args.smoke_out:
@@ -162,7 +190,7 @@ def open_native_window(url: str) -> bool:
     except ImportError:
         return False
     try:
-        webview.create_window(APP_NAME, url, width=1440, height=900, min_size=(390, 640))
+        webview.create_window(f"{APP_NAME} · {build_stamp()}", url, width=1440, height=900, min_size=(390, 640))
         webview.start()  # returns when the window is closed
         return True
     except Exception:  # noqa: BLE001 - e.g. Linux without GTK/Qt: fall back to the browser

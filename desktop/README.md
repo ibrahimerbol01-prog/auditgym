@@ -8,6 +8,24 @@ uses it, and `src/` stays standard-library only. The two build tools below are n
 
 ## Install in one line
 
+### Newest version (team): the latest build of a branch
+
+Every push to `main` or a `task/*` branch builds the app for Windows, macOS and Linux (workflow **Desktop app**).
+This installs the newest successful build of a branch, so you never wait for a release. It needs the GitHub CLI
+(`gh auth login`). Replace `main` with a branch name, e.g. `task/design-and-desktop`, in **both** places:
+
+```powershell
+$env:AUDITGYM_BRANCH='main'; gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.ps1?ref=main" -H "Accept: application/vnd.github.raw" | Out-String | iex
+```
+```bash
+gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.sh?ref=main" -H "Accept: application/vnd.github.raw" | AUDITGYM_BRANCH=main sh
+```
+
+The installer prints what it installed (`version: <branch> @ <commit> · built <time>`); the app shows the same in
+its window title, and `AuditGym --version` prints it. Builds are kept for 30 days.
+
+### Stable version: the latest release
+
 While the repository is **private**, use the GitHub CLI (after `gh auth login`):
 
 ```powershell
@@ -35,7 +53,8 @@ The installer downloads the build for your system from the latest GitHub Release
 | macOS (Apple silicon) | `~/Applications/AuditGym.app` | Applications |
 | Linux (x64) | `~/.local/share/auditgym` | app menu, and the `auditgym-app` command |
 
-Options (environment variables): `AUDITGYM_VERSION=v1.0.0` for a specific release, `AUDITGYM_NO_LAUNCH=1` to
+Options (environment variables): `AUDITGYM_BRANCH=<branch>` for the newest build of a branch,
+`AUDITGYM_VERSION=v1.0.0` for a specific release, `AUDITGYM_NO_LAUNCH=1` to
 not start it, `AUDITGYM_ZIP=<file>` to install a local build. Intel Macs and Linux on ARM have no build yet: run
 from source. The builds are not code-signed, so Windows SmartScreen or macOS may ask for confirmation once.
 
@@ -48,8 +67,9 @@ git tag v1.0.0 && git push origin v1.0.0
 ```
 
 The **Release desktop app** workflow builds Windows, macOS and Linux, self-tests each build and the installer,
-then publishes the release with the zips, `install.ps1`, `install.sh` and `SHA256SUMS.txt`. Every change to
-`desktop/` or the UI also builds test copies (workflow **Desktop app**, downloadable from the run's Artifacts).
+then publishes the release with the zips, `install.ps1`, `install.sh` and `SHA256SUMS.txt`. A release is only
+needed for the stable channel: every push to `main` or `task/*` that touches `src/`, `configs/` or `desktop/` already
+builds installable copies (workflow **Desktop app**; see "Newest version" above).
 
 ## Run from source
 
