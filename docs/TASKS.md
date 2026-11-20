@@ -8,11 +8,11 @@ environment is good is that **something actually learns on it**. Every task belo
 1. *The environment is correct* (contract, data, reward, reproducibility) — mostly done.
 2. *The environment trains* — learning curves on held-out episodes (new: T10–T14).
 
-**Team:** A = **Мади** — main coder (Claude Code, Pro: Sonnet by default, Opus only for reviews) ·
-C = **Ерназар** — small and medium tasks (Google Antigravity / Gemini) ·
-B, D = humans without an agent (video, Docker, clean clone) · lead = owner + the lead Claude (reviews, merges, design).
-Мади (core, hardest first): **T10 → T12 → T11 → T2 → T15**.
-Ерназар (small/medium, one PR each): **T1 digest pin → T14 → T13 → T3 → docs fixes** (README steps, VIDEO_SCRIPT numbers).
+**Team:** A = **Мади** — main coder **and owner of the UI design** (Claude Code, Pro: Sonnet by default, Opus only for
+reviews) · C = **Ерназар** — small and medium tasks (Google Antigravity / Gemini) · B, D = humans without an agent
+(video, Docker, clean clone) · lead = owner + the lead Claude (reviews, merges, deck, video script).
+Мади: **T10 → D1 → D2 → T12 → T11 → T2**. Ерназар: **T1 → T14 → T13 → docs fixes** (README steps, VIDEO_SCRIPT numbers).
+Only Мади edits `src/auditgym/ui/` (one UI PR open at a time); others propose UI changes in an issue.
 
 Rules for every task: branch `task/<id>-<short>`, PR to `main`, paste the outputs, AGENTS.md applies.
 Training code lives in `train/` or `examples/`, **never in `src/`** (src stays standard-library only).
@@ -29,6 +29,15 @@ Anything that needs truth must get it through the evaluator service (score/rewar
 | T6 | Video (2:30, Russian voice) from `docs/VIDEO_SCRIPT.md`, updated with: hero animation as opening shot, learning curve (T10) as the climax | B · human | mp4 in the Drive folder |
 | T7 | Deck: team names, repo link, new slide "Среда обучает" with the T10 curve (+ T11 if done); export PPTX + PDF | C · human | files in the Drive folder |
 | T9 | Submission: repo public, Drive folder (video + deck + GitHub link), send from the cabinet, track FinTech | lead (human) | confirmation screenshot, by Nov 22 21:00 |
+
+## Design (owner: Мади)
+
+Read `docs/DESIGN_BRIEF.md` first. Every UI PR: before/after screenshots at 1440 and 390 px, all UI tests green.
+
+| ID | Task | Done when |
+|---|---|---|
+| D1 | Learning-curve chart on the report page from `train/curve.json` (T10): dev reward vs iteration with the reconcile baseline as a reference line; served as `/data/curve.json` (add it to `ui_extra_files` in `cli.py`); a static test that the file is whitelisted and the chart renders in the browser test | chart visible in report; tests green |
+| D2 | Polish pass guided by the brief: result-screen metric tiles (no empty space), replay table column clipping, any alignment issue found at 1440/768/390; one deliberate improvement of your own | screenshots in the PR |
 
 ## Should (strong extra points)
 

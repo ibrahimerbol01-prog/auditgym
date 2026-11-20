@@ -17,6 +17,7 @@ scores the environment, not an agent. Deadline Nov 22, 23:59 Astana (UTC+5); fre
 - Agent-facing code (`env/`, `policies/` except oracle, `ui/`) never touches truth, provenance or `private/`.
 - Changing generation changes episodes: then run `python -m auditgym.cli build-suite` and commit the new
   `episodes/` and `episodes/golden_hashes.json` together, and say so in the commit message.
+- UI is owned by Мади (read docs/DESIGN_BRIEF.md). Only one UI PR open at a time.
 - UI: `tests/test_ui_static.py` (files, fonts, ids, labels, contrast, offline) and `tests/test_ui_browser.py`
   (full journey by mouse and keyboard) must stay green. Colours come only from the tokens in `style.css`.
 - Field names follow the brief exactly (see README "The environment in one screen").
