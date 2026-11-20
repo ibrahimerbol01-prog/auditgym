@@ -5,9 +5,10 @@ Static mock-ups of the planned UI. They are **not** wired to the environment; th
 
 | File | What |
 |---|---|
-| `preview_v3.html` | **Current proposal.** Newcomer-first web/desktop app: result first, four-step path, findings in plain words, evidence and specialist metrics only on click. Neutral greys, monochrome buttons, one muted blue for data. |
+| `preview_v4.html` | **Current proposal: ASCII motion.** Home page in a motion language inspired by halftone 3D sites, rebuilt in characters: intro pull-back, ray-marched ASCII objects (ledger block, coin), rolling counters, a record field that reacts to the cursor (chip shows real public record IDs), morphing step shapes, the score dissolving in, drifting character dunes. Plain JS, offline, still under reduced motion. Video: `auditgym-v4-motion.mp4`. |
+| `preview_v3.html` | Newcomer-first episode view (structure to keep for the episode screens). Newcomer-first web/desktop app: result first, four-step path, findings in plain words, evidence and specialist metrics only on click. Neutral greys, monochrome buttons, one muted blue for data. |
 | `terminal_v2.html` | Terminal mock-up for specialists (`run-agent`, proposed in task T12). |
-| `v3-*.png`, `v2-terminal.png` | Screenshots at 1440×900 (graphite and paper) and 390×844. |
+| `v4-*.png`, `v3-*.png`, `v2-terminal.png` | Screenshots at 1440×900 (graphite and paper) and 390×844. |
 
 ## Honesty notes
 - All numbers are real: one recorded reconcile run (`ep_266dd8359c7dadbf`, 5 findings, all confirmed, reward
@@ -22,5 +23,6 @@ Static mock-ups of the planned UI. They are **not** wired to the environment; th
 ```bash
 python3 docs/design-research/preview/tools/extract_data.py . docs/design-research/preview/tools
 python3 docs/design-research/preview/tools/build3.py . docs/design-research/preview/tools   # needs build2.py next to it
+python3 docs/design-research/preview/tools/build4.py . docs/design-research/preview/tools   # v4, ASCII motion
 ```
 `build.py` and `build2.py` produce the earlier v1 (working papers) and v2 (neutral, data-dense) previews.
