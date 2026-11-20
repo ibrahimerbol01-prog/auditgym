@@ -103,7 +103,7 @@ A second separate agent attacked the environment white-box from the agent's side
 | `reset` mid-episode abandoned it unscored (read for free, then replay) | medium | an abandoned episode is scored as empty with all its steps charged |
 | Round 2 (Gemini): `POST /reset` body `{"op": ...}` overrode the operation | medium | `/reset` passes only `seed` and `config` |
 | Round 2: `NaN` / `Infinity` accepted as JSON on HTTP and stdio | low | strict JSON in and out (`parse_constant` rejects, `allow_nan=False`) |
-| Round 2: `/fonts/` path with `\\` or `..` (Windows traversal) | low | font names with `\\`, `/` or `..` are refused |
+| Round 2: `/fonts/` path with `\` or `..` (Windows traversal) | low | font names with `\`, `/` or `..` are refused |
 | Open-mode near-miss reasons let an agent probe which (type, ids) are real | low-medium | only matched / not matched is shown; reasons stay with the organizer |
 | Organizer commands (`reference`, `finalize`) reachable through the env's evaluator pipe; negative step counts accepted | low-medium | organizer token held only by the organizer client; the env gets a restricted channel; steps validated and counted by the evaluator |
 | A bad `episode_dir` killed the evaluator process | low | bounded error |
