@@ -4,7 +4,27 @@ The UI is the jury's first impression. It must look like a design studio made it
 AI-generated SaaS template. The concept is **"auditor's working papers"**: dark graphite paper, ivory ink, one brass
 accent, a red pen for exceptions.
 
-## Layout decision (Мади, Nov 20)
+## Layout decision v2: training harness (Мади, Nov 20, evening) — current
+Chosen from three options after a market study (`docs/design-research/harness/`: TensorBoard, MLflow, Aim, Optuna and
+Trackio run locally; 26 product sites). **B for the app, C for the terminal.** It replaces the chat layout below.
+
+- **B · Training console → the app page "Запуски" (`/runs.html`).** Inspired by Prime Intellect Hosted Training and
+  OpenAI fine-tuning, drawn in the working-papers identity. One run per screen: progress (% of episodes, one segment
+  per episode), reward per episode with the base policies as dashed reference lines, a status card (agent, split,
+  closed mode, env version, duration, agent time), four stat tiles, episode tiles (label from the public config
+  only), comparison with oracle / reconcile / random / flag_all from `report.json`, and the learning curve once
+  `train/curve.json` exists (T10). "Журнал шагов" lists every step (tool, short arguments, rows, steps left).
+  "Новый запуск" starts a built-in policy from the page; **an external agent is never started from the browser**:
+  the dialog builds the terminal command (model, temperature, max tokens) to copy.
+- **C · Terminal trace → `python -m auditgym.cli run-agent`.** A rolling window of the last 8 steps redrawn in place,
+  each episode collapsing to one result line with a reward bar, then a score card and a comparison with the base
+  policies. ANSI only on a real terminal; `--plain`, pipes and `NO_COLOR` get plain lines. Not a full-screen TUI,
+  no curses, standard library only.
+- **One source of truth:** both read and write the same run folders (`~/.auditgym/runs/<id>/run.json`,
+  `steps.jsonl`; `AUDITGYM_RUNS` overrides), produced by `auditgym.harness` in closed mode. The app shows runs made
+  in the terminal and vice versa.
+
+## Layout decision v1 (Мади, Nov 20) — superseded by v2
 **The UI is a Claude-style chat with a sidebar of big graphs of the training process and telemetry.**
 
 - **Centre: the chat.** A calm, centred conversation thread with a composer at the bottom, in the manner of Claude's

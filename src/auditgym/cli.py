@@ -3,7 +3,9 @@
   verify                      run the full verification (same as python -m auditgym.verify)
   demo                        play one episode with the reconciliation baseline, printed as text
   serve --stdio|--http        JSON front doors (HTTP binds to 127.0.0.1 only)
-  ui [--port 8000]            thin local web UI (offline)
+  ui [--port 8000]            thin local web UI (offline), including the run page (/runs.html)
+  run-agent --policy NAME | --cmd "PROGRAM" [--split dev] [--limit N] [--pace S] [--plain]
+                              run an agent on a split in closed mode; live trace in the terminal, saved for the app
   generate --seed N [--config FILE] --out DIR      export one episode (public + private)
   build-suite --out DIR       regenerate the 10 train and 10 dev episodes from configs/
   evaluate --private DIR --findings FILE --steps N  organizer scoring of one submission
@@ -69,12 +71,16 @@ def ui_extra_files() -> dict:
                 break
     for split in ("train", "dev"):
         extra[f"/data/{split}.json"] = os.path.join(ROOT, "configs", f"{split}.json")
+    curve = os.path.join(ROOT, "train", "curve.json")  # written by the trainer (T10) once it exists
+    if os.path.exists(curve):
+        extra["/data/curve.json"] = curve
     return extra
 
 
 def cmd_ui(args) -> int:
     from .env.adapters import make_http_server
-    srv, env = make_http_server(args.port, "open", ui=True, extra_files=ui_extra_files(), host=args.host)
+    from .harness import Jobs
+    srv, env = make_http_server(args.port, "open", ui=True, extra_files=ui_extra_files(), host=args.host, api=Jobs())
     url = f"http://127.0.0.1:{args.port}/"
     print(f"AuditGym UI: {url}")
     if not args.no_browser:
@@ -88,6 +94,43 @@ def cmd_ui(args) -> int:
         pass
     env.close()
     return 0
+
+
+def cmd_run_agent(args) -> int:
+    from .harness import make_agent, run_split, runs_dir
+    from .termview import TermView, baseline_means
+    if bool(args.policy) == bool(args.agent_cmd):
+        print("give exactly one of --policy NAME or --cmd \"PROGRAM\"", file=sys.stderr)
+        return 2
+    view = TermView(plain=args.plain)
+    for base in (os.getcwd(), ROOT):
+        if os.path.exists(os.path.join(base, "report.json")):
+            view.compare = baseline_means(os.path.join(base, "report.json"))
+            break
+    name = args.policy or args.name or "cmd"
+    try:
+        make = make_agent(args.policy, args.agent_cmd)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+    run_id = None
+    if args.name:
+        from .harness import new_run_id
+        run_id = new_run_id(args.name, args.split)
+    view.saved = os.path.join(runs_dir(), "<id>")
+    first = {}
+
+    def on_event(e):
+        if e["type"] == "run_start":
+            first["id"] = e["run"]["id"]
+            view.saved = os.path.join(runs_dir(), e["run"]["id"])
+        view(e)
+    try:
+        run = run_split(name, make, args.split, args.limit, run_id=run_id, on_event=on_event, pace=args.pace)
+    except KeyboardInterrupt:
+        print("\nостановлено", file=sys.stderr)
+        return 130
+    return 0 if run["status"] == "done" else 1
 
 
 def cmd_generate(args) -> int:
@@ -146,6 +189,14 @@ def main(argv=None) -> int:
     u.add_argument("--port", type=int, default=8000)
     u.add_argument("--no-browser", action="store_true")
     u.add_argument("--host", default="127.0.0.1", help="use 0.0.0.0 only inside Docker")
+    ra = sub.add_parser("run-agent", help="run an agent on a split in closed mode")
+    ra.add_argument("--policy", choices=["reconcile", "random", "flag_all"])
+    ra.add_argument("--cmd", dest="agent_cmd", help="external agent: reads observations (JSON lines) on stdin, writes actions on stdout")
+    ra.add_argument("--name", help="short name for a --cmd agent (used in the run id)")
+    ra.add_argument("--split", choices=["dev", "train"], default="dev")
+    ra.add_argument("--limit", type=int, help="only the first N episodes")
+    ra.add_argument("--pace", type=float, default=0.0, help="seconds to wait before each step (demos); not counted in time")
+    ra.add_argument("--plain", action="store_true", help="plain lines, no colours or redraw")
     gen = sub.add_parser("generate")
     gen.add_argument("--seed", type=int, required=True)
     gen.add_argument("--config")
@@ -160,7 +211,7 @@ def main(argv=None) -> int:
     if args.cmd == "verify":
         from .verify import main as vmain
         return vmain(args.rest)
-    return {"demo": cmd_demo, "serve": cmd_serve, "ui": cmd_ui, "generate": cmd_generate,
+    return {"demo": cmd_demo, "serve": cmd_serve, "ui": cmd_ui, "run-agent": cmd_run_agent, "generate": cmd_generate,
             "build-suite": cmd_build_suite, "evaluate": cmd_evaluate}[args.cmd](args)
 
 

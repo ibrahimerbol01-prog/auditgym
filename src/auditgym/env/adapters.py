@@ -15,8 +15,8 @@ from typing import Any, Dict, Optional
 from .env import AuditEnv
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ui", "static")
-STATIC_WHITELIST = {"/": "index.html", "/index.html": "index.html", "/report.html": "report.html",
-                    "/app.js": "app.js", "/report.js": "report.js", "/style.css": "style.css"}
+STATIC_WHITELIST = {"/": "index.html", "/index.html": "index.html", "/report.html": "report.html", "/runs.html": "runs.html",
+                    "/app.js": "app.js", "/report.js": "report.js", "/runs.js": "runs.js", "/style.css": "style.css"}
 FONT_EXT = {".woff2": "font/woff2"}
 CTYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8"}
 
@@ -71,7 +71,9 @@ def serve_stdio(mode: str = "open") -> None:
 
 
 def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extra_files: Optional[Dict[str, str]] = None,
-                     host: str = "127.0.0.1"):
+                     host: str = "127.0.0.1", api: Any = None):
+    """``api`` (optional, UI only): an object with ``get(path, query)`` and ``post(path, body)`` that answer
+    ``/api/...`` routes with ``(status, json)`` or None; the local harness (auditgym.harness.Jobs) uses it."""
     env = AuditEnv(mode=mode, time_limit=None if ui else 60.0)
     lock = threading.Lock()
     extra = extra_files or {}
@@ -105,6 +107,12 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
             if path == "/state":
                 with lock:
                     return self._json(env.state())
+            if ui and api is not None and path.startswith("/api/"):
+                from urllib.parse import parse_qsl
+                query = dict(parse_qsl(self.path.split("?", 1)[1])) if "?" in self.path else {}
+                res = api.get(path, query)
+                if res is not None:
+                    return self._json(res[1], res[0])
             if path in extra:
                 with open(extra[path], "rb") as fh:
                     return self._send(200, fh.read(), "application/json" if path.endswith((".json", ".jsonl")) else "text/plain")
@@ -150,6 +158,10 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
                 body = _loads_strict(self.rfile.read(n).decode("utf-8") or "{}")
             except (ValueError, RecursionError, UnicodeDecodeError):
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "invalid JSON"}}, 400)
+            if ui and api is not None and path.startswith("/api/"):
+                res = api.post(path, body)
+                if res is not None:
+                    return self._json(res[1], res[0])
             with lock:
                 if path == "/reset":
                     b = body if isinstance(body, dict) else {}

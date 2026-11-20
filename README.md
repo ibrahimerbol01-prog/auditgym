@@ -69,6 +69,21 @@ obs, info = env.reset(seed=1); obs, reward, terminated, truncated, info = env.st
 - Evaluator-only files (`private/`): `truth.json`, `provenance.json` (replayable), `clean/` (books before injection).
 - Four error types, two interaction scenarios, clean companies and legitimate distractors. Every rule, tolerance and the matching procedure are published in `policy.json`, the first observation and [DESIGN.md](DESIGN.md).
 
+## Подключить своего агента / Plug in your agent
+
+Any program that reads one observation (JSON) per line on stdin and writes one action (JSON) per line on stdout:
+
+```bash
+python -m auditgym.cli run-agent --policy reconcile --split dev                       # a built-in policy
+python -m auditgym.cli run-agent --name random --cmd "python examples/random_agent.py" # your program
+python -m auditgym.cli run-agent --name qwen --cmd "python examples/llm_agent.py --model qwen2.5:1.5b --temperature 0.2 --max-tokens 512"
+```
+
+It runs the 10 held-out dev episodes in closed mode (the agent never sees a reward), shows every step live, prints a
+score card (mean reward, precision, recall, F1, false findings, steps, time) next to the base policies, and saves the
+run to `~/.auditgym/runs/`. The same runs appear in the app: `python -m auditgym.cli ui` → «Запуски», where the
+built-in policies can also be started. `examples/llm_agent.py` talks to a local Ollama server (inference only).
+
 ## Config
 
 `reset(seed, config)` accepts any valid config; omitted keys take defaults; invalid ones return a bounded error. Keys: `n_invoices` (20–100), `n_expenses` (20–600), `errors` (per type 0–4), `clean`, `interactions` (`A`, `B`), `base_currency`, `foreign_currencies` (1–3), `foreign_share` (0.2–0.8), `timezone` (fixed-offset zones), `period_year`, `period_start_month`, `period_months` (1–3), `distractor_level` (0–2), `layout_seed`, `id_seed`, `config_version`. See `src/auditgym/config.py`.

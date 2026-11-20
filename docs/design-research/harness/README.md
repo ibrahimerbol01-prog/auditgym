@@ -56,3 +56,17 @@ public config. **Illustrative until T10:** the learning curves (`train/curve.jso
 python3 -I docs/design-research/harness/tools/build_harness.py . docs/design-research/harness
 node docs/design-research/harness/tools/shoot.js docs/design-research/harness /tmp/shots
 ```
+
+## Decision (Мади, Nov 20): B for the app, C for the terminal — built
+
+Both are real, not mock-ups, and share one harness (`src/auditgym/harness.py`, closed mode, runs saved to
+`~/.auditgym/runs/`). Screenshots below are of the working app and a recorded terminal session, with real scores.
+
+- **B → `/runs.html` ("Запуски")**, in the app's working-papers style: `python -m auditgym.cli ui`.
+- **C → `python -m auditgym.cli run-agent --policy reconcile`** (or `--cmd "<your program>"`); video `img/built-c-terminal.mp4`.
+
+![B running](img/built-b-running.png)
+![B done](img/built-b-runs.png)
+![B new run](img/built-b-new-run.png)
+![B step log](img/built-b-log.png)
+![C terminal](img/built-c-terminal.png)

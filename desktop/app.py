@@ -70,7 +70,9 @@ def data_files(base: str = BASE) -> dict:
 def start_server(port: int = 0):
     """Start the UI server in a background thread. Returns (server, env, url)."""
     from auditgym.env.adapters import make_http_server
-    srv, env = make_http_server(port, "open", ui=True, extra_files=data_files(), host="127.0.0.1")
+    from auditgym.harness import Jobs
+    srv, env = make_http_server(port, "open", ui=True, extra_files=data_files(), host="127.0.0.1",
+                                api=Jobs(configs=os.path.join(BASE, "data", "configs") if FROZEN else None))
     url = f"http://127.0.0.1:{srv.server_address[1]}/"
     threading.Thread(target=srv.serve_forever, name="auditgym-ui", daemon=True).start()
     return srv, env, url
