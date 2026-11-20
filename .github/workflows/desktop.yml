@@ -1,0 +1,50 @@
+name: Desktop app
+# Builds the optional desktop app (desktop/) and checks it headlessly. Separate from CI: the official
+# verification never depends on it.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ["desktop/**", "src/auditgym/ui/**", "src/auditgym/env/adapters.py", ".github/workflows/desktop.yml"]
+  push:
+    branches: [main]
+    paths: ["desktop/**", "src/auditgym/ui/**", "src/auditgym/env/adapters.py", ".github/workflows/desktop.yml"]
+permissions:
+  contents: read
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    name: desktop build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install the desktop build tools (pinned)
+        run: python -m pip install -r desktop/requirements-desktop.txt
+      - name: Build
+        run: python desktop/build.py
+      - name: Headless smoke test of the built app (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath dist/AuditGym/AuditGym.exe -ArgumentList '--smoke','--smoke-out','smoke.txt' -Wait -PassThru
+          Get-Content smoke.txt
+          if ($p.ExitCode -ne 0) { exit 1 }
+      - name: Headless smoke test of the built app (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          dist/AuditGym.app/Contents/MacOS/AuditGym --smoke --smoke-out smoke.txt; code=$?
+          cat smoke.txt; exit $code
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AuditGym-${{ runner.os }}
+          path: dist/AuditGym-*.zip
+          if-no-files-found: error
