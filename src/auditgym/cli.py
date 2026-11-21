@@ -178,7 +178,18 @@ def cmd_evaluate(args) -> int:
 
 
 def main(argv=None) -> int:
-    argv = sys.argv[1:] if argv is None else argv
+    argv = sys.argv[1:] if argv is None else list(argv)
+    for stream in (sys.stdout, sys.stderr):  # Cyrillic, ✓ and block characters on any console code page (Windows: cp1252)
+        if stream is not None and (getattr(stream, "encoding", "") or "").lower().replace("-", "") != "utf8":
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except (AttributeError, ValueError):
+                pass
+    if argv[:1] == ["verify"]:
+        # Handed straight to the verifier: argparse's REMAINDER no longer captures options such as --out after a
+        # subcommand on current Python 3.11 releases, which broke the Docker image's default command.
+        from .verify import main as vmain
+        return vmain(argv[1:])
     if not argv and sys.stdin.isatty() and sys.stdout.isatty():
         argv = ["tui"]  # `auditgym` on its own, in a terminal: the interactive terminal UI
     ap = argparse.ArgumentParser(prog="auditgym")

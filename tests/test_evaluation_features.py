@@ -143,3 +143,18 @@ class CurrencyExponents(unittest.TestCase):
                 ce = pub["manifest"]["currency_exponents"]
                 self.assertEqual(set(ce), used, e["label"])
                 self.assertTrue(all(ce[c] == exponent(c) for c in ce))
+
+
+class CliVerifyArguments(unittest.TestCase):
+    """The Docker image runs `auditgym.cli verify --out ... --trajectories ...`: every argument reaches the verifier."""
+
+    def test_verify_options_are_passed_through(self):
+        from auditgym import cli, verify
+        seen = []
+        real = verify.main
+        verify.main = lambda argv=None: seen.append(argv) or 0
+        try:
+            self.assertEqual(cli.main(["verify", "--out", "/work/report.json", "--trajectories", "/work/t.jsonl"]), 0)
+        finally:
+            verify.main = real
+        self.assertEqual(seen, [["--out", "/work/report.json", "--trajectories", "/work/t.jsonl"]])

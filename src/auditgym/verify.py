@@ -548,6 +548,12 @@ def estimate(areas: Dict[str, List[Dict[str, Any]]]) -> Dict[str, float]:
 
 
 def main(argv: List[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):  # the ✓ marks on any console code page (Windows defaults to cp1252)
+        if stream is not None and (getattr(stream, "encoding", "") or "").lower().replace("-", "") != "utf8":
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except (AttributeError, ValueError):
+                pass
     ap = argparse.ArgumentParser(description="AuditGym verification")
     ap.add_argument("--out", default="report.json")
     ap.add_argument("--trajectories", default="trajectories.jsonl")

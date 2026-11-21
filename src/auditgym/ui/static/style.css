@@ -1195,3 +1195,7 @@ main.arena{display:flex;flex-direction:column;gap:16px;padding-top:32px;padding-
 .ar-concl{margin:12px 0 0;font-size:13.5px;line-height:1.5;font-weight:500}
 .ar-past{margin:0}
 @media (max-width:860px){.ar-hero{grid-template-columns:1fr}.ar-shield{display:none}.ar-lane{grid-template-columns:1fr 64px;grid-auto-rows:auto}.ar-track{grid-column:1/-1}.ar-rl{grid-template-columns:1fr}}
+
+/* sidebar layout (no top header): the investigation's episode bar sticks to the very top; anchors and scrolled-into-view
+   controls stop below it */
+@media (min-width:1101px){.epbar{top:0}html{scroll-padding-top:140px}}

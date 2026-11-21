@@ -574,6 +574,8 @@ class Jobs:
 
     # HTTP routes: return (status, json)
     def get(self, path: str, query: Dict[str, str]):
+        if path == "/api/update":  # updates exist in the packaged desktop app only (desktop/updater.py answers there)
+            return 200, {"ok": True, "update": None}
         if path == "/api/scout":
             from . import scout as _scout
             return 200, {"ok": True, "scout": _scout.scout(explain=query.get("explain") == "1")}

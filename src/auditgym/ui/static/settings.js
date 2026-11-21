@@ -31,8 +31,9 @@ const $ = (id) => document.getElementById(id);
   };
   const load = async (force) => {
     const r = await fetch("/api/update" + (force ? "?force=1" : ""), { cache: "no-store" });
-    if (r.status === 404) { ver.textContent = "запуск из исходников"; msg.textContent = "Обновления встроены в приложение для компьютера; здесь — git pull."; btn.hidden = true; return; }
-    show((await r.json()).update);
+    const d = r.status === 404 ? null : await r.json();
+    if (r.status === 404 || !d || !d.update) { ver.textContent = "запуск из исходников"; msg.textContent = "Обновления встроены в приложение для компьютера; здесь — git pull."; btn.hidden = true; return; }
+    show(d.update);
   };
   btn.addEventListener("click", async () => {
     btn.disabled = true;

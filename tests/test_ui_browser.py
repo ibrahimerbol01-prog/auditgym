@@ -25,7 +25,10 @@ class TestUIBrowser(unittest.TestCase):
     def setUpClass(cls):
         if sync_playwright is None:
             raise AssertionError("AUDITGYM_E2E=1 but Playwright is not installed")
-        cls.srv, cls.env = make_http_server(0, "open", ui=True, extra_files=ui_extra_files())
+        import tempfile
+        from auditgym.harness import Jobs
+        cls.runs = tempfile.mkdtemp()  # served like `auditgym ui` and the desktop app: with the runs API, on an empty folder
+        cls.srv, cls.env = make_http_server(0, "open", ui=True, extra_files=ui_extra_files(), api=Jobs(base=cls.runs))
         cls.base = f"http://127.0.0.1:{cls.srv.server_address[1]}"
         threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
         cls.pw = sync_playwright().start()
