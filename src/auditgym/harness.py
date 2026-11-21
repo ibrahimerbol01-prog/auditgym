@@ -10,6 +10,7 @@ Record contents are not stored, only counts.
 
 Agents:
 - built-in policies: ``reconcile``, ``random``, ``flag_all`` (the oracle needs the answer, so it is not offered);
+- a local LLM through Ollama on 127.0.0.1 (``policy="llm"`` + an installed ``llm_model``; policies/llm.py), in-process;
 - any program (``--cmd``): one process per episode, reads one observation (JSON) per line on stdin and writes
   one action (JSON) per line on stdout, exactly the AuditEnv action contract.
 """
@@ -27,11 +28,13 @@ from typing import Any, Callable, Dict, List, Optional
 
 from .env.env import AuditEnv
 from .eval.service import ServiceClient
+from .policies import llm as _llm
 from .policies.baselines import FlagAllPolicy, Policy, RandomPolicy, ReconcilePolicy
 from .version import ENV_VERSION
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BUILTIN = {"reconcile": ReconcilePolicy, "random": RandomPolicy, "flag_all": FlagAllPolicy}
+LLM_DEFAULT_LIMIT = 3                     # local LLMs are slow: a few episodes unless asked for more (1..20)
 SPLITS = ("dev", "train")                 # the open episode files in configs/
 EVAL_SPLITS = ("dev", "train", "test")     # "test": 20 fresh episodes never used for training or model choice
 TRAIN_PRESETS = ("mixed", "simple", "interacting")
@@ -342,7 +345,7 @@ def list_runs(base: Optional[str] = None) -> List[Dict[str, Any]]:
                 except (OSError, ValueError):
                     continue
                 out.append({k: r.get(k) for k in ("id", "kind", "agent", "model", "method", "split", "mode", "status", "started",
-                                                   "finished", "summary", "at", "iterations", "group", "model_run", "seed")}
+                                                   "finished", "summary", "at", "iterations", "group", "model_run", "seed", "llm_model")}
                            | {"test_reward": ((r.get("test") or {}).get("auditor") or {}).get("reward"),
                               "preset": ((r.get("config") or {}).get("dataset") or {}).get("preset")}
                            | {"episodes": len(r.get("episodes", [])),
@@ -387,9 +390,25 @@ class Jobs:
     def busy(self) -> bool:
         return self.thread is not None and self.thread.is_alive()
 
-    def start(self, policy: Any, split: Any, limit: Any = None, pace: Any = 0.0, model: Any = None) -> Dict[str, Any]:
+    def start(self, policy: Any, split: Any, limit: Any = None, pace: Any = 0.0, model: Any = None,
+              llm_model: Any = None) -> Dict[str, Any]:
         meta: Dict[str, Any] = {}
-        if model is not None:                      # a trained auditor: the best parameters of a training run
+        if policy == "llm" and model is None:      # a local Ollama model: checked against what the server reports
+            if not _llm.valid_model_name(llm_model):
+                return {"ok": False, "error": {"code": "bad_arguments", "message": "llm_model must be an installed Ollama model name"}}
+            if split not in EVAL_SPLITS:
+                return {"ok": False, "error": {"code": "bad_arguments", "message": "split must be dev, train or test"}}
+            tags = _llm.list_models(timeout=1.5)
+            if not tags["available"]:
+                return {"ok": False, "error": {"code": "ollama_unavailable", "message": "Ollama is not running on 127.0.0.1:11434"}}
+            name = _llm.resolve_model(llm_model, tags["models"])
+            if name is None:
+                return {"ok": False, "error": {"code": "bad_arguments", "message": "llm_model is not installed in Ollama",
+                                               "models": tags["models"]}}
+            make = (lambda m: (lambda: _llm.OllamaPolicy(m)))(name)
+            policy, meta = _llm.agent_name(name), {"llm_model": name}
+            limit = LLM_DEFAULT_LIMIT if limit is None else limit
+        elif model is not None:                      # a trained auditor: the best parameters of a training run
             r = read_run(model, self.base) if isinstance(model, str) and RUN_ID.match(model) else None
             theta = ((r or {}).get("best") or {}).get("theta")
             if not r or r.get("kind") != "training" or not theta:
@@ -402,7 +421,7 @@ class Jobs:
         else:
             make = None
         if make is None or split not in EVAL_SPLITS:
-            return {"ok": False, "error": {"code": "bad_arguments", "message": "policy must be reconcile, random or flag_all (or a trained model); split dev, train or test"}}
+            return {"ok": False, "error": {"code": "bad_arguments", "message": "policy must be reconcile, random, flag_all or llm (or a trained model); split dev, train or test"}}
         if limit is not None and not (isinstance(limit, int) and not isinstance(limit, bool) and 1 <= limit <= 20):
             return {"ok": False, "error": {"code": "bad_arguments", "message": "limit must be 1..20"}}
         if not (isinstance(pace, (int, float)) and not isinstance(pace, bool) and 0 <= pace <= 0.5):
@@ -526,6 +545,8 @@ class Jobs:
         if path == "/api/scout":
             from . import scout as _scout
             return 200, {"ok": True, "scout": _scout.scout(explain=query.get("explain") == "1")}
+        if path == "/api/llm/models":  # installed local Ollama models (short timeout; available false without Ollama)
+            return 200, {"ok": True, **_llm.list_models(timeout=1.0)}
         if path == "/api/curve":  # the trainer's learning curve (T10), or null until it has run
             try:
                 with open(self.curve_path, encoding="utf-8") as fh:
@@ -549,8 +570,9 @@ class Jobs:
     def post(self, path: str, body: Any):
         b = body if isinstance(body, dict) else {}
         if path == "/api/runs":
-            res = self.start(b.get("policy"), b.get("split", "dev"), b.get("limit"), b.get("pace", 0.0), b.get("model"))
-            return (200 if res["ok"] else (409 if res["error"]["code"] == "busy" else 400)), res
+            res = self.start(b.get("policy"), b.get("split", "dev"), b.get("limit"), b.get("pace", 0.0), b.get("model"),
+                             b.get("llm_model"))
+            return (200 if res["ok"] else (409 if res["error"]["code"] in ("busy", "ollama_unavailable") else 400)), res
         m = re.match(r"^/api/runs/([^/]+)/stop$", path)
         if m:
             res = self.stop(m.group(1))

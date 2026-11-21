@@ -12,7 +12,8 @@ const STATUS = { running: ["идёт", "lime"], done: ["завершён", "dim"
 const TABLES = { fx: "курсы", invoices: "счета", payments: "платежи", ledger: "главная книга" };
 const f2 = (v) => (v == null || Number.isNaN(v) ? "—" : (Math.round(v * 100) / 100 + 0 < 0 ? "−" : "") + Math.abs(v).toFixed(2));
 const plural = (n, a, b, c) => { const k = n % 100, d = n % 10; return `${n} ${k >= 11 && k <= 14 ? c : d === 1 ? a : d >= 2 && d <= 4 ? b : c}`; };
-const agentName = (a) => (NAMES[a] ? `${NAMES[a]} · ${a}` : a);
+const agentName = (a, r) => (NAMES[a] ? `${NAMES[a]} · ${a}` : /^auditor-(cem|reinforce)$/.test(a || "") ? `Обученный аудитор · ${a.endsWith("cem") ? "CEM" : "REINFORCE"}`
+  : /^llm-/.test(a || "") ? `LLM · ${(r && r.llm_model) || a.slice(4)}` : a);
 const when = (t) => (t ? new Date(t * 1000).toLocaleString((window.AG_LANG === "en" ? "en-GB" : "ru-RU"), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
 const dur = (s) => (s < 60 ? `${s.toFixed(1)} с` : `${Math.floor(s / 60)} мин ${Math.round(s % 60)} с`);
 
@@ -74,7 +75,7 @@ function render() {
   if (!run) return;
   const eps = run.episodes || [], done = eps.filter((e) => e.score).length, s = run.summary || {};
   const [st, cls] = STATUS[run.status] || [run.status, "dim"];
-  $("d-title").textContent = agentName(run.agent);
+  $("d-title").textContent = agentName(run.agent, run);
   $("d-id").textContent = run.id;
   $("d-status").className = "badge " + cls; if (run.status === "running") { const sp = document.createElement("span"); sp.className = "ascii-spin"; sp.setAttribute("aria-hidden", "true"); $("d-status").replaceChildren(sp, " " + st); } else $("d-status").textContent = st;
   $("d-split").textContent = `${run.split} · ${eps.length} эп. · закрытый режим`;
@@ -94,11 +95,33 @@ function render() {
   const secs = ((run.finished || Date.now() / 1000) - run.started);
   const kv = [["Начат", when(run.started)], ["Длительность", dur(Math.max(0, secs))], ["Время агента", s.seconds != null ? dur(s.seconds) : "—"], ["Версия среды", run.env_version], ["Режим", "закрытый: агент не видит награду"]];
   if (run.pace) kv.push(["Темп показа", `${Math.round(run.pace * 1000)} мс на шаг`]);
+  if (run.model_run) kv.push(["Модель", el("a", { href: "/train.html#run=" + encodeURIComponent(run.model_run) }, run.model_run)]);
   $("d-kv").replaceChildren(...kv.map(([k, v]) => el("div", {}, el("dt", {}, k), el("dd", {}, v))));
   drawChart(eps);
   drawCompare(done ? s.reward : null);
   drawTable(eps);
   drawTraining();
+  drawAnalysis();
+}
+
+// ---- measured failure analysis (written by the harness when the run ends)
+const TYPES = { duplicate_invoice: "дубль счёта", payment_allocation: "разнесение платежа", date_or_fx: "дата или курс", period_classification: "отчётный период", invalid: "некорректная" };
+const KINDS = { clean: "чистые", interacting: "взаимодействие", errors: "с ошибками" };
+function drawAnalysis() {
+  const an = run.analysis, card = $("an-card");
+  card.classList.toggle("hidden", !an);
+  if (!an) return;
+  const bt = an.by_type || {}, fb = an.false_by_type || {}, bk = an.by_kind || {};
+  const row = (name, bar, val, cls = "") => el("div", { class: "tb-r" }, el("span", { class: "tb-n" }, name), bar, el("span", { class: "tb-v mono " + cls }, val));
+  const meter = (a, b) => el("span", { class: "mt", "aria-hidden": "true" }, el("i", { style: `width:${b ? (100 * a / b).toFixed(1) : 0}%` }));
+  const zbar = (v) => { const x = Math.max(-1, Math.min(1, v)), w = Math.abs(x) * 50; return el("span", { class: "zb", "aria-hidden": "true" }, el("i", { class: "zb-0" }), el("i", { class: "zb-f " + (x >= 0 ? "pos" : "neg"), style: `left:${x >= 0 ? 50 : 50 - w}%;width:${w}%` })); };
+  const types = Object.keys(TYPES).filter((k) => bt[k]);
+  const found = el("div", { class: "tb" }, el("h4", {}, "Найдено по типам ошибок"),
+    ...(types.length ? types.map((k) => row(TYPES[k], meter(bt[k].found, bt[k].issues), `${bt[k].found}/${bt[k].issues}`)) : [el("p", { class: "tb-note" }, "В этих эпизодах не было ошибок: только чистые компании.")]),
+    el("p", { class: "tb-note" }, "Ложные находки по заявленному типу: " + (Object.entries(fb).map(([k, n]) => `${TYPES[k] || k} ${n}`).join(", ") || "нет")));
+  const kinds = el("div", { class: "tb" }, el("h4", {}, "Награда по видам эпизодов"),
+    ...Object.entries(bk).map(([k, v]) => row(`${KINDS[k] || k} (${v.episodes})`, zbar(v.reward), f2(v.reward), v.reward > 0 ? "pos" : "neg")));
+  $("an-body").replaceChildren(found, kinds);
 }
 
 // ---- tooltip (values lead, labels follow); text only via textContent
@@ -238,6 +261,8 @@ const kind = () => document.querySelector('input[name="kind"]:checked').value;
 function cmdline() {
   if (kind() === "cmd") return `python -m auditgym.cli run-agent --name ${($("f-model").value.split(":")[0] || "llm").replace(/[^\w.-]/g, "")} --cmd "python examples/llm_agent.py --model ${$("f-model").value} --temperature ${$("f-temp").value} --max-tokens ${$("f-tok").value}" --split ${$("f-split2").value}`;
   const lim = $("f-limit").value; const pace = +$("f-pace").value;
+  if ($("f-policy").value.startsWith("model:")) return `# ${$("f-policy").value.slice(6)}: обученный аудитор запускается из приложения`;
+  if ($("f-policy").value.startsWith("llm:")) return `python -m auditgym.cli run-agent --name llm --cmd "python examples/llm_agent.py --model ${$("f-policy").value.slice(4)}" --split ${$("f-split").value} --limit ${lim || 3}`;
   return `python -m auditgym.cli run-agent --policy ${$("f-policy").value} --split ${$("f-split").value}${lim ? " --limit " + lim : ""}${pace ? " --pace " + pace : ""}`;
 }
 function syncDlg() {
@@ -248,14 +273,34 @@ function syncDlg() {
   $("f-cmdline").textContent = (k === "cmd" ? "" : "то же в терминале:\n") + cmdline();
 }
 for (const id of ["k-builtin", "k-cmd", "f-policy", "f-split", "f-limit", "f-pace", "f-model", "f-temp", "f-tok", "f-split2"]) $(id).addEventListener("input", syncDlg);
-const openDlg = (k) => { $(k === "cmd" ? "k-cmd" : "k-builtin").checked = true; $("f-err").classList.add("hidden"); syncDlg(); dlg.showModal(); };
+const openDlg = (k) => { $(k === "cmd" ? "k-cmd" : "k-builtin").checked = true; $("f-err").classList.add("hidden"); syncDlg(); dlg.showModal(); loadModels().then(syncDlg); };
 $("new-run").addEventListener("click", () => openDlg("builtin"));
 $("empty-new").addEventListener("click", () => openDlg("cmd"));
 $("dlg-cancel").addEventListener("click", () => dlg.close());
 $("dlg-copy").addEventListener("click", async () => { try { await navigator.clipboard.writeText(cmdline()); $("dlg-copy").textContent = "Скопировано"; setTimeout(() => ($("dlg-copy").textContent = "Скопировать команду"), 1500); } catch { /* clipboard blocked: the command is visible to copy by hand */ } });
+async function loadModels() {  // finished trainings can be evaluated like any agent
+  const sel = $("f-policy");
+  for (const o of [...sel.querySelectorAll("option[data-model]")]) o.remove();
+  let all = [];
+  try { all = ((await getJSON("/api/runs")).runs || []).filter((r) => r.kind === "training" && r.status !== "running" && r.summary && r.summary.dev_best != null); } catch { return; }
+  try {  // local LLMs (Ollama), evaluated in-process like any agent
+    const llm = await getJSON("/api/llm/models");
+    if (llm.available && (llm.models || []).length) {
+      const g2 = el("optgroup", { label: "Локальные LLM (Ollama)", "data-model": "1" });
+      for (const m of llm.models.slice(0, 12)) g2.append(el("option", { value: "llm:" + m, "data-model": "1" }, `LLM · ${m} · первые 3 эпизода`));
+      sel.append(g2);
+    }
+  } catch { /* no LLM route on this server */ }
+  if (!all.length) return;
+  const grp = el("optgroup", { label: "Обученные аудиторы", "data-model": "1" });
+  for (const r of all.slice(0, 12)) grp.append(el("option", { value: "model:" + r.id, "data-model": "1" }, `Аудитор · ${r.method === "reinforce" ? "REINFORCE" : "CEM"} · сид ${r.seed ?? "—"} · ${f2(r.summary.dev_best)} на dev · ${when(r.started)}`));
+  sel.append(grp);
+}
 async function start(policy, split, limit, pace) {
-  const res = await postJSON("/api/runs", { policy, split, limit: limit ? +limit : null, pace });
-  if (!res.ok) { $("f-err").textContent = res.error.code === "busy" ? "Уже идёт другой запуск. Дождитесь его или остановите." : "Не удалось запустить: " + res.error.message; $("f-err").classList.remove("hidden"); return false; }
+  const p = String(policy), lim = limit ? +limit : null;
+  const body = p.startsWith("model:") ? { model: p.slice(6), split, limit: lim, pace } : p.startsWith("llm:") ? { policy: "llm", llm_model: p.slice(4), split, limit: lim, pace } : { policy, split, limit: lim, pace };
+  const res = await postJSON("/api/runs", body);
+  if (!res.ok) { $("f-err").textContent = res.error.code === "busy" ? "Уже идёт другой запуск. Дождитесь его или остановите." : res.error.code === "ollama_unavailable" ? "Ollama не запущена на этом компьютере: запустите её и попробуйте снова." : "Не удалось запустить: " + res.error.message; $("f-err").classList.remove("hidden"); return false; }
   current = res.run; location.hash = res.run; drawnFor = ""; setTab("ov"); refresh(); return true;
 }
 $("dlg-go").addEventListener("click", async () => { if (await start($("f-policy").value, $("f-split").value, $("f-limit").value, +$("f-pace").value)) dlg.close(); });

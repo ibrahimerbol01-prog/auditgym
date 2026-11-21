@@ -69,6 +69,7 @@
               <label class="f">Популяция<input id="f-pop" type="number" min="4" max="64" step="1" value="16" inputmode="numeric"></label>
               <label class="f">Эпизодов на кандидата<input id="f-epc" type="number" min="1" max="10" step="1" value="4" inputmode="numeric"></label>
               <label class="f">Сид<input id="f-seed" type="number" min="0" max="1000000" step="1" value="1" inputmode="numeric"></label>
+              <label class="chk"><input type="checkbox" id="f-seeds"><span><b>Повторить на 3 сидах</b><small>та же конфигурация на сидах N, N+1, N+2 подряд — проверка воспроизводимости</small></span></label>
             </div>
             <details class="adv"><summary>Дополнительно</summary>
               <div class="fgrid tr-fg three">
@@ -158,6 +159,8 @@
       <span class="con-sp"></span>
       <div class="row">
         <button class="btn outline small hidden" id="d-stop">Остановить</button>
+        <button class="btn outline small hidden" id="d-eval">Оценить модель</button>
+        <button class="btn outline small hidden" id="d-export">Экспорт отчёта</button>
         <button class="btn outline small" id="d-save">Сохранить кривую</button>
         <button class="btn ghost small" id="d-new">Новое обучение</button>
       </div>
@@ -173,6 +176,19 @@
       <div class="kpi"><span class="k">Эпизодов в секунду</span><span class="v" id="k-rate">—</span><span class="d">последняя итерация</span></div>
       <div class="kpi"><span class="k">Время</span><span class="v" id="k-time">—</span><span class="d" id="k-time-d"></span></div>
       <div class="kpi-prog"><div class="segs" id="d-segs" aria-hidden="true"></div><span class="d" id="k-prog"></span></div>
+    </section>
+
+    <section class="card test-card" id="test-card" aria-labelledby="test-h">
+      <div class="chart-h"><div><h3 id="test-h">Итог на тестовом наборе</h3><p>20 свежих эпизодов (5 чистых, 5 со взаимодействием ошибок, 10 с ошибками): не участвовали ни в обучении, ни в выборе лучшей итерации</p></div></div>
+      <div class="test-body" id="test-body"></div>
+    </section>
+
+    <section class="card grp-card hidden" id="grp-card" aria-labelledby="grp-h">
+      <div class="chart-h"><div><h3 id="grp-h">Сравнение сидов</h3><p id="grp-sub">та же конфигурация на разных сидах · награда на dev</p></div>
+        <ul class="lgd" id="grp-lgd" aria-label="Легенда"></ul></div>
+      <div class="grp-body"><div class="chart" id="grp-chart"></div><div class="scroll"><table class="eps-t grp-t"><caption class="sr-only">Сиды группы</caption>
+        <thead><tr><th scope="col">Сид</th><th scope="col" class="num">Старт на dev</th><th scope="col" class="num">Лучшая на dev</th><th scope="col" class="num">На test</th><th scope="col">Статус</th></tr></thead>
+        <tbody id="grp-t"></tbody></table></div></div>
     </section>
 
     <div class="tr-charts">

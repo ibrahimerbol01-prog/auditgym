@@ -12,7 +12,8 @@
     const v = training ? r.summary && r.summary.dev_best : r.summary && r.summary.episodes_done ? r.summary.reward : null;
     const dot = document.createElement("i"); dot.className = "sr-dot " + (r.status === "running" ? "run" : v == null ? "" : v > 0 ? "pos" : "neg");
     const name = document.createElement("span"); name.className = "sr-n";
-    name.textContent = training ? `Обучение · ${r.method === "reinforce" ? "REINFORCE" : "CEM"}` : `Оценка · ${NAMES[r.agent] || r.agent}`;
+    const who = NAMES[r.agent] || (/^auditor-/.test(r.agent || "") ? `Аудитор · ${r.agent.endsWith("reinforce") ? "REINFORCE" : "CEM"}` : /^llm-/.test(r.agent || "") ? "LLM · " + r.agent.slice(4) : r.agent);
+    name.textContent = training ? `Обучение · ${r.method === "reinforce" ? "REINFORCE" : "CEM"}${r.group ? " · сид " + r.seed : ""}` : `Оценка · ${who}`;
     const val = document.createElement("span"); val.className = "sr-v"; val.textContent = v == null ? "" : f2(v);
     a.append(dot, name, val);
     return a;
@@ -200,4 +201,34 @@
     const foot = matchMedia("(min-width: 1100px)").matches && document.querySelector(".side-foot");
     if (foot) foot.prepend(box); else document.body.append(box);
   }).catch(() => { /* offline or not the desktop app */ });
+})();
+
+// ---- keyboard shortcuts on every page: g then a letter goes to a section, n starts a new training, ? lists them
+(() => {
+  const GO = { h: "/", t: "/train.html", r: "/runs.html", i: "/play.html", s: "/settings.html" };
+  const LIST = [["g h", "Главная"], ["g t", "Обучение"], ["g r", "Запуски"], ["g i", "Расследование"], ["g s", "Настройки"],
+    ["n", "Новое обучение (на странице «Запуски» — новый запуск)"], ["?", "Эта подсказка"], ["Esc", "Закрыть"]];
+  let pending = 0, box = null;
+  const typing = (e) => /INPUT|SELECT|TEXTAREA/.test((e.target && e.target.tagName) || "") || (e.target && e.target.isContentEditable) || document.querySelector("dialog[open]");
+  const help = () => {
+    if (box) { box.close(); return; }
+    box = document.createElement("dialog");
+    box.className = "kbd-help";
+    box.setAttribute("aria-labelledby", "kbd-h");
+    const h = document.createElement("h2"); h.id = "kbd-h"; h.textContent = "Клавиши";
+    const dl = document.createElement("dl");
+    for (const [k, v] of LIST) { const dt = document.createElement("dt"); for (const part of k.split(" ")) { const kb = document.createElement("kbd"); kb.textContent = part; dt.append(kb); } const dd = document.createElement("dd"); dd.textContent = v; dl.append(dt, dd); }
+    box.append(h, dl);
+    box.addEventListener("close", () => { box.remove(); box = null; });
+    box.addEventListener("click", (e) => { if (e.target === box) box.close(); });
+    document.body.append(box);
+    box.showModal();
+  };
+  addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || (typing(e) && !box)) return;
+    if (e.key === "?") { e.preventDefault(); help(); return; }
+    if (pending && GO[e.key]) { e.preventDefault(); pending = 0; location.href = GO[e.key]; return; }
+    pending = e.key === "g" ? setTimeout(() => { pending = 0; }, 1200) : 0;
+    if (e.key === "n" && !/\/runs\.html$/.test(location.pathname)) { e.preventDefault(); location.href = "/train.html"; }
+  });
 })();

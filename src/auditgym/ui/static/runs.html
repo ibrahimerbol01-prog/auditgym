@@ -80,6 +80,10 @@
             <thead><tr><th scope="col" class="num">№</th><th scope="col">Эпизод</th><th scope="col" class="num">Сид</th><th scope="col" class="num">Награда</th><th scope="col"><span class="sr-only">Шкала</span></th><th scope="col" class="num">F1</th><th scope="col" class="num">Верных</th><th scope="col" class="num">Ложных</th><th scope="col" class="num">Пропущено</th><th scope="col" class="num">Шагов</th><th scope="col" class="num">Время</th></tr></thead>
             <tbody id="d-eps"></tbody></table></div>
         </section>
+        <section class="card chart-card hidden" id="an-card" aria-labelledby="an-h">
+          <div class="chart-h"><div><h3 id="an-h">Разбор ошибок</h3><p>по результатам оценщика после окончания запуска: какие типы ошибок найдены и где агент ошибся</p></div></div>
+          <div class="test-body" id="an-body"></div>
+        </section>
         <section class="card chart-card" id="train-card" aria-labelledby="tr-h">
           <div class="chart-h"><div><h3 id="tr-h">Обучение</h3><p>кривая обучаемого аудитора на отложенных эпизодах</p></div></div>
           <div id="train-chart" class="chart"></div><p class="muted small" id="train-note"></p>
@@ -109,8 +113,8 @@
   </fieldset>
   <div id="f-builtin" class="fgrid">
     <label class="f">Политика<select id="f-policy"><option value="reconcile">Сверщик · reconcile</option><option value="random">Стажёр · random</option><option value="flag_all">Паникёр · flag_all</option></select></label>
-    <label class="f">Эпизоды<select id="f-split"><option value="dev">dev · 10 отложенных</option><option value="train">train · 10 учебных</option></select></label>
-    <label class="f">Сколько<select id="f-limit"><option value="">все 10</option><option value="3">первые 3</option></select></label>
+    <label class="f">Эпизоды<select id="f-split"><option value="dev">dev · 10 отложенных</option><option value="train">train · 10 учебных</option><option value="test">test · 20 свежих</option></select></label>
+    <label class="f">Сколько<select id="f-limit"><option value="">все эпизоды</option><option value="3">первые 3</option></select></label>
     <label class="f">Темп<select id="f-pace"><option value="0.06">для показа · 60 мс на шаг</option><option value="0">без пауз</option></select></label>
   </div>
   <div id="f-cmd" class="fgrid hidden">

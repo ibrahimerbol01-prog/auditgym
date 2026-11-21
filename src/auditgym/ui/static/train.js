@@ -213,6 +213,8 @@ async function loadRecent() {
 // ---- launch
 $("go").addEventListener("click", async () => {
   const err = $("go-err"), c = readCfg(), bad = validate(c);
+  if ($("f-seeds").checked && Number.isFinite(c.seed)) c.seeds = [c.seed, c.seed + 1, c.seed + 2];
+  try { if (window.Notification && Notification.permission === "default") Notification.requestPermission(); } catch { /* not offered */ }
   err.classList.add("hidden");
   if (bad.length) { leaveStep2(); setStep(2); return; }
   const b = $("go"); b.disabled = true; b.textContent = "Запускаем…";
@@ -440,6 +442,73 @@ function renderDash() {
   for (const ch of Object.values(charts)) ch.update(pts, n);
   renderPolicy();
   renderTable(pts);
+  renderTest();
+  renderGroup();
+  const finished = r.status !== "running" && r.best && r.best.theta;
+  $("d-eval").classList.toggle("hidden", !finished);
+  $("d-export").classList.toggle("hidden", !finished);
+}
+
+// ---- the final number on the fresh test split (measured once when training ends) and its failure analysis
+const TYPES = { duplicate_invoice: "дубль счёта", payment_allocation: "разнесение платежа", date_or_fx: "дата или курс", period_classification: "отчётный период", invalid: "некорректная" };
+const KINDS = { clean: "чистые", interacting: "взаимодействие", errors: "с ошибками" };
+function zbar(v) {  // reward in [-1, 1] as a bar from the zero line
+  const x = Math.max(-1, Math.min(1, v ?? 0)), w = Math.abs(x) * 50;
+  return el("span", { class: "zb", "aria-hidden": "true" }, el("i", { class: "zb-0" }), el("i", { class: "zb-f " + (x >= 0 ? "pos" : "neg"), style: `left:${x >= 0 ? 50 : 50 - w}%;width:${w}%` }));
+}
+function meter(found, total) {
+  return el("span", { class: "mt", "aria-hidden": "true" }, el("i", { style: `width:${total ? (100 * found / total).toFixed(1) : 0}%` }));
+}
+function renderTest() {
+  const box = $("test-body"), t = run.test, r = run;
+  if (r.status_note === "testing") { const sp = el("span", { class: "ascii-spin", "aria-hidden": "true" }); box.replaceChildren(el("p", { class: "test-wait" }, sp, " Измеряем лучшую модель на 20 свежих эпизодах…")); return; }
+  if (!t || t.error) { box.replaceChildren(el("p", { class: "test-wait muted" }, t && t.error ? "Не удалось измерить на тестовом наборе: " + t.error : r.status === "running" ? "Появится после обучения: лучшая на dev модель будет один раз проверена на 20 свежих эпизодах рядом со Сверщиком и Стажёром." : "Для этого обучения тестовый замер не сохранён (оно сделано до появления тестового набора).")); return; }
+  const rows = [["Обученный аудитор", t.auditor, true], ["Сверщик · ручные правила", t.reconcile, false], ["Стажёр · случайный", t.random, false]];
+  const left = el("div", { class: "tb" }, el("h4", {}, "Награда на test"), ...rows.map(([name, m, me]) => el("div", { class: "tb-r" + (me ? " me" : "") },
+    el("span", { class: "tb-n" }, name), zbar(m && m.reward), el("span", { class: "tb-v mono " + ((m && m.reward) > 0 ? "pos" : "neg") }, f2(m && m.reward)))),
+    el("p", { class: "tb-note" }, `F1 ${f2(t.auditor.f1)} · точность ${f2(t.auditor.precision)} · полнота ${f2(t.auditor.recall)} · ложных ${num(t.auditor.fp, 1)} на эпизод · ${num(t.auditor.steps, 1)} шагов`));
+  const an = t.analysis || {}, bt = an.by_type || {};
+  const right = el("div", { class: "tb" }, el("h4", {}, "Что нашёл и что пропустил"),
+    ...Object.keys(TYPES).filter((k) => bt[k]).map((k) => el("div", { class: "tb-r" }, el("span", { class: "tb-n" }, TYPES[k]), meter(bt[k].found, bt[k].issues),
+      el("span", { class: "tb-v mono" }, `${bt[k].found}/${bt[k].issues}`))),
+    el("p", { class: "tb-note" }, "Ложные находки: " + (Object.entries(an.false_by_type || {}).map(([k, n]) => `${TYPES[k] || k} ${n}`).join(", ") || "нет")),
+    el("p", { class: "tb-note" }, "По видам эпизодов: " + Object.entries(an.by_kind || {}).map(([k, v]) => `${KINDS[k] || k} ${f2(v.reward)}`).join(" · ")));
+  box.replaceChildren(left, right);
+}
+
+// ---- seeds of a group: one curve per seed on dev, their best and their test number
+let grpKey = "", grpRunning = false;
+async function renderGroup() {
+  const card = $("grp-card"), g = run.group;
+  card.classList.toggle("hidden", !g);
+  if (!g) return;
+  const { status, body } = await api("/api/runs");
+  if (status !== 200 || !body || !body.ok) return;
+  const members = (body.runs || []).filter((x) => x.group === g).sort((a, b) => (a.seed ?? 0) - (b.seed ?? 0));
+  grpRunning = members.some((x) => x.status === "running") || members.length < ((run.group_seeds || []).length || members.length);
+  const key = members.map((m) => `${m.id}:${m.status}:${m.at}:${m.test_reward}`).join("|");
+  if (key === grpKey && $("grp-chart").childNodes.length) return;
+  grpKey = key;
+  const full = await Promise.all(members.map(async (m) => { const r = await api("/api/runs/" + encodeURIComponent(m.id)); return (r.body && r.body.run) || m; }));
+  const host = $("grp-chart"), W = Math.max(260, host.clientWidth || 520), H = 200, m = { l: 34, r: 10, t: 10, b: 22 };
+  const n = Math.max(...full.map((r) => r.iterations || (r.config || {}).iterations || 1));
+  const X = (i) => m.l + (n <= 1 ? 0 : (i / (n - 1)) * (W - m.l - m.r)), Y = (v) => m.t + ((1 - v) / 2) * (H - m.t - m.b);
+  const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: "ch", role: "img", "aria-label": "Награда на dev по сидам" });
+  for (const v of [1, 0, -1]) { svg("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: v === 0 ? "zero" : "grid" }, s); const tx = svg("text", { x: m.l - 6, y: Y(v) + 4, class: "tick", "text-anchor": "end" }, s); tx.textContent = tickTxt(v); }
+  if (base.reconcile != null) svg("line", { x1: m.l, x2: W - m.r, y1: Y(base.reconcile), y2: Y(base.reconcile), class: "ref" }, s);
+  full.forEach((r, k) => {
+    const pts = (r.points || []).filter((p) => p.dev);
+    if (!pts.length) return;
+    svg("polyline", { points: pts.map((p) => `${X(p.i).toFixed(1)},${Y(p.dev.reward).toFixed(1)}`).join(" "), class: `gl s${(k % 3) + 1}` }, s);
+  });
+  host.replaceChildren(s);
+  $("grp-lgd").replaceChildren(...full.map((r, k) => el("li", {}, el("i", { class: `lk s${(k % 3) + 1}` }), `сид ${(r.config || {}).seed ?? r.seed}`)), ...(base.reconcile != null ? [el("li", {}, el("i", { class: "sw ref" }), "Сверщик")] : []));
+  $("grp-t").replaceChildren(...full.map((r) => { const ss = r.summary || {}, [st] = STATUS[r.status] || [r.status];
+    return el("tr", { class: r.id === run.id ? "on" : "" }, el("td", {}, el("a", { href: "#run=" + encodeURIComponent(r.id) }, `сид ${(r.config || {}).seed ?? r.seed}`)),
+      el("td", { class: "num mono" }, f2(ss.dev_start)), el("td", { class: "num mono" }, f2(ss.dev_best)), el("td", { class: "num mono strong" }, f2(((r.test || {}).auditor || {}).reward)), el("td", {}, st)); }));
+  const done = full.filter((r) => r.test && r.test.auditor);
+  if (done.length > 1) { const v = done.map((r) => r.test.auditor.reward), mean = v.reduce((a, b) => a + b, 0) / v.length;
+    $("grp-sub").textContent = `та же конфигурация на ${full.length} сидах · на test: среднее ${f2(mean)}, от ${f2(Math.min(...v))} до ${f2(Math.max(...v))}`; }
 }
 
 function renderPolicy() {
@@ -467,7 +536,7 @@ function renderTable(pts) {
 
 function loaded(ok) {  // the run's numbers are shown only once they are read: never a stale or half-empty frame
   for (const e of [$("dash-body"), $("d-status").parentNode, $("d-save")]) e.classList.toggle("hidden", !ok);
-  if (!ok) $("d-stop").classList.add("hidden");
+  if (!ok) for (const id of ["d-stop", "d-eval", "d-export", "grp-card"]) $(id).classList.add("hidden");
 }
 async function poll() {
   clearTimeout(timer);
@@ -481,9 +550,11 @@ async function poll() {
     if ($("d-msg").dataset.kind === "net") msg("");
     renderDash();
     const running = run.status === "running";
+    if (wasRunning && !running && !run.status_note) notifyEnd();
     if (wasRunning && !running) { loadRecent(); msg(run.status === "done" ? "Обучение завершено. Сохраните кривую, чтобы она появилась на странице «Запуски»." : run.status === "stopped" ? "Обучение остановлено; лучшая найденная политика сохранена." : "Обучение прервалось с ошибкой.", run.status === "error" ? "bad" : ""); }
-    wasRunning = running;
-    if (running) timer = setTimeout(poll, 700);
+    wasRunning = running || !!run.status_note;
+    if (running || run.status_note) timer = setTimeout(poll, 700);
+    else if (run.group && grpRunning) timer = setTimeout(poll, 1500);  // the other seeds of the group are still training
     return;
   }
   if (status === 404) { run = null; loaded(false); $("d-title").textContent = "Обучение не найдено"; msg(`Обучение «${id}» не найдено: папка запуска удалена или ещё не создана.`, "bad", ["/train.html", "Новое обучение"]); return; }
@@ -506,6 +577,26 @@ $("d-save").addEventListener("click", async () => {
   else if (status === 404 && body && body.error && body.error.code === "not_found") msg("Сохранить нельзя: это обучение не найдено на сервере.", "bad");
   else if (status === 404 || status === 405) msg("На этом сервере сохранение кривой пока не включено.", "bad");
   else msg(status === 0 ? NO_SERVER : "Не удалось сохранить кривую: " + (((body || {}).error || {}).message || "ошибка " + status), "bad");
+});
+function notifyEnd() {  // a desktop notification when the window is in the background (if the user allowed it)
+  const text = run.status === "done" ? `лучшая на dev ${f2((run.summary || {}).dev_best)}` + (run.test && run.test.auditor ? ` · на test ${f2(run.test.auditor.reward)}` : "") : run.status === "stopped" ? "остановлено" : "ошибка";
+  try { if (document.hidden && window.Notification && Notification.permission === "granted") new Notification("AuditGym: обучение завершено", { body: text }); } catch { /* not offered here */ }
+  if (document.hidden) { const t0 = document.title; document.title = "✓ " + t0; addEventListener("focus", () => { document.title = t0; }, { once: true }); }
+}
+$("d-eval").addEventListener("click", async () => {
+  const b = $("d-eval"); b.disabled = true;
+  const { status, body } = await post("/api/runs", { model: runId, split: "test" });
+  b.disabled = false;
+  if (status === 200 && body && body.ok) { location.href = "/runs.html#" + encodeURIComponent(body.run); return; }
+  const e = (body && body.error) || {};
+  msg(e.code === "busy" ? "Уже идёт другой запуск: дождитесь его окончания." : status === 0 ? NO_SERVER : "Не удалось запустить оценку: " + (e.message || "ошибка " + status), "bad");
+});
+$("d-export").addEventListener("click", async () => {
+  const { status, body } = await post(`/api/runs/${encodeURIComponent(runId)}/export`, { lang: window.AG_LANG === "en" ? "en" : "ru" });
+  if (status === 200 && body && body.ok) {
+    try { const a = el("a", { href: URL.createObjectURL(new Blob([body.markdown], { type: "text/markdown" })), download: `auditgym-${runId}.md` }); document.body.append(a); a.click(); a.remove(); } catch { /* the file is saved on disk anyway */ }
+    msg("Отчёт сохранён: " + body.path, "ok");
+  } else msg(status === 0 ? NO_SERVER : "Не удалось сохранить отчёт: " + (((body || {}).error || {}).message || "ошибка " + status), "bad");
 });
 $("d-new").addEventListener("click", () => { history.pushState(null, "", location.pathname); route(); });
 
