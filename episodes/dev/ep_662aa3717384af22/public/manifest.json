@@ -7,6 +7,12 @@
     "ledger": 437,
     "payments": 29
   },
+  "currency_exponents": {
+    "EUR": 2,
+    "GBP": 2,
+    "KWD": 3,
+    "USD": 2
+  },
   "episode_id": "ep_662aa3717384af22",
   "period_end": "2026-09-30",
   "period_start": "2026-09-01",

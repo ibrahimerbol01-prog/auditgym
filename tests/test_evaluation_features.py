@@ -124,3 +124,22 @@ class ExternalAgentScoresStayHidden(unittest.TestCase):
         self.assertEqual(r["summary"]["episodes_done"], 2)
         self.assertNotIn("scores_hidden_until_end", r)
         shutil.rmtree(base, ignore_errors=True)
+
+
+class CurrencyExponents(unittest.TestCase):
+    """Brief §03: money is integer minor units with the currency's exponent; the manifest states every exponent."""
+
+    def test_manifest_lists_the_exponent_of_every_currency_in_the_records(self):
+        from auditgym.gen.build import generate
+        from auditgym.money import exponent
+        for split in ("train", "dev"):
+            for e in harness.load_split(split):
+                pub = generate(e["seed"], e["config"])["public"]
+                used = {pub["manifest"]["base_currency"]}
+                for t in ("ledger", "invoices", "payments"):
+                    used |= {r["currency"] for r in pub["tables"][t]}
+                for r in pub["tables"]["fx"]:
+                    used |= {r["source_currency"], r["target_currency"]}
+                ce = pub["manifest"]["currency_exponents"]
+                self.assertEqual(set(ce), used, e["label"])
+                self.assertTrue(all(ce[c] == exponent(c) for c in ce))

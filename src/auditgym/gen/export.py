@@ -16,6 +16,7 @@ import os
 from datetime import timezone
 from typing import Any, Dict, List
 
+from ..money import exponent
 from ..seeding import Rng
 from ..timeutil import parse_ts
 from ..version import ENV_VERSION, SCHEMA_VERSION
@@ -29,6 +30,16 @@ FX_FIELDS = ["date", "source_currency", "target_currency", "rate"]
 PK = {"ledger": "row_id", "invoices": "invoice_id", "payments": "payment_id"}
 _LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 _DIGITS = "23456789"
+
+
+def _currencies(pub: dict, base: str) -> set:
+    """Every currency that appears in the public records (and the base currency)."""
+    out = {base}
+    for t in ("ledger", "invoices", "payments"):
+        out |= {r["currency"] for r in pub.get(t, []) if r.get("currency")}
+    for r in pub.get("fx", []):
+        out |= {r["source_currency"], r["target_currency"]}
+    return out
 
 
 def _instant(ts: str) -> str:
@@ -114,6 +125,8 @@ def assemble(w: World, clean: Tables, inj: Dict[str, Any], policy: Dict[str, Any
         "counts": {"ledger": len(pub["ledger"]), "invoices": len(pub["invoices"]), "payments": len(pub["payments"]),
                    "fx": len(pub["fx"]), "documents": len(pub["documents"])},
         "rounding": {"mode": "half_even", "applies_to": "conversion_to_base"},
+        # brief §03: money is integer minor units *with the currency's exponent* (JPY 0, USD 2, KWD 3, ...)
+        "currency_exponents": {c: exponent(c) for c in sorted(_currencies(pub, w.base))},
     }
     truth = {"episode_id": eid, "issues": issues}
     provenance = {"episode_id": eid, "env_version": ENV_VERSION, "seed": w.seed, "config": w.cfg.canonical(),

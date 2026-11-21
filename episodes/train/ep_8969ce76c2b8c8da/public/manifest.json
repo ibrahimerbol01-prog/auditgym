@@ -7,6 +7,11 @@
     "ledger": 475,
     "payments": 43
   },
+  "currency_exponents": {
+    "EUR": 2,
+    "KZT": 2,
+    "USD": 2
+  },
   "episode_id": "ep_8969ce76c2b8c8da",
   "period_end": "2026-03-31",
   "period_start": "2026-01-01",

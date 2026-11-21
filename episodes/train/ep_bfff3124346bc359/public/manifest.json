@@ -7,6 +7,11 @@
     "ledger": 494,
     "payments": 44
   },
+  "currency_exponents": {
+    "EUR": 2,
+    "JPY": 0,
+    "USD": 2
+  },
   "episode_id": "ep_bfff3124346bc359",
   "period_end": "2026-03-31",
   "period_start": "2026-01-01",

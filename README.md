@@ -68,7 +68,7 @@ obs, info = env.reset(seed=1); obs, reward, terminated, truncated, info = env.st
 ```
 
 - Episode = one fictional company, one reporting period, 200–2,000 ledger rows, 0–12 issues.
-- Open files per episode (`episodes/<split>/<episode_id>/public/`): `manifest.json`, `ledger.csv`, `invoices.jsonl`, `payments.jsonl`, `fx.csv`, `policy.json`, `documents.jsonl`. Empty CSV cells are `null`.
+- Open files per episode (`episodes/<split>/<episode_id>/public/`): `manifest.json` (with `currency_exponents`: JPY 0, USD 2, KWD 3 …), `ledger.csv`, `invoices.jsonl`, `payments.jsonl`, `fx.csv`, `policy.json`, `documents.jsonl`. Empty CSV cells are `null`.
 - Evaluator-only files (`private/`): `truth.json`, `provenance.json` (replayable), `clean/` (books before injection).
 - Four error types, two interaction scenarios, clean companies and legitimate distractors. Every rule, tolerance and the matching procedure are published in `policy.json`, the first observation and [DESIGN.md](DESIGN.md).
 
