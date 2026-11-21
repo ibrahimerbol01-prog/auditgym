@@ -84,3 +84,87 @@ class DesktopAppTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def load_updater():
+    spec = importlib.util.spec_from_file_location("auditgym_desktop_updater", os.path.join(ROOT, "desktop", "updater.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class UpdaterTests(unittest.TestCase):
+    """desktop/updater.py: which build is newer, and the installer command that replaces the app (no network here)."""
+
+    def setUp(self):
+        import tempfile
+        self.u = load_updater()
+        self.tmp = tempfile.mkdtemp()
+        self.u.HOME = self.tmp
+        self.u.CACHE = os.path.join(self.tmp, "update.json")
+        self.u.LOG = os.path.join(self.tmp, "update.log")
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_versions_and_stamps(self):
+        self.assertEqual(self.u.parse_stamp("v0.2.0 @ 1a2b3c4 · built 2026-11-21 10:00 UTC"), ("v0.2.0", "1a2b3c4"))
+        self.assertEqual(self.u.parse_stamp("source checkout"), ("", ""))
+        self.assertGreater(self.u.version_key("v0.10.0"), self.u.version_key("v0.9.9"))
+        self.assertIsNone(self.u.version_key("task/design-and-desktop"))
+
+    def test_release_channel_offers_only_a_newer_release_and_caches(self):
+        calls = []
+        self.u.latest_release = lambda: calls.append(1) or {"version": "v0.3.0", "url": "u", "notes": ""}
+        res = self.u.check("v0.2.0 @ 1a2b3c4 · built x")
+        self.assertEqual((res["channel"], res["available"], res["latest"]["version"]), ("release", True, "v0.3.0"))
+        self.u.check("v0.2.0 @ 1a2b3c4 · built x")
+        self.assertEqual(len(calls), 1, "the second check within the TTL comes from the cache")
+        self.assertFalse(self.u.check("v0.3.0 @ 9f9f9f9 · built x")["available"])
+
+    def test_branch_channel_compares_commits(self):
+        self.u.latest_branch_build = lambda b: {"version": f"{b} @ abcdef1", "sha": "abcdef1234", "at": None}
+        self.assertTrue(self.u.check("main @ 1a2b3c4 · built x")["available"])
+        self.assertFalse(self.u.check("main @ abcdef1 · built x", force=True)["available"])
+        self.u.latest_branch_build = lambda b: None
+        self.assertIn("gh", self.u.check("main @ 1a2b3c4 · built x", force=True)["error"])
+
+    def test_offline_and_source_checkout_offer_nothing(self):
+        def boom():
+            raise OSError("offline")
+        self.u.latest_release = boom
+        res = self.u.check("v0.2.0 @ 1a2b3c4 · built x")
+        self.assertFalse(res["available"])
+        self.assertTrue(res["error"])
+        self.assertEqual(self.u.check("source checkout")["channel"], "source")
+
+    def test_installer_command_pins_the_offered_version(self):
+        info = {"channel": "release", "current": "v0.2.0 @ 1a2b3c4 · built x", "available": True, "latest": {"version": "v0.3.0"}}
+        cmd, env = self.u.installer_command(info)
+        self.assertEqual(env["AUDITGYM_VERSION"], "v0.3.0")
+        self.assertIn(f"{self.u.PUBLIC}/releases/download/v0.3.0/install.", cmd[-1])
+        self.assertIn(self.u.LOG, cmd[-1].replace("''", "'"))
+        info = {"channel": "branch", "current": "main @ 1a2b3c4 · built x", "available": True, "latest": {"version": "main @ abcdef1"}}
+        cmd, env = self.u.installer_command(info, detached=False)
+        self.assertEqual(env["AUDITGYM_BRANCH"], "main")
+        self.assertIn("contents/desktop/install.", cmd[-1])
+        self.assertNotIn(self.u.LOG, cmd[-1])
+
+    def test_routes_refuse_while_busy_and_pass_everything_else_through(self):
+        class Api:
+            def get(self, path, query):
+                return 200, {"from": "jobs"}
+
+            def post(self, path, body):
+                return 200, {"from": "jobs"}
+        exits = []
+        r = self.u.UpdateRoutes(Api(), "v0.2.0 @ 1a2b3c4 · built x", on_exit=lambda: exits.append(1), busy=lambda: True)
+        self.assertEqual(r.get("/api/runs", {})[1], {"from": "jobs"})
+        self.assertEqual(r.post("/api/train", {})[1], {"from": "jobs"})
+        self.assertEqual(r.post("/api/update", {})[0], 409)
+        r.busy = lambda: False
+        self.u.latest_release = lambda: {"version": "v0.2.0", "url": "u", "notes": ""}
+        status, res = r.post("/api/update", {})
+        self.assertEqual((status, res["error"]["code"]), (409, "no_update"))
+        self.assertEqual(exits, [])

@@ -46,6 +46,21 @@ from source. The builds are not code-signed, so Windows SmartScreen or macOS may
 
 To uninstall, delete the folder above (and the Start menu shortcut or `~/.local/share/applications/auditgym.desktop`).
 
+## Updates
+
+Install once; after that the app keeps itself current. On start it asks GitHub (at most every 6 hours) whether a
+newer build exists and, if so, shows **Доступно обновление** in the sidebar. **Обновить сейчас** downloads the new
+build with the same installer, checks it against `SHA256SUMS.txt`, replaces the app and starts it again (about a
+minute; the log is `~/.auditgym/update.log`). It is refused while a training or evaluation is running. In a terminal:
+
+```
+auditgym update
+```
+
+Release builds follow the newest release of `auditgym-releases` (no login). Team branch builds follow the newest CI
+build of their branch, which needs the GitHub CLI logged in (`gh auth login`). Offline, nothing is offered and the
+app works as before.
+
 ## Publish a release (maintainers)
 
 ```bash

@@ -65,14 +65,14 @@ def main() -> int:
                 "--workpath", os.path.join(ROOT, "build", work), "--specpath", os.path.join(ROOT, "build", work)] + data
 
     # 1. the desktop app: no console window on Windows, an .app bundle on macOS
-    args = common("app.py", "AuditGym", "app") + ["--windowed", "--distpath", os.path.join(ROOT, "dist")]
+    args = common("app.py", "AuditGym", "app") + ["--windowed", "--hidden-import", "updater", "--distpath", os.path.join(ROOT, "dist")]
     icon = os.path.join(ROOT, "desktop", "icon.ico" if sys.platform == "win32" else "icon.icns")
     if os.path.exists(icon):
         args += ["--icon", icon]
     PyInstaller.__main__.run(args)
     # 2. the `auditgym` terminal command (console program), in its own process so the two builds never mix state
     cli_dist = os.path.join(ROOT, "build", "cli-dist")
-    subprocess.run([sys.executable, "-m", "PyInstaller", *common("cli_entry.py", "auditgym", "cli"), "--console",
+    subprocess.run([sys.executable, "-m", "PyInstaller", *common("cli_entry.py", "auditgym", "cli"), "--console", "--hidden-import", "updater",
                     "--distpath", cli_dist], check=True)
 
     archive = os.path.join(ROOT, "dist", asset_name())

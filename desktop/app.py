@@ -80,13 +80,22 @@ def start_server(port: int = 0):
     """Start the UI server in a background thread. Returns (server, env, url)."""
     from auditgym.env.adapters import make_http_server
     from auditgym.harness import Jobs
-    srv, env = make_http_server(port, "open", ui=True, extra_files=data_files(), host="127.0.0.1",
-                                api=Jobs(configs=os.path.join(BASE, "data", "configs") if FROZEN else None,
-                                         # the bundle is read-only: a saved learning curve goes to the user's folder
-                                         curve=os.path.join(os.path.expanduser("~"), ".auditgym", "curve.json") if FROZEN else None))
+    api = Jobs(configs=os.path.join(BASE, "data", "configs") if FROZEN else None,
+               # the bundle is read-only: a saved learning curve goes to the user's folder
+               curve=os.path.join(os.path.expanduser("~"), ".auditgym", "curve.json") if FROZEN else None)
+    if FROZEN or os.environ.get("AUDITGYM_UPDATE_TEST"):
+        # /api/update: the sidebar offers a newer build; installing it restarts the app (desktop/updater.py)
+        from updater import UpdateRoutes
+        api = UpdateRoutes(api, os.environ.get("AUDITGYM_UPDATE_TEST") or build_stamp(), on_exit=_exit_soon, busy=api.busy)
+    srv, env = make_http_server(port, "open", ui=True, extra_files=data_files(), host="127.0.0.1", api=api)
     url = f"http://127.0.0.1:{srv.server_address[1]}/"
     threading.Thread(target=srv.serve_forever, name="auditgym-ui", daemon=True).start()
     return srv, env, url
+
+
+def _exit_soon(delay: float = 1.0) -> None:
+    """Quit the whole app shortly after an update was started (the reply reaches the page first)."""
+    threading.Timer(delay, lambda: os._exit(0)).start()
 
 
 def stop_server(srv, env) -> None:

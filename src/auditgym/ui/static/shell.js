@@ -179,3 +179,27 @@
     requestAnimationFrame(step);
   }
 })();
+
+// ---- updates (desktop app only: the server answers /api/update there; elsewhere the request 404s and nothing shows)
+(() => {
+  if (!window.fetch) return;
+  const short = (v) => String(v || "").replace(/ · built.*$/, "");
+  fetch("/api/update", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+    const u = d && d.update; if (!u || !u.available || !u.latest) return;
+    const box = document.createElement("div"); box.className = "upd"; box.setAttribute("role", "status");
+    const h = document.createElement("p"); h.className = "upd-h"; h.textContent = "Доступно обновление";
+    const v = document.createElement("p"); v.className = "upd-v"; v.textContent = `${short(u.current).split(" @ ")[0]} → ${short(u.latest.version)}`;
+    const b = document.createElement("button"); b.type = "button"; b.className = "btn primary small"; b.textContent = "Обновить сейчас";
+    const msg = document.createElement("p"); msg.className = "upd-m"; msg.hidden = true;
+    b.addEventListener("click", async () => {
+      b.disabled = true; msg.hidden = false; msg.textContent = "Скачиваю и устанавливаю… приложение закроется и откроется само (около минуты).";
+      try {
+        const r = await (await fetch("/api/update", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })).json();
+        if (!r.ok) { b.disabled = false; msg.textContent = r.error && r.error.code === "busy" ? "Сейчас идёт обучение или оценка: обновите, когда оно закончится." : "Не удалось начать обновление: " + ((r.error && r.error.message) || "ошибка"); }
+      } catch { /* the app is closing for the update: expected */ }
+    });
+    box.append(h, v, b, msg);
+    const foot = matchMedia("(min-width: 1100px)").matches && document.querySelector(".side-foot");
+    if (foot) foot.prepend(box); else document.body.append(box);
+  }).catch(() => { /* offline or not the desktop app */ });
+})();
