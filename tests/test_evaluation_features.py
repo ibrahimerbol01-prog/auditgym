@@ -101,3 +101,26 @@ class AnalysisOnlyAtTheEnd(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ExternalAgentScoresStayHidden(unittest.TestCase):
+    """Brief §04: in closed mode the reward stays with the evaluator until the run ends. An external program runs on
+    the same machine, so run.json must not show its scores while the run is going."""
+
+    def test_no_scores_on_disk_until_the_end(self):
+        base = tempfile.mkdtemp()
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        cmd = f'"{sys.executable}" "{os.path.join(root, "examples", "random_agent.py")}"'
+        seen = []
+
+        def on_event(e):
+            if e["type"] == "episode_end":
+                r = harness.read_run("ext-hidden", base)
+                seen.append(any("score" in ep for ep in r["episodes"]) or bool(r["summary"].get("episodes_done")))
+        harness.run_split("ext", harness.make_agent(cmd=cmd), split="dev", limit=2, run_id="ext-hidden", base=base, on_event=on_event)
+        r = harness.read_run("ext-hidden", base)
+        self.assertEqual(seen, [False, False], "no score or summary on disk during the run")
+        self.assertTrue(all("score" in ep for ep in r["episodes"]))
+        self.assertEqual(r["summary"]["episodes_done"], 2)
+        self.assertNotIn("scores_hidden_until_end", r)
+        shutil.rmtree(base, ignore_errors=True)

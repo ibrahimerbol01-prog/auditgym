@@ -948,6 +948,7 @@
 "шагов на эпизод": "steps per episode",
 "элита": "elite",
 "эпизод": "episode",
+"эпизод {0} из {1} · закрытый режим: оценки откроются после последнего эпизода": "episode {0} of {1} · closed mode: scores are shown after the last episode",
 "эпизод {0} из {1}{2}": "episode {0} of {1}{2}",
 "эпизода": "episodes",
 "эпизодов": "episodes",

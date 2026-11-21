@@ -92,7 +92,7 @@ function render() {
   setKpi("k-st", done ? s.steps.toFixed(1) : "—", null);
   const cur = eps.find((e) => e.status === "running");
   $("d-segs").replaceChildren(...eps.map((e) => el("i", { class: e.score ? signCls(e.score.reward) : e.status === "running" ? "now" : "" })));
-  $("k-prog").textContent = run.status === "running" ? `эпизод ${cur ? cur.index + 1 : done + 1} из ${eps.length}${cur ? " · " + cur.label : ""}` : `${done} из ${eps.length} эпизодов оценено`;
+  $("k-prog").textContent = run.status === "running" ? (run.scores_hidden_until_end ? `эпизод ${(cur ? cur.index : eps.filter((e) => e.status === "done").length) + 1} из ${eps.length} · закрытый режим: оценки откроются после последнего эпизода` : `эпизод ${cur ? cur.index + 1 : done + 1} из ${eps.length}${cur ? " · " + cur.label : ""}`) : `${done} из ${eps.length} эпизодов оценено`;
   const secs = ((run.finished || Date.now() / 1000) - run.started);
   const kv = [["Начат", when(run.started)], ["Длительность", dur(Math.max(0, secs))], ["Время агента", s.seconds != null ? dur(s.seconds) : "—"], ["Версия среды", run.env_version], ["Режим", "закрытый: агент не видит награду"]];
   if (run.pace) kv.push(["Темп показа", `${Math.round(run.pace * 1000)} мс на шаг`]);

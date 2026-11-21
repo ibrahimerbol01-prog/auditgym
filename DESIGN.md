@@ -111,7 +111,24 @@ A second separate agent attacked the environment white-box from the agent's side
 
 It also trained classifiers on public features to predict which invoices host errors: formatting features (ids, minutes, round amounts, offsets, line counts) are at chance (AUC 0.49–0.51). It found one real tell — host invoices were drawn from a narrower date window — which we removed; the remaining signal comes from the errors' own nature (cut-off errors sit near the period end, FX errors need a foreign invoice). An in-process Python agent shares memory with the environment and is trusted by construction; untrusted agents should use the stdio or HTTP front doors.
 
-## 9. Limitations (honest)
+## 9. Optional training (measured, not scored)
+
+Training is optional in the brief and earns no points by itself; we include it to show the environment is usable for RL and to measure it honestly (§01: no improvement claim without a controlled comparison on held-out data).
+
+- **What is trained.** A small auditor policy (`learner.AuditorPolicy`, 20 parameters: which tables to read, which checks to run, how strict) with the cross-entropy method (CEM) or REINFORCE, on freshly generated episodes in open mode, CPU only. No weights of a language model are trained.
+- **How it is measured.** Every 2 iterations the current policy plays the 10 held-out **dev** episodes in closed mode; dev picks the best iteration. At the end, that policy is measured once on a fixed **test** set of 20 fresh episodes (5 clean, 5 with interacting errors, 10 with ordinary errors, seeds outside train, dev and the trainer's stream), next to the Reconciler and the Intern.
+- **Result** (30 iterations × 16 candidates × 4 episodes, ~20 s on 4 cores):
+
+| Seed | dev at start | best on dev | on test | test F1 | Reconciler on test |
+|---:|---:|---:|---:|---:|---:|
+| 1 | −0.645 | +0.961 | +0.961 | 1.00 | +0.961 |
+| 2 | −0.600 | +0.961 | +0.961 | 1.00 | +0.961 |
+| 3 | +0.013 | +0.961 | +0.961 | 1.00 | +0.961 |
+
+  The same seed reproduces the same curve. REINFORCE (seed 1) reaches +0.745 on dev. **Training matches the hand-written Reconciler from a poor start; it does not beat it**, and we claim nothing more.
+- **Red team.** The app's Red team page (`redteam.py`) plays nine reward attacks (including flag-everything) and an RL attacker — a cheating policy trained with the same CEM to maximise reward without looking for errors — on the 20 test episodes. None beats silence (−0.50 on that mix); the RL attacker learns to claim nothing. This complements §8 and the R-checks; it is not part of the official verification.
+
+## 10. Limitations (honest)
 
 - **Synthetic only.** All companies, people, accounts and money are fictional; the FX series are random walks. Nothing here is evidence of fitness for real audit work, and the reward does not prove it.
 - **Simplified FX policy.** Spot rate of the policy date in the company time zone, one rounding at the end; inspired by IAS 21 from secondary sources, not a faithful implementation.
@@ -120,11 +137,11 @@ It also trained classifiers on public features to predict which invoices host er
 - **Tolerance.** Absolute `1 + conversions` minor units forgives rounding only; a solver that rounds twice can miss by more.
 - **Reward shape.** Silence on erroneous books and wild accusations on clean books both score −1; the reward cannot tell "did nothing" from "was badly wrong".
 - **Open generator.** The code is public and deterministic. `episode_id` does not reveal the seed, but anyone with unlimited compute could search seeds by regenerating and comparing records; hidden seeds should be large (64-bit).
-- **No model training.** We train nothing and claim no model improvement.
-- **Docker base image.** The Dockerfile pins `python:3.11-slim-bookworm`; pin it by digest on the build machine before release (instructions in the Dockerfile).
+- **Training is small and bounded.** The optional trainer (§9) tunes a 20-parameter rule policy, not a language model; it reaches the Reconciler's level on held-out episodes and does not exceed it. Local LLMs (Ollama) can be evaluated in the app but are not trained, and on a CPU they are often cut by the 60 s limit.
+- **Docker base image.** The Dockerfile pins `python:3.11-slim-bookworm` by digest; rebuilding on a new digest needs the pin updated by hand (instructions in the Dockerfile).
 - **The 60 s limit is real.** The brief's 60 s per episode applies to the front doors too; an LLM agent that thinks for seconds per step will be truncated. The UI pauses the clock for human practice only.
 - **Our checks are stand-ins.** The organizers' 20/20/20 check definitions were not available to us when this was written; our lists are built from the brief and may differ in detail.
 
-## 10. Tools and resources used
+## 11. Tools and resources used
 
 Python 3.11 standard library only at runtime. Fonts: Inter and JetBrains Mono (SIL Open Font License, bundled with their licenses; the UI makes no network requests, which a browser test asserts). Built with the help of AI coding assistants (Anthropic Claude; Google Antigravity/Gemini), with every result checked by the tests above.

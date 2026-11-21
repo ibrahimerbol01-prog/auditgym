@@ -254,8 +254,15 @@ def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", l
                            "env_version": ENV_VERSION, "pace": pace, "status": "running", "started": time.time(), "finished": None,
                            "episodes": [{"index": i, "seed": e["seed"], "label": e["label"], "status": "queued"} for i, e in enumerate(eps)],
                            "summary": {"episodes_done": 0}, **(meta or {})}
-    _write_json(os.path.join(folder, "run.json"), run)
     analysis = Analysis()
+    # An external program (--cmd) runs on this machine and could read run.json while the run goes on. In closed mode
+    # the reward stays with the evaluator until the run ends (brief §04), so its scores are written only at the end.
+    probe = make()
+    hide = isinstance(probe, SubprocessAgent)
+    if hide:
+        run["scores_hidden_until_end"] = True
+    held: Dict[int, Dict[str, Any]] = {}
+    _write_json(os.path.join(folder, "run.json"), run)
     emit({"type": "run_start", "run": run})
     svc = ServiceClient()
     kw = {} if time_limit is None else {"time_limit": time_limit}
@@ -308,10 +315,13 @@ def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", l
             results = svc.call({"cmd": "finalize", "run_id": run_id}).get("results") or [{}]
             score = {k: results[-1][k] for k in PUBLIC_SCORE if k in results[-1]}
             analysis.add(results[-1], action, e["label"])
-            rec.update(status="done", steps=n, seconds=round(time.perf_counter() - t0 - waited, 3), score=score)
-            run["summary"] = summarize(run["episodes"])
+            rec.update(status="done", steps=n, seconds=round(time.perf_counter() - t0 - waited, 3))
+            held[i] = score
+            if not hide:
+                rec["score"] = score
+                run["summary"] = summarize(run["episodes"])
             _write_json(os.path.join(folder, "run.json"), run)
-            emit({"type": "episode_end", "index": i, "episode": rec, "summary": run["summary"]})
+            emit({"type": "episode_end", "index": i, "episode": dict(rec, score=score), "summary": summarize([dict(e, score=held[e["index"]]) if e["index"] in held else e for e in run["episodes"]])})
         else:
             run["status"] = "done"
     except Exception as exc:  # noqa: BLE001 - a broken agent or config ends the run with a readable status
@@ -323,6 +333,9 @@ def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", l
             policy.close()
         env.close()
         run["finished"] = time.time()
+        for i, sc in held.items():                     # the run is over: the evaluator's scores may now be shown
+            run["episodes"][i]["score"] = sc
+        run.pop("scores_hidden_until_end", None)
         run["summary"] = summarize(run["episodes"])
         if run["summary"].get("episodes_done"):
             run["analysis"] = analysis.out()
