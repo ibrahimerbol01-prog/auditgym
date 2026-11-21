@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f7f8">
+<title>AuditGym — red team</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect x=%221%22 y=%221%22 width=%2230%22 height=%2230%22 rx=%228%22 fill=%22%2318181b%22/%3E%3Crect x=%225.8%22 y=%225.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%228.8%22 y=%225.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2211.8%22 y=%225.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2214.8%22 y=%225.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2217.8%22 y=%225.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2220.8%22 y=%225.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%225.8%22 y=%2211.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%228.8%22 y=%2211.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2211.8%22 y=%2211.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%228.8%22 y=%2217.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2211.8%22 y=%2220.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2214.8%22 y=%2223.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2217.8%22 y=%2220.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2220.8%22 y=%2217.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3Crect x=%2223.8%22 y=%2214.8%22 width=%222.4%22 height=%222.4%22 rx=%22.5%22 fill=%22%23fafafa%22/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/style.css">
+<script>try{if(localStorage.getItem("ag-theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/" aria-label="AuditGym, главная">
+    <svg class="lm" width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect class="lm-bg" x="1" y="1" width="30" height="30" rx="8"/><rect class="lm-px" x="5.8" y="5.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="8.8" y="5.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="11.8" y="5.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="14.8" y="5.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="17.8" y="5.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="20.8" y="5.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="5.8" y="11.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="8.8" y="11.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="11.8" y="11.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="8.8" y="17.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="11.8" y="20.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="14.8" y="23.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="17.8" y="20.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="20.8" y="17.8" width="2.4" height="2.4" rx=".5"/><rect class="lm-px" x="23.8" y="14.8" width="2.4" height="2.4" rx=".5"/></svg><span>AuditGym</span></a>
+  <a class="side-new" href="/train.html"><span aria-hidden="true">+</span> Новое обучение</a>
+  <nav class="main" aria-label="Разделы"><a href="/"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8.5 10 3l7 5.5V17h-4.5v-5h-5v5H3z"/></svg><span>Главная</span></a><a href="/train.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16h14M5 13l3-4 3 2 4-6"/></svg><span>Обучение</span></a><a href="/runs.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"/></svg><span>Запуски</span></a><a href="/play.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5"/><path d="m13 13 4 4"/></svg><span>Расследование</span></a><a href="/arena.html" aria-current="page"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 16 5v4.5c0 3.6-2.5 6.6-6 8-3.5-1.4-6-4.4-6-8V5z"/><path d="m7.2 10 2 2 3.8-4"/></svg><span>Red team</span></a><a href="/settings.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h8M15 6h2M3 14h2M9 14h8"/><circle cx="13" cy="6" r="2"/><circle cx="7" cy="14" r="2"/></svg><span>Настройки</span></a></nav>
+  <div class="side-recent" id="side-recent"></div>
+  <div class="side-foot"><span class="meta-top">ENV 1.0.0 · только CPU · без сети</span><button class="theme-t" id="theme" aria-pressed="false" aria-label="Тёмная тема"><i aria-hidden="true"></i><span>Тёмная</span></button></div>
+</div></header>
+<main id="main" tabindex="-1" class="wrap arena">
+  <header class="ar-head">
+    <div>
+      <p class="eyebrow">Red team · спецификация награды</p>
+      <h1>Попробуйте взломать награду</h1>
+      <p class="ar-sub">Девять атак и обученный RL-атакующий пытаются заработать награду, не находя ошибок. Все играют одни и те же 20 свежих эпизодов в закрытом режиме; награду считает только оценщик. Так же жюри проверяет каждую среду атакой «пометить всё».</p>
+    </div>
+    <div class="ar-act"><button class="btn primary" id="ar-go">Запустить атаку</button><p class="ar-err hidden" id="ar-err" role="alert"></p></div>
+  </header>
+
+  <section class="card ar-hero" id="ar-hero" aria-live="polite">
+    <pre class="ascii-art ar-shield" data-art="shield" aria-hidden="true"></pre>
+    <div class="ar-verdict"><span class="ar-big" id="ar-big">—</span><span class="ar-big-l" id="ar-big-l">запустите атаку, чтобы проверить награду</span></div>
+    <dl class="ar-refs">
+      <div><dt>Молчание (пол)</dt><dd class="mono" id="ar-floor">—</dd></div>
+      <div><dt>Честный Сверщик (потолок)</dt><dd class="mono" id="ar-ceil">—</dd></div>
+      <div><dt>Лучшая атака</dt><dd class="mono" id="ar-best">—</dd></div>
+    </dl>
+  </section>
+
+  <section class="card ar-lanes-card" aria-labelledby="ar-lanes-h">
+    <div class="chart-h"><div><h3 id="ar-lanes-h">Атаки</h3><p id="ar-lanes-sub">награда на 20 тестовых эпизодах · пунктир — молчание, сплошная — честный Сверщик</p></div>
+      <ul class="lgd"><li><i class="sw ref"></i>честный Сверщик</li><li><i class="sw floor"></i>молчание</li></ul></div>
+    <ol class="ar-lanes" id="ar-lanes"></ol>
+  </section>
+
+  <section class="card ar-rl-card" aria-labelledby="ar-rl-h">
+    <div class="chart-h"><div><h3 id="ar-rl-h">RL-атакующий</h3><p>тот же метод CEM, что и у аудитора, но цель — награда любой ценой: открытый режим, видит свою награду, не ищет ошибок</p></div>
+      <ul class="lgd"><li><i class="lk s1"></i>лучший кандидат</li><li><i class="lk s2"></i>среднее</li><li><i class="sw floor"></i>молчание</li></ul></div>
+    <div class="ar-rl"><div class="chart" id="ar-rl-chart"></div><div class="ar-rl-txt" id="ar-rl-txt"></div></div>
+  </section>
+
+  <p class="muted small ar-past" id="ar-past"></p>
+</main>
+<script src="/i18n.js"></script>
+<script src="/shell.js"></script>
+<script src="/arena.js"></script>
+</body>
+</html>

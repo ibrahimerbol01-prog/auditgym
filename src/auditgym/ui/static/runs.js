@@ -36,7 +36,8 @@ async function loadStatic() {
 async function refresh() {
   let data;
   try { data = await getJSON("/api/runs"); } catch { $("runs-hint").textContent = "Сервер запусков недоступен: откройте страницу через python -m auditgym.cli ui."; return; }
-  runs = (data.runs || []).filter((r) => r.kind !== "training");  // trainings live on /train.html
+  const want0 = decodeURIComponent(location.hash.slice(1));
+  runs = (data.runs || []).filter((r) => r.kind !== "training" && r.kind !== "arena" && (!r.arena || r.id === want0 || r.id === current));  // trainings: /train.html; red-team lanes: /arena.html
   const want = decodeURIComponent(location.hash.slice(1));
   if (!current || !runs.some((r) => r.id === current)) current = runs.some((r) => r.id === want) ? want : (runs[0] && runs[0].id) || null;
   renderList();

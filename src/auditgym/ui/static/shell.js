@@ -8,18 +8,18 @@
   const item = (r) => {
     const training = r.kind === "training";
     const a = document.createElement("a");
-    a.href = training ? "/train.html#run=" + encodeURIComponent(r.id) : "/runs.html#" + encodeURIComponent(r.id);
-    const v = training ? r.summary && r.summary.dev_best : r.summary && r.summary.episodes_done ? r.summary.reward : null;
+    a.href = r.kind === "arena" ? "/arena.html#" + encodeURIComponent(r.id) : training ? "/train.html#run=" + encodeURIComponent(r.id) : "/runs.html#" + encodeURIComponent(r.id);
+    const v = r.kind === "arena" ? null : training ? r.summary && r.summary.dev_best : r.summary && r.summary.episodes_done ? r.summary.reward : null;
     const dot = document.createElement("i"); dot.className = "sr-dot " + (r.status === "running" ? "run" : v == null ? "" : v > 0 ? "pos" : "neg");
     const name = document.createElement("span"); name.className = "sr-n";
     const who = NAMES[r.agent] || (/^auditor-/.test(r.agent || "") ? `Аудитор · ${r.agent.endsWith("reinforce") ? "REINFORCE" : "CEM"}` : /^llm-/.test(r.agent || "") ? "LLM · " + r.agent.slice(4) : r.agent);
-    name.textContent = training ? `Обучение · ${r.method === "reinforce" ? "REINFORCE" : "CEM"}${r.group ? " · сид " + r.seed : ""}` : `Оценка · ${who}`;
+    name.textContent = r.kind === "arena" ? "Red team · атака на награду" : training ? `Обучение · ${r.method === "reinforce" ? "REINFORCE" : "CEM"}${r.group ? " · сид " + r.seed : ""}` : `Оценка · ${who}`;
     const val = document.createElement("span"); val.className = "sr-v"; val.textContent = v == null ? "" : f2(v);
     a.append(dot, name, val);
     return a;
   };
   fetch("/api/runs", { cache: "no-store" }).then((r) => r.json()).then((d) => {
-    const runs = (d.runs || []).slice(0, 7);
+    const runs = (d.runs || []).filter((r) => !r.arena).slice(0, 7);  // an arena's lanes are listed on its own page
     if (!runs.length) return;
     const h = document.createElement("p"); h.className = "sr-h"; h.textContent = "Недавние";
     host.replaceChildren(h, ...runs.map(item));
@@ -42,6 +42,16 @@
     interacting(t) { const a = Math.round(2 + 2 * Math.sin(t * 1.6)), g = Array.from({ length: 4 }, () => Array(16).fill(" "));
       const box = (x, y, w, h) => { for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) { const edge = j === 0 || j === h - 1 ? "─" : i === 0 || i === w - 1 ? "│" : null; if (!edge) continue; const c = g[y + j][x + i]; g[y + j][x + i] = c !== " " && c !== edge ? "┼" : edge; } };
       box(a, 0, 7, 3); box(14 - 7 - a + 2, 1, 7, 3); return g.map((r) => r.join("")).join("\n"); },
+    // red team: attacks fly at a shield and bounce off
+    shield(t) { const W = 34, sh = [" ╭─────────╮", " │░░░░░░░░░│", " │░░░ ✓ ░░░│", " │░░░░░░░░░│", " ╰╮░░░░░░░╭╯", "  ╰╮░░░░░╭╯", "   ╰─────╯"];
+      const g = sh.map((r) => (r + " ".repeat(W)).slice(0, W).split(""));
+      for (let k = 0; k < 3; k++) {                      // three attacks fly in from the right and break on the shield
+        const ph = (t * 0.55 + k * 0.37) % 1, y = 1 + k * 2, hit = 13;
+        if (ph < 0.7) { const x = Math.round(W - 3 - (ph / 0.7) * (W - 3 - hit)); for (let i = 0; i < 3 && x + i < W; i++) g[y][x + i] = i ? "─" : "◂"; }
+        else if (ph < 0.82) { g[y][hit] = "✕"; if (y > 0) g[y - 1][hit + 1] = "·"; if (y + 1 < g.length) g[y + 1][hit + 1] = "·"; }
+        else if (ph < 0.92) { g[y][hit + 2] = "·"; }
+      }
+      return g.map((r) => r.join("")).join("\n"); },
     // the empty runs page: a lens sweeps across ledger lines and reads them
     scan(t) { const x = Math.round((Math.sin(t * 1.3) + 1) / 2 * 30); return [0, 1, 2, 3, 4].map((j) => { let r = ""; for (let i = 0; i < 36; i++) { const near = Math.abs(i - x - 3) < 4 && j >= 1 && j <= 3; r += near ? "█" : (i + j * 5) % 7 === 0 ? " " : "─"; } return (j === 0 ? " ".repeat(x) + "╭─────╮" : j === 4 ? " ".repeat(x) + "╰──┬──╯" : r); }).join("\n") + "\n" + " ".repeat(x + 3) + "│"; },
   };

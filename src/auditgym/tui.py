@@ -635,7 +635,8 @@ class App:
     # ---- data, read from disk at most a few times a second
     def runs(self) -> List[Dict[str, Any]]:
         if time.monotonic() - self._runs_at > 1.0:
-            self._runs, self._runs_at = list_runs(self.base), time.monotonic()
+            # the red-team arena is one row; its lanes (one evaluation per attack) stay on the app's Red team page
+            self._runs, self._runs_at = [r for r in list_runs(self.base) if not r.get("arena")], time.monotonic()
         return self._runs
 
     def run(self, run_id: str) -> Optional[Dict[str, Any]]:
@@ -913,6 +914,8 @@ class App:
 
     def run_name(self, r: Dict[str, Any]) -> str:
         tx = self.tx
+        if r.get("kind") == "arena":
+            return "Red team · " + ("attack on the reward" if self.lang == "en" else "атака на награду")
         if r.get("kind") == "training":
             name = f"{tx['training']} · {'REINFORCE' if r.get('method') == 'reinforce' else 'CEM'}"
             return name + (f" · {tx['seed']} {r['seed']}" if r.get("group") and r.get("seed") is not None else "")

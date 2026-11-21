@@ -45,6 +45,7 @@ Other entry points:
 | `python -m auditgym.cli evaluate --private DIR --findings FILE --steps N` | organizer scoring of one submission |
 | `python -m auditgym.cli build-suite` | regenerate the 10 train + 10 dev episodes (golden hashes are tested) |
 | `python -m unittest discover -s tests -q` | the test suite |
+| app → **Red team** | try to break the reward: 9 attacks (incl. the judges' flag-everything) and an RL attacker trained to win reward without finding errors, on 20 fresh test episodes; none beats silence |
 | `python train/campaign.py` | end-to-end harness check before a submission (~3 min): verify, every policy, an external agent, trainings on held-out dev, the app's API, the desktop smoke test |
 
 ## The environment in one screen

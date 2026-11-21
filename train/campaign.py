@@ -8,7 +8,7 @@
 3. an external agent as a separate program (--cmd examples/random_agent.py)
 4. trainings measured on the held-out dev episodes: CEM on 3 seeds, the same seed twice (must be identical),
    REINFORCE, CEM on the "interacting" dataset
-5. the app's HTTP API: start a training and an evaluation, refusals for busy / bad input
+5. the app's HTTP API: start a training and an evaluation, refusals for busy / bad input; the red-team arena
 6. the desktop smoke test from source
 
 Runs go to a temporary folder (not ~/.auditgym/runs). Prints one line per check and exits 1 if any fails;
@@ -148,6 +148,15 @@ def main(argv: list[str] | None = None) -> int:
     check("HTTP API: training + evaluation", st == 200 and tr.get("status") == "done" and ev.get("status") == "done" and steps == 200,
           f"evaluation reward {(ev.get('summary') or {}).get('reward')}")
     check("HTTP API: refuses busy and bad input", busy and bad, "409 while busy, 400 for an unknown policy or config")
+
+    # 5b. the red-team arena: no attack may earn reward without finding errors
+    from auditgym import redteam
+    ar = redteam.run_arena("campaign-arena", base=runs, rl_iterations=4 if args.quick else 10)
+    s = ar.get("summary") or {}
+    results["arena"] = s
+    check("red team: no exploit", ar.get("status") == "done" and s.get("exploits") == 0,
+          f"{s.get('exploits')}/{s.get('attacks')} attacks beat the bar; best attack {s.get('best_attack')} {s.get('best_attack_reward')}, "
+          f"silence {s.get('floor')}, Reconciler {s.get('ceiling')}")
 
     # 6. desktop smoke from source
     p = subprocess.run([sys.executable, os.path.join("desktop", "app.py"), "--smoke"], cwd=ROOT, env=env, capture_output=True, text=True)

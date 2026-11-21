@@ -345,7 +345,7 @@ def list_runs(base: Optional[str] = None) -> List[Dict[str, Any]]:
                 except (OSError, ValueError):
                     continue
                 out.append({k: r.get(k) for k in ("id", "kind", "agent", "model", "method", "split", "mode", "status", "started",
-                                                   "finished", "summary", "at", "iterations", "group", "model_run", "seed", "llm_model")}
+                                                   "finished", "summary", "at", "iterations", "group", "model_run", "seed", "llm_model", "arena")}
                            | {"test_reward": ((r.get("test") or {}).get("auditor") or {}).get("reward"),
                               "preset": ((r.get("config") or {}).get("dataset") or {}).get("preset")}
                            | {"episodes": len(r.get("episodes", [])),
@@ -515,6 +515,25 @@ class Jobs:
                 time.sleep(0.025)
         return {"ok": True, "run": run_id, **({"group": group, "runs": ids} if seeds else {})}
 
+    def start_arena(self, quick: bool = False) -> Dict[str, Any]:
+        """The red-team arena (auditgym.redteam): every attack on the test episodes, then an RL attacker."""
+        from . import redteam
+        with self.lock:
+            if self.busy():
+                return {"ok": False, "error": {"code": "busy", "message": "another run is in progress", "run": self.current}}
+            arena_id = new_run_id("arena", "test")
+            self.stop_ev = threading.Event()
+            self.current = arena_id
+            self.thread = threading.Thread(target=redteam.run_arena, daemon=True, kwargs=dict(
+                arena_id=arena_id, base=self.base, stop=self.stop_ev, rl_iterations=4 if quick else 10))  # always all 20 test episodes (the first 5 are clean)
+            self.thread.start()
+            path = os.path.join(self.base or runs_dir(), arena_id, "run.json")
+            for _ in range(200):
+                if os.path.exists(path) or not self.thread.is_alive():
+                    break
+                time.sleep(0.025)
+        return {"ok": True, "run": arena_id}
+
     def export(self, run_id: str, lang: str = "en") -> Dict[str, Any]:
         """Write a Markdown report of a training run to its folder (report.md) and return it."""
         r = read_run(run_id, self.base) if RUN_ID.match(run_id or "") else None
@@ -576,6 +595,9 @@ class Jobs:
         m = re.match(r"^/api/runs/([^/]+)/stop$", path)
         if m:
             res = self.stop(m.group(1))
+            return (200 if res["ok"] else 409), res
+        if path == "/api/arena":
+            res = self.start_arena(bool(b.get("quick")))
             return (200 if res["ok"] else 409), res
         m = re.match(r"^/api/runs/([^/]+)/export$", path)
         if m:
