@@ -81,7 +81,9 @@ def start_server(port: int = 0):
     from auditgym.env.adapters import make_http_server
     from auditgym.harness import Jobs
     srv, env = make_http_server(port, "open", ui=True, extra_files=data_files(), host="127.0.0.1",
-                                api=Jobs(configs=os.path.join(BASE, "data", "configs") if FROZEN else None))
+                                api=Jobs(configs=os.path.join(BASE, "data", "configs") if FROZEN else None,
+                                         # the bundle is read-only: a saved learning curve goes to the user's folder
+                                         curve=os.path.join(os.path.expanduser("~"), ".auditgym", "curve.json") if FROZEN else None))
     url = f"http://127.0.0.1:{srv.server_address[1]}/"
     threading.Thread(target=srv.serve_forever, name="auditgym-ui", daemon=True).start()
     return srv, env, url

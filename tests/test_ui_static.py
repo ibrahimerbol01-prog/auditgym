@@ -13,8 +13,8 @@ import unittest
 from auditgym.cli import ui_extra_files
 from auditgym.env.adapters import STATIC_DIR, STATIC_WHITELIST, make_http_server
 
-HTML = ("index.html", "report.html", "runs.html")
-JS = {"index.html": "app.js", "report.html": "report.js", "runs.html": "runs.js"}
+HTML = ("index.html", "report.html", "runs.html", "train.html")
+JS = {"index.html": "app.js", "report.html": "report.js", "runs.html": "runs.js", "train.html": "train.js"}
 
 
 def read(name):

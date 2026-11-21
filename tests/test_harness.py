@@ -124,6 +124,15 @@ class RunsApiTests(unittest.TestCase):
         self.assertEqual(st["steps"][-1]["tool"], "submit")
         self.assertEqual(self.req("GET", "/api/curve"), (200, {"ok": True, "curve": None}))
 
+    def test_training_settings_are_validated(self):
+        for body in ({"method": "lora"}, {"iterations": 10_000}, {"population": 2}, {"episodes_per_candidate": 0},
+                     {"dataset": {"preset": "private"}}, {"pace": 9}, {"seed": "1; rm -rf /"}, {"iterations": True}):
+            code, res = self.req("POST", "/api/train", body)
+            self.assertEqual(code, 400, body)
+            self.assertEqual(res["error"]["code"], "bad_arguments")
+        self.assertEqual(self.req("POST", "/api/train", {"method": "cem"}, {"Origin": "http://evil.example"})[0], 403)
+        self.assertEqual(self.req("POST", "/api/train/../../x/curve", {})[0], 404)
+
     def test_refuses_bad_input_and_foreign_origins(self):
         self.assertEqual(self.req("POST", "/api/runs", {"policy": "oracle"})[0], 400)
         self.assertEqual(self.req("POST", "/api/runs", {"policy": "reconcile", "cmd": "rm -rf /"})[1].get("run", "")[:9], "reconcile")

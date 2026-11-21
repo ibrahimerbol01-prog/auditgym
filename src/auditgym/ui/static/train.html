@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f7f8">
+<title>AuditGym — обучение аудитора</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23131210%27/%3E%3Crect x=%274.5%27 y=%274.5%27 width=%2723%27 height=%2723%27 rx=%275%27 fill=%27none%27 stroke=%27%23cfb07a%27 stroke-width=%271.4%27/%3E%3Cpath d=%27M9.5 11.5h13M9.5 16h7%27 stroke=%27%23efe9dc%27 stroke-width=%271.5%27 stroke-linecap=%27round%27/%3E%3Cpath d=%27M17 20.5l2.4 2.4L23.5 18.5%27 stroke=%27%23cfb07a%27 stroke-width=%271.8%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/style.css">
+<script>try{if(localStorage.getItem("ag-theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Перейти к содержимому</a>
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <symbol id="tm-agree" viewBox="0 0 16 16"><path pathLength="1" d="M2.4 8.6c1.4.8 2.5 2.2 3.5 3.9C7.8 8.4 10.3 5.4 13.7 2.9"/></symbol>
+  <symbol id="tm-lock" viewBox="0 0 16 16"><path d="M4.5 7.2V5.4a3.5 3.5 0 0 1 7 0v1.8M3.4 7.2h9.2v6.4H3.4z"/></symbol>
+</defs></svg>
+<header class="top"><div class="wrap">
+  <a class="brand" href="/" aria-label="AuditGym, главная">
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><path class="bl" d="M8.5 11h15M8.5 15.5h8"/><path d="M16.5 21.2c1.1.6 1.9 1.6 2.6 2.8 1.5-3 3.4-5.3 5.9-7.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AuditGym</span></a>
+  <nav class="main" aria-label="Разделы"><a href="/">Расследование</a><a href="/train.html" aria-current="page">Обучение</a><a href="/runs.html">Запуски</a><a href="/report.html">Отчёт</a></nav>
+  <span class="meta-top">ENV 1.0.0 · только CPU · без сети</span>
+  <button class="theme-t" id="theme" aria-pressed="false" aria-label="Тёмная тема"><i aria-hidden="true"></i><span>Тёмная</span></button>
+</div></header>
+
+<main id="main" tabindex="-1" class="wrap train">
+  <!-- ============ wizard ============ -->
+  <section id="wiz" class="tr-wiz" aria-labelledby="wiz-h">
+    <div class="tr-head">
+      <h1 id="wiz-h">Обучение аудитора</h1>
+      <p class="muted">Политика учится на свежих эпизодах, а улучшение засчитывается только на 10 отложенных эпизодах dev в закрытом режиме — рядом с базовыми политиками.</p>
+    </div>
+    <div class="tr-grid">
+      <section class="card tr-card" aria-label="Мастер настройки">
+        <ol class="stepper" id="stepper" aria-label="Шаги настройки">
+          <li><button class="st" id="st-1" data-step="1"><span class="st-n" aria-hidden="true">1</span><span class="st-l">Модель</span></button></li>
+          <li><button class="st" id="st-2" data-step="2"><span class="st-n" aria-hidden="true">2</span><span class="st-l">Данные</span></button></li>
+          <li><button class="st" id="st-3" data-step="3"><span class="st-n" aria-hidden="true">3</span><span class="st-l">Помощник</span></button></li>
+          <li><button class="st" id="st-4" data-step="4"><span class="st-n" aria-hidden="true">4</span><span class="st-l">Запуск</span></button></li>
+        </ol>
+
+        <div class="tr-body">
+          <!-- step 1: model -->
+          <section class="pane" id="p-1" aria-labelledby="p1-h">
+            <div class="pane-h"><h2 id="p1-h">Какую модель обучаем</h2><p>Обучается небольшая политика аудитора: пара десятков чисел решает, какие таблицы читать, какие проверки включить и насколько строго. Работает на процессоре.</p></div>
+            <fieldset class="opts tr-opts"><legend class="sr-only">Метод обучения</legend>
+              <label class="opt"><input type="radio" name="method" value="cem" id="m-cem" checked><span><b>Аудитор · CEM <em class="rec-tag">рекомендуется</em></b><small>Кросс-энтропийный поиск: пробует популяцию политик и сдвигается к лучшим. Устойчив и быстро сходится на CPU.</small></span></label>
+              <label class="opt"><input type="radio" name="method" value="reinforce" id="m-rf"><span><b>Аудитор · REINFORCE</b><small>Градиент политики по награде. Шумнее и медленнее — полезен для сравнения методов.</small></span></label>
+            </fieldset>
+            <div class="llm-box">
+              <div class="llm-h"><h3>Локальные модели Ollama</h3><span class="badge dim">только оценка</span></div>
+              <p class="muted small" id="llm-note">Ищем модели через помощника…</p>
+              <ul class="llm-list" id="llm-list" aria-label="Найденные модели"></ul>
+            </div>
+          </section>
+
+          <!-- step 2: data -->
+          <section class="pane hidden" id="p-2" aria-labelledby="p2-h">
+            <div class="pane-h"><h2 id="p2-h">На чём учится</h2><p>Учебные эпизоды создаются заново из сида — это не эпизоды dev и не учебного набора.</p></div>
+            <fieldset class="seg3"><legend class="f-l">Учебные эпизоды</legend>
+              <label class="opt"><input type="radio" name="preset" value="mixed" id="d-mixed" checked><span><b>Смешанные</b><small>все типы ошибок вперемешку</small></span></label>
+              <label class="opt"><input type="radio" name="preset" value="simple" id="d-simple"><span><b>Простые</b><small>по одной ошибке, учится быстрее</small></span></label>
+              <label class="opt"><input type="radio" name="preset" value="interacting" id="d-inter"><span><b>С взаимодействиями</b><small>ошибки влияют друг на друга</small></span></label>
+            </fieldset>
+            <div class="fgrid tr-fg">
+              <label class="f">Итераций<input id="f-iter" type="number" min="2" max="200" step="1" value="30" inputmode="numeric"></label>
+              <label class="f">Популяция<input id="f-pop" type="number" min="4" max="64" step="1" value="16" inputmode="numeric"></label>
+              <label class="f">Эпизодов на кандидата<input id="f-epc" type="number" min="1" max="10" step="1" value="4" inputmode="numeric"></label>
+              <label class="f">Сид<input id="f-seed" type="number" min="0" max="1000000" step="1" value="1" inputmode="numeric"></label>
+            </div>
+            <details class="adv"><summary>Дополнительно</summary>
+              <div class="fgrid tr-fg three">
+                <label class="f">Доля элиты<input id="f-elite" type="number" min="0.05" max="0.5" step="0.05" value="0.25" inputmode="decimal"></label>
+                <label class="f">Проверка на dev, каждые N итераций<input id="f-every" type="number" min="1" max="20" step="1" value="2" inputmode="numeric"></label>
+                <label class="f">Темп показа, с на итерацию<input id="f-pace" type="number" min="0" max="0.5" step="0.05" value="0" inputmode="decimal"></label>
+              </div>
+            </details>
+            <p class="f-err hidden" id="f-err" role="alert"></p>
+            <div class="lock-box">
+              <svg class="tm lg" aria-hidden="true"><use href="#tm-lock"/></svg>
+              <div><b>Оценка зафиксирована: 10 отложенных эпизодов dev, закрытый режим</b>
+                <p>Тренер их не видит и награду на них не получает. Лучшая политика проверяется на них так же, как жюри проверяет любого агента, поэтому улучшение — честное сравнение, а не подгонка.</p></div>
+            </div>
+          </section>
+
+          <!-- step 3: assistant -->
+          <section class="pane hidden" id="p-3" aria-labelledby="p3-h">
+            <div class="pane-h"><h2 id="p3-h">Помощник настройки</h2><p>Смотрит на ваш компьютер и локальные модели и предлагает настройки. Ничего не отправляет в сеть.</p></div>
+            <p class="muted small" id="sc-state" role="status">Спрашиваем помощника…</p>
+            <div class="sc-grid" id="sc-body">
+              <div class="sc-col">
+                <h3>Компьютер</h3>
+                <dl class="kv-r sc-kv" id="sc-machine"></dl>
+              </div>
+              <div class="sc-col sc-rec">
+                <h3>Рекомендация</h3>
+                <p class="sc-big" id="sc-rec">—</p>
+                <ul class="sc-why" id="sc-why"></ul>
+                <div class="row"><button class="btn primary small" id="sc-apply">Применить</button><button class="btn outline small" id="sc-explain">Объяснить</button><span class="muted small" id="sc-applied" role="status"></span></div>
+              </div>
+            </div>
+            <div class="sc-expl hidden" id="sc-expl" aria-live="polite"></div>
+          </section>
+
+          <!-- step 4: launch -->
+          <section class="pane hidden" id="p-4" aria-labelledby="p4-h">
+            <div class="pane-h"><h2 id="p4-h">Запуск</h2><p>Обучение идёт на этом компьютере; графики появятся сразу, остановить можно в любой момент.</p></div>
+            <ol class="go-steps">
+              <li><b>Учится</b><span id="go-train">—</span></li>
+              <li><b>Проверяется</b><span id="go-eval">—</span></li>
+              <li><b>Сравнивается</b><span>со Сверщиком (ручные правила) и Стажёром (случайные действия)</span></li>
+            </ol>
+            <div class="go-see">
+              <h3>Что будет на экране</h3>
+              <ul>
+                <li><b>Награда на dev</b> — главный график, рядом линии Сверщика и Стажёра</li>
+                <li><b>Обучение</b> — награда популяции, F1, точность и полнота, ложные находки, шаги, разброс σ</li>
+                <li><b>Выученная политика</b> — какие таблицы читает аудитор и какие проверки включил</li>
+                <li><b>Таблица значений</b> — все точки графиков числами</li>
+              </ul>
+            </div>
+            <p class="go-est" id="go-est"></p>
+            <p class="f-err hidden" id="go-err" role="alert"></p>
+          </section>
+        </div>
+
+        <div class="tr-foot">
+          <button class="btn ghost small" id="back">Назад</button>
+          <span class="tr-foot-n muted small" id="foot-n">Шаг 1 из 4</span>
+          <button class="btn primary small" id="next">Далее</button>
+          <button class="btn primary small hidden" id="go">Запустить обучение</button>
+        </div>
+      </section>
+
+      <aside class="tr-side">
+        <section class="card tr-sum" aria-labelledby="sum-h">
+          <h2 id="sum-h">Конфигурация</h2>
+          <dl class="kv-r" id="sum"></dl>
+          <p class="muted small sum-cmd-l">то же в терминале</p>
+          <pre class="cmd" id="sum-cmd"></pre>
+        </section>
+        <section class="card tr-recent" aria-labelledby="rec-h">
+          <h2 id="rec-h">Недавние обучения</h2>
+          <p class="muted small" id="rec-note">Загрузка…</p>
+          <ol class="run-list" id="recent" aria-label="Недавние обучения"></ol>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ telemetry dashboard ============ -->
+  <section id="dash" class="tr-dash hidden" aria-labelledby="d-title">
+    <div class="con-head">
+      <div class="con-title"><h1 id="d-title">Обучение</h1>
+        <p class="con-sub"><span class="badge" id="d-status"></span><span class="sep" aria-hidden="true">·</span><span id="d-cfg"></span><span class="sep" aria-hidden="true">·</span><span class="mono" id="d-id"></span></p></div>
+      <span class="con-sp"></span>
+      <div class="row">
+        <button class="btn outline small hidden" id="d-stop">Остановить</button>
+        <button class="btn outline small" id="d-save">Сохранить кривую</button>
+        <button class="btn ghost small" id="d-new">Новое обучение</button>
+      </div>
+    </div>
+    <p class="d-msg hidden" id="d-msg" role="status"></p>
+    <div class="tr-dash-b" id="dash-body">
+
+    <section class="kpis card tr-kpis" aria-label="Показатели обучения">
+      <div class="kpi main"><span class="k">Лучшая награда на dev</span><span class="v" id="k-best">—</span><span class="d" id="k-best-d"></span></div>
+      <div class="kpi"><span class="k">Итерация</span><span class="v" id="k-it">—</span><span class="d" id="k-it-d"></span></div>
+      <div class="kpi"><span class="k">Средняя на обучении</span><span class="v" id="k-mean">—</span><span class="d" id="k-mean-d">открытый режим</span></div>
+      <div class="kpi"><span class="k">Эпизодов пройдено</span><span class="v" id="k-eps">—</span><span class="d" id="k-eps-d"></span></div>
+      <div class="kpi"><span class="k">Эпизодов в секунду</span><span class="v" id="k-rate">—</span><span class="d">последняя итерация</span></div>
+      <div class="kpi"><span class="k">Время</span><span class="v" id="k-time">—</span><span class="d" id="k-time-d"></span></div>
+      <div class="kpi-prog"><div class="segs" id="d-segs" aria-hidden="true"></div><span class="d" id="k-prog"></span></div>
+    </section>
+
+    <div class="tr-charts">
+      <section class="card chart-card c-main" aria-labelledby="ch1-h">
+        <div class="chart-h"><div><h3 id="ch1-h">Награда на отложенных эпизодах</h3><p>10 эпизодов dev · закрытый режим · лучшая политика на итерации</p></div>
+          <ul class="lgd" aria-label="Легенда"><li><i class="lk s1"></i>dev</li><li><i class="sw ref"></i>базовые политики</li></ul></div>
+        <div class="chart" id="ch-dev"></div>
+      </section>
+      <section class="card pol-card" aria-labelledby="pol-h">
+        <div class="chart-h"><div><h3 id="pol-h">Выученная политика</h3><p id="pol-sub">появится после первой проверки</p></div></div>
+        <ul class="pol-list" id="pol" tabindex="0" aria-labelledby="pol-h"></ul>
+      </section>
+      <section class="card chart-card c-half" aria-labelledby="ch2-h">
+        <div class="chart-h"><div><h3 id="ch2-h">Награда на обучении</h3><p>по популяции · открытый режим</p></div>
+          <ul class="lgd" aria-label="Легенда"><li><i class="lk s3"></i>лучший</li><li><i class="lk s2"></i>элита</li><li><i class="lk s1"></i>среднее</li></ul></div>
+        <div class="chart" id="ch-train"></div>
+      </section>
+      <section class="card chart-card c-half" aria-labelledby="ch3-h">
+        <div class="chart-h"><div><h3 id="ch3-h">Качество находок на dev</h3><p>от 0 до 1</p></div>
+          <ul class="lgd" aria-label="Легенда"><li><i class="lk s1"></i>F1</li><li><i class="lk s2"></i>точность</li><li><i class="lk s3"></i>полнота</li></ul></div>
+        <div class="chart" id="ch-q"></div>
+      </section>
+      <section class="card chart-card c-third" aria-labelledby="ch4-h">
+        <div class="chart-h"><div><h3 id="ch4-h">Ложные находки</h3><p>на эпизод dev</p></div></div>
+        <div class="chart" id="ch-fp"></div>
+      </section>
+      <section class="card chart-card c-third" aria-labelledby="ch5-h">
+        <div class="chart-h"><div><h3 id="ch5-h">Шаги</h3><p>на эпизод dev, из 100</p></div></div>
+        <div class="chart" id="ch-steps"></div>
+      </section>
+      <section class="card chart-card c-third" aria-labelledby="ch6-h">
+        <div class="chart-h"><div><h3 id="ch6-h">Разброс поиска σ</h3><p>сужается, когда метод уверен</p></div></div>
+        <div class="chart" id="ch-sigma"></div>
+      </section>
+    </div>
+
+    <details class="card table-card tr-table" id="tbl-box">
+      <summary><span class="tbl-h">Таблица значений</span><span class="muted small" id="tbl-n"></span></summary>
+      <div class="scroll tbl-scroll"><table class="eps-t tr-t"><caption class="sr-only">Значения по итерациям</caption>
+        <thead><tr><th scope="col" class="num">Итерация</th><th scope="col" class="num">Среднее</th><th scope="col" class="num">Элита</th><th scope="col" class="num">Лучший</th><th scope="col" class="num">σ</th><th scope="col" class="num">dev</th><th scope="col" class="num">F1</th><th scope="col" class="num">Точность</th><th scope="col" class="num">Полнота</th><th scope="col" class="num">Ложных</th><th scope="col" class="num">Шагов</th><th scope="col" class="num">Эпизодов</th><th scope="col" class="num">Время</th></tr></thead>
+        <tbody id="tbl"></tbody></table></div>
+    </details>
+    </div>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
+  </section>
+</main>
+<footer class="foot-site"><div class="wrap"><span>AuditGym · Genesis Hackathon 2026 · FinTech</span><span>обучение только на CPU · без сети и платных API · улучшение — только на отложенных данных</span></div></footer>
+<script src="/train.js"></script>
+</body>
+</html>

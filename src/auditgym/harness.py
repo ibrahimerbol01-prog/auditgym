@@ -33,6 +33,7 @@ from .version import ENV_VERSION
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BUILTIN = {"reconcile": ReconcilePolicy, "random": RandomPolicy, "flag_all": FlagAllPolicy}
 SPLITS = ("dev", "train")
+TRAIN_PRESETS = ("mixed", "simple", "interacting")
 RUN_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
 PUBLIC_SCORE = ("status", "reward", "precision", "recall", "f1", "tp", "fp", "fn", "inspection_steps")
 
@@ -289,7 +290,8 @@ def list_runs(base: Optional[str] = None) -> List[Dict[str, Any]]:
                         r = json.load(fh)
                 except (OSError, ValueError):
                     continue
-                out.append({k: r.get(k) for k in ("id", "kind", "agent", "split", "mode", "status", "started", "finished", "summary")}
+                out.append({k: r.get(k) for k in ("id", "kind", "agent", "model", "method", "split", "mode", "status", "started",
+                                                   "finished", "summary", "at", "iterations")}
                            | {"episodes": len(r.get("episodes", [])),
                               "rewards": [(e.get("score") or {}).get("reward") for e in r.get("episodes", [])]})
     return sorted(out, key=lambda r: r.get("started") or 0, reverse=True)
@@ -367,8 +369,64 @@ class Jobs:
             return {"ok": True}
         return {"ok": False, "error": {"code": "not_running", "message": "this run is not running"}}
 
+    def start_train(self, body: Any) -> Dict[str, Any]:
+        """Start a training job (auditgym.learner) from the app. Every setting is checked: the browser can only
+        choose among the trainer's own options."""
+        b = body if isinstance(body, dict) else {}
+        def num(key, lo, hi, default, integer=True):
+            v = b.get(key, default)
+            ok = isinstance(v, (int, float)) and not isinstance(v, bool) and lo <= v <= hi and (not integer or float(v).is_integer())
+            if not ok:
+                raise ValueError(f"{key} must be {'an integer ' if integer else ''}in {lo}..{hi}")
+            return int(v) if integer else float(v)
+        try:
+            method = b.get("method", "cem")
+            if method not in ("cem", "reinforce"):
+                raise ValueError("method must be cem or reinforce")
+            preset = (b.get("dataset") or {}).get("preset", "mixed") if isinstance(b.get("dataset", {}), dict) else None
+            if preset not in TRAIN_PRESETS:
+                raise ValueError("dataset.preset must be one of " + ", ".join(TRAIN_PRESETS))
+            config = {"method": method, "iterations": num("iterations", 2, 200, 30), "population": num("population", 4, 64, 16),
+                      "episodes_per_candidate": num("episodes_per_candidate", 1, 10, 4),
+                      "elite_frac": num("elite_frac", 0.05, 0.5, 0.25, integer=False), "seed": num("seed", 0, 1_000_000, 1),
+                      "eval_every": num("eval_every", 1, 20, 2), "pace": num("pace", 0, 0.5, 0.0, integer=False),
+                      "dataset": {"preset": preset}}
+        except ValueError as exc:
+            return {"ok": False, "error": {"code": "bad_arguments", "message": str(exc)}}
+        from . import learner  # imported lazily: the evaluation-only app does not need it
+        with self.lock:
+            if self.busy():
+                return {"ok": False, "error": {"code": "busy", "message": "another run is in progress", "run": self.current}}
+            run_id = new_run_id(f"auditor-{method}", "train")
+            self.stop_ev = threading.Event()
+            self.current = run_id
+            self.thread = threading.Thread(target=learner.train, daemon=True,
+                                           kwargs=dict(config=config, run_id=run_id, base=self.base, stop=self.stop_ev))
+            self.thread.start()
+            path = os.path.join(self.base or runs_dir(), run_id, "run.json")
+            for _ in range(200):
+                if os.path.exists(path) or not self.thread.is_alive():
+                    break
+                time.sleep(0.025)
+        return {"ok": True, "run": run_id}
+
+    def save_curve(self, run_id: str) -> Dict[str, Any]:
+        """Copy a finished training run's learning curve to train/curve.json (shown on the runs page, T-1)."""
+        r = read_run(run_id, self.base)
+        if not r or r.get("kind") != "training":
+            return {"ok": False, "error": {"code": "not_found", "message": "no such training run"}}
+        points = [{"iteration": p["i"], "train_reward": p.get("train_mean"),
+                   **({"dev_reward": p["dev"]["reward"], "steps": p["dev"].get("steps")} if p.get("dev") else {})}
+                  for p in r.get("points", [])]
+        os.makedirs(os.path.dirname(self.curve_path), exist_ok=True)
+        _write_json(self.curve_path, {"points": points, "config": r.get("config"), "run": run_id, "env_version": r.get("env_version")})
+        return {"ok": True, "path": self.curve_path}
+
     # HTTP routes: return (status, json)
     def get(self, path: str, query: Dict[str, str]):
+        if path == "/api/scout":
+            from . import scout as _scout
+            return 200, {"ok": True, "scout": _scout.scout(explain=query.get("explain") == "1")}
         if path == "/api/curve":  # the trainer's learning curve (T10), or null until it has run
             try:
                 with open(self.curve_path, encoding="utf-8") as fh:
@@ -398,6 +456,13 @@ class Jobs:
         if m:
             res = self.stop(m.group(1))
             return (200 if res["ok"] else 409), res
+        if path == "/api/train":
+            res = self.start_train(body)
+            return (200 if res["ok"] else (409 if res["error"]["code"] == "busy" else 400)), res
+        m = re.match(r"^/api/train/([^/]+)/curve$", path)
+        if m:
+            res = self.save_curve(m.group(1))
+            return (200 if res["ok"] else 404), res
         return None
 
 

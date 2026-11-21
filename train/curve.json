@@ -1,0 +1,309 @@
+{
+ "points": [
+  {
+   "iteration": 0,
+   "train_reward": -0.4459,
+   "dev_reward": -0.6451,
+   "steps": 18.4
+  },
+  {
+   "iteration": 1,
+   "train_reward": -0.5534
+  },
+  {
+   "iteration": 2,
+   "train_reward": -0.4342,
+   "dev_reward": -0.257,
+   "steps": 18.2
+  },
+  {
+   "iteration": 3,
+   "train_reward": -0.5966
+  },
+  {
+   "iteration": 4,
+   "train_reward": -0.3046,
+   "dev_reward": 0.5823,
+   "steps": 18.2
+  },
+  {
+   "iteration": 5,
+   "train_reward": -0.3635
+  },
+  {
+   "iteration": 6,
+   "train_reward": -0.4673,
+   "dev_reward": 0.5823,
+   "steps": 18.2
+  },
+  {
+   "iteration": 7,
+   "train_reward": -0.4824
+  },
+  {
+   "iteration": 8,
+   "train_reward": -0.0503,
+   "dev_reward": 0.0005,
+   "steps": 7.8
+  },
+  {
+   "iteration": 9,
+   "train_reward": 0.0615
+  },
+  {
+   "iteration": 10,
+   "train_reward": -0.0832,
+   "dev_reward": 0.0093,
+   "steps": 2.9
+  },
+  {
+   "iteration": 11,
+   "train_reward": 0.2906
+  },
+  {
+   "iteration": 12,
+   "train_reward": -0.2031,
+   "dev_reward": 0.2271,
+   "steps": 14.1
+  },
+  {
+   "iteration": 13,
+   "train_reward": -0.2573
+  },
+  {
+   "iteration": 14,
+   "train_reward": 0.1116,
+   "dev_reward": 0.7071,
+   "steps": 19.5
+  },
+  {
+   "iteration": 15,
+   "train_reward": -0.3096
+  },
+  {
+   "iteration": 16,
+   "train_reward": 0.1953,
+   "dev_reward": 0.7073,
+   "steps": 19.4
+  },
+  {
+   "iteration": 17,
+   "train_reward": -0.2988
+  },
+  {
+   "iteration": 18,
+   "train_reward": 0.2473,
+   "dev_reward": 0.932,
+   "steps": 20.7
+  },
+  {
+   "iteration": 19,
+   "train_reward": 0.4273
+  },
+  {
+   "iteration": 20,
+   "train_reward": 0.2307,
+   "dev_reward": 0.932,
+   "steps": 20.7
+  },
+  {
+   "iteration": 21,
+   "train_reward": 0.0742
+  },
+  {
+   "iteration": 22,
+   "train_reward": 0.2893,
+   "dev_reward": 0.932,
+   "steps": 20.7
+  },
+  {
+   "iteration": 23,
+   "train_reward": 0.4111
+  },
+  {
+   "iteration": 24,
+   "train_reward": 0.2188,
+   "dev_reward": 0.9606,
+   "steps": 20.7
+  },
+  {
+   "iteration": 25,
+   "train_reward": 0.2586
+  },
+  {
+   "iteration": 26,
+   "train_reward": 0.3828,
+   "dev_reward": 0.932,
+   "steps": 20.7
+  },
+  {
+   "iteration": 27,
+   "train_reward": 0.6444
+  },
+  {
+   "iteration": 28,
+   "train_reward": 0.6877,
+   "dev_reward": 0.932,
+   "steps": 20.7
+  },
+  {
+   "iteration": 29,
+   "train_reward": 0.7821,
+   "dev_reward": 0.932,
+   "steps": 20.7
+  }
+ ],
+ "config": {
+  "method": "cem",
+  "iterations": 30,
+  "population": 16,
+  "episodes_per_candidate": 4,
+  "elite_frac": 0.25,
+  "seed": 1,
+  "dataset": {
+   "preset": "mixed"
+  },
+  "eval_every": 2,
+  "pace": 0.0
+ },
+ "run": "auditor-cem-train-20261121-083516",
+ "env_version": "1.0.0",
+ "baselines": {
+  "reconcile": 0.9606,
+  "random": -1.0
+ },
+ "best": {
+  "i": 24,
+  "dev": {
+   "reward": 0.9606,
+   "f1": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "fp": 0.0,
+   "steps": 20.7,
+   "episodes": 10
+  },
+  "describe": [
+   {
+    "key": "read_fx",
+    "label": "Читать курсы валют",
+    "value": "да",
+    "on": true
+   },
+   {
+    "key": "read_invoices",
+    "label": "Читать счета",
+    "value": "да",
+    "on": true
+   },
+   {
+    "key": "read_payments",
+    "label": "Читать платежи",
+    "value": "да",
+    "on": true
+   },
+   {
+    "key": "read_ledger",
+    "label": "Читать главную книгу",
+    "value": "да",
+    "on": true
+   },
+   {
+    "key": "pages_fx",
+    "label": "Страниц курсов",
+    "value": "до 14",
+    "on": true
+   },
+   {
+    "key": "pages_invoices",
+    "label": "Страниц счетов",
+    "value": "до 24",
+    "on": true
+   },
+   {
+    "key": "pages_payments",
+    "label": "Страниц платежей",
+    "value": "все",
+    "on": true
+   },
+   {
+    "key": "pages_ledger",
+    "label": "Страниц главной книги",
+    "value": "все",
+    "on": true
+   },
+   {
+    "key": "check_duplicate",
+    "label": "Проверка дублей счетов",
+    "value": "вкл · полное совпадение строк",
+    "on": true
+   },
+   {
+    "key": "check_payment",
+    "label": "Проверка разноски платежей",
+    "value": "вкл · только по ссылке на один счёт",
+    "on": true
+   },
+   {
+    "key": "check_fx",
+    "label": "Проверка курсов",
+    "value": "вкл · допуск 4341 · местное время",
+    "on": true
+   },
+   {
+    "key": "check_period",
+    "label": "Проверка периода",
+    "value": "вкл · местное время",
+    "on": true
+   },
+   {
+    "key": "dup_match",
+    "label": "Критерий дубля",
+    "value": "полное совпадение строк",
+    "on": true
+   },
+   {
+    "key": "fx_tolerance",
+    "label": "Допуск по курсу",
+    "value": "4341 мин. ед.",
+    "on": true
+   },
+   {
+    "key": "fx_local_time",
+    "label": "Дата курса",
+    "value": "местное время",
+    "on": true
+   },
+   {
+    "key": "period_local_time",
+    "label": "Дата для периода",
+    "value": "местное время",
+    "on": true
+   },
+   {
+    "key": "payment_strict",
+    "label": "Строгость разноски",
+    "value": "строго",
+    "on": true
+   },
+   {
+    "key": "evidence_rich",
+    "label": "Доказательства",
+    "value": "строка книги и курс",
+    "on": true
+   },
+   {
+    "key": "min_amount",
+    "label": "Порог суммы",
+    "value": "от 2970 мин. ед.",
+    "on": true
+   },
+   {
+    "key": "max_findings",
+    "label": "Предел находок",
+    "value": "24",
+    "on": true
+   }
+  ]
+ }
+}
