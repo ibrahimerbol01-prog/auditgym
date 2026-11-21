@@ -143,7 +143,9 @@ def smoke() -> int:
             if run.get("status") not in (None, "running"):
                 break
             time.sleep(0.1)
-        assert run.get("status") == "done" and run["summary"]["reward"] > 0.5, f"run: {str(run)[:300]}"
+        why = [(e.get("status"), e.get("error")) for e in run.get("episodes", [])]
+        assert run.get("status") == "done" and run["summary"]["reward"] > 0.5, \
+            f"run {run.get('status')}: error={run.get('error')!r} episodes={str(why)[:400]}"
     finally:
         stop_server(srv, env)
     return 0
