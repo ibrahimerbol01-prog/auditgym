@@ -121,6 +121,7 @@ Type=Application
 Name=AuditGym
 Comment=RL environment for audit agents (offline)
 Exec=$DEST/AuditGym/AuditGym
+Icon=$DEST/AuditGym/_internal/data/icon.png
 Terminal=false
 Categories=Education;Development;
 EOF

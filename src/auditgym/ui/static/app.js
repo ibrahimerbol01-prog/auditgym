@@ -299,8 +299,8 @@ function showResult(rep, reward, truncated) {
   const tiles = $("r-tiles"); tiles.textContent = "";
   const t = (label, value, note) => tiles.append(el("div", { class: "card" }, el("div", { class: "tl" }, label), el("div", { class: "disp" }, value), el("div", { class: "tn" }, note)));
   if (rep && rep.status === "invalid_structure") { t("Статус", "−1", "неверная структура: " + (rep.error || "")); }
-  t("Precision", rep ? rep.precision.toFixed(3) : "—", rep ? `совпало ${rep.tp} из ${rep.tp + rep.fp}` : "");
-  t("Recall", rep ? rep.recall.toFixed(3) : "—", rep ? `найдено ${rep.tp} из ${rep.tp + rep.fn}` : "");
+  t("Точность · precision", rep ? rep.precision.toFixed(3) : "—", rep ? `совпало ${rep.tp} из ${rep.tp + rep.fp}` : "");
+  t("Полнота · recall", rep ? rep.recall.toFixed(3) : "—", rep ? `найдено ${rep.tp} из ${rep.tp + rep.fn}` : "");
   t("F1", rep ? f1.toFixed(3) : "—", "2·TP / (2·TP + FP + FN)");
   t("Шаги расследования", steps, "+ 1 отправка");
   t("Цена шагов", "−" + (0.002 * steps).toFixed(3), "0.002 за каждый шаг");

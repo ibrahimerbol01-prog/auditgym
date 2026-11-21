@@ -46,17 +46,28 @@ async function refresh() {
   timer = setTimeout(refresh, run && run.status === "running" ? 700 : 4000);
 }
 
+function strip(rewards) {  // one tiny bar per episode, above or below a hairline zero
+  const w = el("span", { class: "ri-strip", "aria-hidden": "true" });
+  for (const v of rewards) w.append(el("span", { class: "sl" }, el("i", { class: v == null ? "" : v > 0 ? "pos" : "neg", style: v == null ? "height:0" : `height:${Math.max(2, Math.abs(v) * 9)}px;${v > 0 ? "bottom:50%" : "top:50%"}` })));
+  return w;
+}
+
 function renderList() {
   const ol = $("run-list"); ol.replaceChildren();
   for (const r of runs) {
     const s = r.summary || {}; const [st, cls] = STATUS[r.status] || [r.status, "dim"];
     const b = el("button", { class: "run-i" + (r.id === current ? " on" : ""), "aria-current": r.id === current ? "true" : "false", onclick: () => { current = r.id; location.hash = r.id; drawnFor = ""; refresh(); } },
-      el("span", { class: "ri-top" }, el("b", {}, agentName(r.agent)), el("span", { class: "badge " + cls }, st)),
+      el("span", { class: "ri-top" }, el("b", {}, agentName(r.agent)), el("span", { class: "badge " + cls }, (r.status === "running" ? "● " : "") + st)),
       el("span", { class: "ri-sub" }, `${r.split} · ${s.episodes_done || 0}/${r.episodes} · ${when(r.started)}`),
-      el("span", { class: "ri-v mono" }, s.episodes_done ? f2(s.reward) : "—"));
+      el("span", { class: "ri-v mono " + (s.episodes_done ? (s.reward > 0 ? "pos" : "neg") : "") }, s.episodes_done ? f2(s.reward) : "—"),
+      strip(r.rewards || []));
     ol.append(el("li", {}, b));
   }
 }
+
+const tick = (kind) => { const t = svg("svg", { class: "tm sm " + (kind === "exc" ? "exc" : "") + " p", viewBox: "0 0 16 16", "aria-hidden": "true" }); svg("use", { href: "#tm-" + kind }, t); return t; };
+const row = (k, v, cls = "") => el("div", { class: "fr " + cls }, el("span", {}, k), el("b", {}, v));
+const tile = (label, value, note, cls = "") => el("div", { class: "card" }, el("span", { class: "tl" }, label), el("span", { class: "disp " + cls }, value), el("span", { class: "tn" }, note));
 
 function render() {
   $("empty").classList.toggle("hidden", !!run);
@@ -67,17 +78,32 @@ function render() {
   $("d-id").textContent = run.id;
   $("d-status").className = "badge " + cls; $("d-status").textContent = (run.status === "running" ? "● " : "") + st;
   $("d-stop").classList.toggle("hidden", run.status !== "running");
-  $("d-pct").textContent = Math.round((done / Math.max(1, eps.length)) * 100) + "%";
   const cur = eps.find((e) => e.status === "running");
-  $("d-prog").textContent = run.status === "running" ? `эпизод ${cur ? cur.index + 1 : done} из ${eps.length}` + (cur ? ` · #${cur.seed} ${cur.label}` : "") : `${done} из ${eps.length} ${eps.length % 10 === 1 && eps.length % 100 !== 11 ? "эпизода" : "эпизодов"} готово`;
+  const gen = eps.length % 10 === 1 && eps.length % 100 !== 11 ? "эпизода" : "эпизодов";
+  const big = $("s-big"); big.textContent = done ? f2(s.reward) : "—"; big.className = "big " + (done ? (s.reward > 0 ? "pos" : "neg") : "");
+  $("s-mark").style.left = done ? `${(s.reward + 1) * 50}%` : "50%";
+  const good = done && s.reward > 0;
+  $("s-verdict").replaceChildren(...(run.status === "running"
+    ? [el("span", { class: "live-dot", "aria-hidden": "true" }), `Идёт эпизод ${cur ? cur.index + 1 : done + 1} из ${eps.length}` + (cur ? ` · #${cur.seed} ${cur.label}` : "")]
+    : done ? [tick(good ? "agree" : "exc"), good ? `Награда на ${eps.filter((e) => e.score && e.score.reward > 0).length} из ${eps.length} ${gen}` : "Агент не заработал награды"]
+      : [run.status === "error" ? "Запуск прервался с ошибкой" : "Ни один эпизод не завершён"]));
+  $("s-verdict").classList.toggle("neg", done > 0 && !good);
   $("d-segs").replaceChildren(...eps.map((e) => el("i", { class: e.score ? (e.score.reward > 0 ? "pos" : "neg") : e.status === "running" ? "now" : "" })));
+  $("s-formula").replaceChildren(
+    row("эпизодов оценено", `${done} из ${eps.length}`), row("верных · ложных · пропусков", done ? `${s.tp ?? 0} · ${s.fp ?? 0} · ${s.fn ?? 0}` : "—"),
+    row("шагов в среднем (бюджет 100)", done ? s.steps.toFixed(1) : "—"), row("средняя награда", done ? f2(s.reward) : "—", "tot"));
+  $("s-tiles").replaceChildren(
+    tile("Точность", done ? f2(s.precision) : "—", done ? `precision · ${s.tp ?? 0} из ${(s.tp ?? 0) + (s.fp ?? 0)} верны` : "precision"),
+    tile("Полнота", done ? f2(s.recall) : "—", done ? `recall · ${s.tp ?? 0} из ${(s.tp ?? 0) + (s.fn ?? 0)} найдены` : "recall"),
+    tile("F1", done ? f2(s.f1) : "—", "все находки запуска"),
+    tile("Ложные находки", done ? String(s.fp ?? 0) : "—", "каждая снижает награду", done && s.fp ? "neg" : ""),
+    tile("Шагов в среднем", done ? s.steps.toFixed(1) : "—", "из 100 на эпизод"),
+    tile("Время агента", s.seconds != null ? dur(s.seconds) : "—", run.pace ? `плюс показ ${Math.round(run.pace * 1000)} мс на шаг` : "без пауз"));
   $("d-split").textContent = `${run.split} · закрытый режим`;
+  $("d-agent").textContent = "агент " + run.agent;
   const secs = ((run.finished || Date.now() / 1000) - run.started);
-  const kv = [["Агент", agentName(run.agent)], ["Эпизоды", `${run.split} · ${eps.length}`], ["Режим", "закрытый"], ["Версия среды", run.env_version], ["Начат", when(run.started)], ["Длительность", dur(Math.max(0, secs))], ["Время агента", s.seconds != null ? dur(s.seconds) : "—"]];
-  if (run.pace) kv.push(["Темп показа", `${Math.round(run.pace * 1000)} мс на шаг`]);
-  $("d-kv").replaceChildren(...kv.flatMap(([k, v]) => [el("dt", {}, k), el("dd", {}, v)]));
-  $("s-rew").textContent = done ? f2(s.reward) : "—"; $("s-f1").textContent = done ? f2(s.f1) : "—";
-  $("s-steps").textContent = done ? s.steps.toFixed(1) : "—"; $("s-fp").textContent = done ? String(s.fp) : "—";
+  const kv = [["Запуск", run.id], ["Эпизоды", `${run.split} · ${eps.length}`], ["Режим", "закрытый: агент не видит награду"], ["Версия среды", run.env_version], ["Начат", when(run.started)], ["Длительность", dur(Math.max(0, secs))]];
+  $("d-kv").replaceChildren(...kv.map(([k, v]) => el("div", {}, el("dt", {}, k), el("dd", {}, v))));
   drawChart(eps);
   $("d-eps").replaceChildren(...eps.map((e) => {
     const r = e.score ? e.score.reward : null;
@@ -85,15 +111,15 @@ function render() {
       el("span", { class: "et-h" }, el("span", {}, e.label), el("span", { class: "mono" }, "#" + e.seed)),
       el("span", { class: "et-v mono" }, r == null ? (e.status === "running" ? "идёт…" : "в очереди") : f2(r)),
       el("span", { class: "et-m" }, el("i", { style: r == null ? "width:0" : r >= 0 ? `left:50%;width:${r * 50}%` : `left:${50 + r * 50}%;width:${-r * 50}%` })),
-      el("span", { class: "et-s" }, e.score ? `${plural(e.steps, "шаг", "шага", "шагов")} · ложных ${e.score.fp ?? 0}` : " "));
+      el("span", { class: "et-s" }, ...(e.score ? [tick(r > 0 ? "agree" : "exc"), `${plural(e.steps, "шаг", "шага", "шагов")} · ложных ${e.score.fp ?? 0}`] : [" "])));
     t.setAttribute("aria-label", `${e.label}, сид ${e.seed}: ${r == null ? "нет оценки" : "награда " + f2(r)}. Открыть журнал`);
     return el("li", {}, t);
   }));
-  const rows = [[agentName(run.agent) + " — этот запуск", done ? s.reward : null, true]].concat(Object.entries(base).map(([k, v]) => [agentName(k) + (k === run.agent ? " — report.json" : ""), v, false]));
+  const rows = [[(NAMES[run.agent] || run.agent) + " · этот запуск", done ? s.reward : null, true]].concat(Object.entries(base).map(([k, v]) => [k === run.agent ? `${NAMES[k]} · report.json` : agentName(k), v, false]));
   rows.sort((a, b) => (b[1] ?? -9) - (a[1] ?? -9));
-  $("d-cmp").replaceChildren(...rows.map(([n, v, me]) => el("tr", { class: me ? "me" : "" }, el("td", {}, n),
-    el("td", { class: "bar-c" }, el("span", { class: "zb" }, el("i", { class: v != null && v < 0 ? "neg" : "", style: v == null ? "width:0" : v >= 0 ? `left:50%;width:${v * 50}%` : `left:${50 + v * 50}%;width:${-v * 50}%` }), el("b", {}))),
-    el("td", { class: "num mono" }, f2(v)))));
+  $("d-cmp").replaceChildren(...rows.map(([n, v, me]) => el("div", { class: "bn" + (me ? " you" : "") }, el("span", { class: "nm" }, n),
+    el("span", { class: "zb" }, el("i", { class: v != null && v < 0 ? "neg" : "", style: v == null ? "width:0" : v >= 0 ? `left:50%;width:${v * 50}%` : `left:${50 + v * 50}%;width:${-v * 50}%` }), el("b", {})),
+    el("span", { class: "vv " + (v == null ? "" : v > 0 ? "ok" : "bad") }, f2(v)))));
   drawTraining();
 }
 

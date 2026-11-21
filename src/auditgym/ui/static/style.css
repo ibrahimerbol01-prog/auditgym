@@ -456,10 +456,10 @@ dl.kv dd.wide{grid-column:1/-1;padding-top:0}
 .verdict{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:19px;color:var(--txt)}
 .reward.is-neg .verdict .tm{stroke:var(--neg)}
 .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:hidden}
-.tiles>.card{border:0;border-radius:0;box-shadow:none;background:transparent;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:6px}
+.tiles>.card{border:0;border-radius:0;box-shadow:none;background:transparent;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:20px 22px;display:flex;flex-direction:column;justify-content:center;gap:4px}
 .tiles>.card:nth-child(3n+1){border-left:0}.tiles>.card:nth-child(-n+3){border-top:0}
 .tiles .tl{font-size:13px;color:var(--txt2)}
-.tiles .disp{margin-top:auto;font-weight:300;font-size:38px;line-height:1.1;font-variant-numeric:lining-nums tabular-nums}
+.tiles .disp{margin-top:6px;font-weight:300;font-size:44px;line-height:1.05;font-variant-numeric:lining-nums tabular-nums}
 .tiles .tn{font-size:12.5px;color:var(--txt3)}
 .gauge .g-track{position:relative;height:3px;background:linear-gradient(90deg,var(--neg),var(--line2) 50%,var(--pos))}
 .gauge .g-zero{position:absolute;left:50%;top:-6px;bottom:-6px;width:1px;background:var(--rule)}
@@ -725,3 +725,23 @@ dialog.run-modal pre.cmd{margin:0 0 16px}
 @media (max-width:1100px){.con-grid{grid-template-columns:1fr}.ep-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:560px){header.top .wrap{gap:12px;padding:0 14px}nav.main a{padding:8px 7px}.theme-t span{display:none}.brand span{display:none}}
 @media (max-width:860px){main.runs{grid-template-columns:1fr}.runs-side{position:static;max-height:none}.run-list{max-height:260px}.ep-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.big-n{font-size:48px}ol.trace li{grid-template-columns:40px 100px minmax(0,1fr) 110px}ol.trace .l{display:none}.fgrid{grid-template-columns:1fr}.empty{padding:24px}.empty h2{font-size:30px}}
+
+/* runs page, working-paper version: the run's conclusion reuses the result screen (C-2 card, tiles, R-2 bench) */
+#pane-ov{display:flex;flex-direction:column;gap:20px}
+#pane-ov .reward .big{font-size:88px}
+#pane-ov .verdict.neg .tm{stroke:var(--neg)}
+#pane-ov .segs{margin:2px 0 0}
+#pane-ov .sec-h2{margin:10px 0 0}
+.sec-h2 h2{font-size:21px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);flex:none;animation:blink-seg 1.2s var(--ease-std) infinite}
+.ri-strip{grid-column:1/-1;position:relative;display:flex;gap:2px;height:20px;margin-top:6px;border-top:0}
+.ri-strip::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.ri-strip .sl{position:relative;flex:1;max-width:9px;height:100%}
+.ri-strip i{position:absolute;left:1px;right:1px}
+.ri-strip i.pos{background:var(--pos)}.ri-strip i.neg{background:var(--neg)}
+.ri-v.pos{color:var(--pos)}.ri-v.neg{color:var(--neg)}
+.et-s{display:flex;align-items:center;gap:6px}
+.ep-t .tm.p{animation:pen .35s ease-out both}
+dl.run-meta{display:flex;flex-wrap:wrap;gap:6px 22px;margin:4px 0 0;font-size:12px;color:var(--txt3)}
+dl.run-meta div{display:flex;gap:6px}dl.run-meta dt{color:var(--txt3)}dl.run-meta dd{margin:0;font-family:var(--mono);color:var(--txt2)}
+@media (max-width:860px){#pane-ov .reward .big{font-size:64px}}

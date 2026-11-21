@@ -52,6 +52,7 @@ def main() -> int:
     with open(stamp_file, "w", encoding="utf-8") as fh:
         fh.write(build_stamp() + "\n")
     data += ["--add-data", f"{stamp_file}{SEP}data"]
+    data += add("desktop/icon.png", "data")  # Linux menu entry and window icon
     for name in ("report.json", "trajectories.jsonl"):
         if os.path.exists(os.path.join(ROOT, name)):
             data += add(name, "data")

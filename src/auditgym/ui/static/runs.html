@@ -12,6 +12,10 @@
 </head>
 <body>
 <a class="skip" href="#main">Перейти к содержимому</a>
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <symbol id="tm-agree" viewBox="0 0 16 16"><path pathLength="1" d="M2.4 8.6c1.4.8 2.5 2.2 3.5 3.9C7.8 8.4 10.3 5.4 13.7 2.9"/></symbol>
+  <symbol id="tm-exc" viewBox="0 0 16 16"><path pathLength="1" d="M8.1 2.1c3.4 0 5.9 2.6 5.8 5.9-.1 3.3-2.7 5.8-6 5.8-3.2-.1-5.7-2.7-5.6-5.9.1-3.2 2.6-5.7 5.8-5.8ZM5.4 5.3l5.3 5.4M10.7 5.2l-5.4 5.5"/></symbol>
+</defs></svg>
 <header class="top"><div class="wrap">
   <a class="brand" href="/" aria-label="AuditGym, главная">
     <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><path class="bl" d="M8.5 11h15M8.5 15.5h8"/><path d="M16.5 21.2c1.1.6 1.9 1.6 2.6 2.8 1.5-3 3.4-5.3 5.9-7.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AuditGym</span></a>
@@ -48,30 +52,37 @@
       </div>
 
       <div id="pane-ov" role="tabpanel" aria-labelledby="tab-ov">
-        <div class="con-grid">
-          <div class="card con-main">
-            <div class="big"><span class="big-n" id="d-pct">0%</span><span class="muted" id="d-prog"></span></div>
-            <div class="segs" id="d-segs" aria-hidden="true"></div>
-            <div class="card-h"><h2>Награда по эпизодам</h2><span class="tag" id="d-split"></span></div>
-            <p class="muted small cap">Награда от −1 до 1: верные находки с доказательствами минус ложные, минус 0.002 за каждый шаг. Пунктир — средние базовых политик из report.json.</p>
-            <div id="d-chart" class="chart"></div>
-          </div>
-          <div class="card con-side">
-            <dl class="kv-r" id="d-kv"></dl>
-            <div class="stats">
-              <div class="stat"><span class="k">Средняя награда</span><span class="v" id="s-rew">—</span></div>
-              <div class="stat"><span class="k">F1 находок</span><span class="v" id="s-f1">—</span></div>
-              <div class="stat"><span class="k">Шагов в среднем</span><span class="v" id="s-steps">—</span><span class="d">из 100</span></div>
-              <div class="stat"><span class="k">Ложных находок</span><span class="v" id="s-fp">—</span><span class="d">за запуск</span></div>
+        <div class="res-top">
+          <section class="reward crop" aria-labelledby="sum-h">
+            <div class="wp-head"><div class="wp-code">L-2<small>W/P</small></div><div class="wp-title" id="sum-h">Итог запуска · средняя награда</div><dl class="wp-meta"><div><dt>Подготовил</dt><dd id="d-agent">агент</dd></div><div><dt>Проверил</dt><dd>оценщик, отдельный процесс</dd></div></dl></div>
+            <div class="inner">
+              <div class="big" id="s-big" aria-live="polite">—</div>
+              <div class="verdict" id="s-verdict"></div>
+              <div class="gauge" aria-hidden="true"><div class="g-track"><i class="g-zero"></i><i class="g-mark" id="s-mark"></i></div><div class="g-l"><span>−1</span><span>0</span><span>+1</span></div></div>
+              <div class="segs" id="d-segs" aria-hidden="true"></div>
+              <div class="formula" id="s-formula"></div>
             </div>
-          </div>
+          </section>
+          <div class="tiles" id="s-tiles"></div>
         </div>
-        <div class="sec-h2"><h3>Эпизоды</h3><span class="muted small">Тип эпизода берётся из публичной конфигурации. Ответы не показываются.</span></div>
-        <ol class="ep-tiles" id="d-eps" aria-label="Эпизоды запуска"></ol>
-        <div class="sec-h2"><h3>Сравнение</h3><span class="muted small">Средняя награда на тех же эпизодах.</span></div>
-        <div class="card cmp-card"><table class="cmp" id="d-cmp"><caption class="sr-only">Средняя награда запуска и базовых политик</caption></table></div>
-        <div class="sec-h2"><h3>Обучение</h3><span class="muted small">Кривая обучаемого аудитора на отложенных эпизодах.</span></div>
-        <div class="card" id="train-card"><div id="train-chart" class="chart"></div><p class="muted small" id="train-note"></p></div>
+        <section class="card" aria-labelledby="ch-h">
+          <div class="card-h"><h2 id="ch-h"><span class="wpref">L-3</span>Награда по эпизодам</h2><span class="tag" id="d-split"></span></div>
+          <p class="muted small cap">Награда от −1 до 1: верные находки с доказательствами минус ложные, минус 0.002 за каждый шаг. Пунктир — средние базовых политик из report.json.</p>
+          <div id="d-chart" class="chart"></div>
+        </section>
+        <section aria-labelledby="eps-h">
+          <div class="sec-h2"><h2 id="eps-h"><span class="wpref">L-4</span>Эпизоды</h2><span class="muted small">Тип эпизода — из публичной конфигурации; ответы не показываются. Нажмите, чтобы открыть журнал.</span></div>
+          <ol class="ep-tiles" id="d-eps" aria-label="Эпизоды запуска"></ol>
+        </section>
+        <section class="card" aria-labelledby="cmp-h">
+          <div class="card-h"><h2 id="cmp-h"><span class="wpref">R-2</span>Рядом с базовыми политиками</h2><span class="muted small">средняя награда из report.json</span></div>
+          <div class="bench" id="d-cmp"></div>
+        </section>
+        <section class="card" id="train-card" aria-labelledby="tr-h">
+          <div class="card-h"><h2 id="tr-h"><span class="wpref">T-1</span>Обучение</h2><span class="muted small">кривая обучаемого аудитора на отложенных эпизодах</span></div>
+          <div id="train-chart" class="chart"></div><p class="muted small" id="train-note"></p>
+        </section>
+        <dl class="run-meta" id="d-kv"></dl>
       </div>
 
       <div id="pane-log" role="tabpanel" aria-labelledby="tab-log" class="hidden">

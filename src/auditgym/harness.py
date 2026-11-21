@@ -290,7 +290,8 @@ def list_runs(base: Optional[str] = None) -> List[Dict[str, Any]]:
                 except (OSError, ValueError):
                     continue
                 out.append({k: r.get(k) for k in ("id", "kind", "agent", "split", "mode", "status", "started", "finished", "summary")}
-                           | {"episodes": len(r.get("episodes", []))})
+                           | {"episodes": len(r.get("episodes", [])),
+                              "rewards": [(e.get("score") or {}).get("reward") for e in r.get("episodes", [])]})
     return sorted(out, key=lambda r: r.get("started") or 0, reverse=True)
 
 
