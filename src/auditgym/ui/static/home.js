@@ -15,17 +15,32 @@ const FONT = {
   Y: ["#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.."], M: ["#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#"],
 };
 const MARK = ["######.", ".......", "###....", "......#", ".#...#.", "..#.#..", "...#..."];  // same as the logo
-const BITS = (() => {  // 7 rows of 0/1; each glyph pixel becomes 2 characters wide
-  const rows = MARK.map((r) => r + "....");
-  for (const ch of "AUDITGYM") FONT[ch].forEach((r, i) => { rows[i] += r + ".."; });
-  return rows.map((r) => [...r].flatMap((c) => [c === "#", c === "#"]));
+// Source pixels: [row, pixelX, glyphIndex]; glyph 0 is the mark, 1..8 the letters. Each pixel is drawn 2 chars wide.
+const PIX = (() => {
+  const out = [], put = (rows, x0, gi) => rows.forEach((r, y) => [...r].forEach((c, x) => { if (c === "#") out.push([y, x0 + x, gi]); }));
+  put(MARK, 0, 0); let x = 11;
+  [..."AUDITGYM"].forEach((ch, i) => { put(FONT[ch], x, i + 1); x += 7; });
+  return { list: out, width: x };
 })();
+const TICK = [[4, 1], [5, 2], [6, 3], [5, 4], [4, 5], [3, 6]];   // the mark's check, in stroke order
+const isTick = (y, x) => TICK.findIndex(([ty, tx]) => ty === y && tx === x);
 function frame(t) {
-  return BITS.map((row, y) => row.map((on, x) => {
-    const w = Math.sin(t * 2.2 - x * 0.16 + y * 0.35);          // a diagonal wave sweeping left to right
-    if (on) return w > 0.9 ? "░" : w > 0.7 ? "▒" : w > 0.45 ? "▓" : "█";   // solid letters, a sheen passes over
-    return w > 0.985 && (x + y) % 5 === 0 ? "·" : " ";
-  }).join("")).join("\n");
+  const H = 9, W = PIX.width * 2, g = Array.from({ length: H }, () => Array(W).fill(" "));
+  const wave = (t % 6) / 6 * 2.6 - 0.4;                         // a stadium wave runs over the glyphs every 6 s
+  const draw = Math.min(TICK.length, Math.floor(((t + 3) % 6) * 7));   // the tick re-draws itself, pixel by pixel
+  for (const [y, px, gi] of PIX.list) {
+    const ti = gi === 0 ? isTick(y, px) : -1;
+    if (ti >= 0 && ti >= draw) continue;
+    const dy = Math.abs(wave - gi * 0.25) < 0.13 ? -1 : 0;
+    const w = Math.sin(t * 2.2 - px * 0.32 + y * 0.35);
+    const ch = w > 0.9 ? "░" : w > 0.7 ? "▒" : w > 0.45 ? "▓" : "█";
+    g[y + 1 + dy][px * 2] = ch; g[y + 1 + dy][px * 2 + 1] = ch;
+  }
+  if (draw === TICK.length && ((t + 3) % 6) < 1.6) {               // a little sparkle when the tick lands
+    const k = Math.floor(t * 8) % 3, sp = [["✦", 1, 15], ["·", 0, 12], ["✧", 2, 17]];
+    for (let i = 0; i <= k; i++) { const [c, y, x] = sp[i]; g[y][x] = c; }
+  }
+  return g.map((r) => r.join("")).join("\n");
 }
 (() => {
   const el = $("ascii"); if (!el) return;

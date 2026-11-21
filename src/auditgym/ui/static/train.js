@@ -408,7 +408,7 @@ function renderDash() {
   const last = pts[pts.length - 1], devs = pts.filter((p) => p.dev);
   const [st, cls] = STATUS[r.status] || [r.status, "dim"];
   $("d-title").textContent = `Аудитор · ${METHODS[r.method || c.method] || r.model || "—"}`;
-  $("d-status").className = "badge " + cls; $("d-status").textContent = (r.status === "running" ? "● " : "") + st;
+  $("d-status").className = "badge " + cls; if (r.status === "running") { const sp = document.createElement("span"); sp.className = "ascii-spin"; sp.setAttribute("aria-hidden", "true"); $("d-status").replaceChildren(sp, " " + st); } else $("d-status").textContent = st;
   $("d-cfg").textContent = `${PRESETS[(c.dataset || {}).preset] || "смешанные"} эпизоды · популяция ${c.population ?? "—"} × ${c.episodes_per_candidate ?? "—"} · сид ${c.seed ?? "—"}`;
   $("d-id").textContent = r.id;
   $("d-stop").classList.toggle("hidden", r.status !== "running");

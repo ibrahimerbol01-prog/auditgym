@@ -76,7 +76,7 @@ function render() {
   const [st, cls] = STATUS[run.status] || [run.status, "dim"];
   $("d-title").textContent = agentName(run.agent);
   $("d-id").textContent = run.id;
-  $("d-status").className = "badge " + cls; $("d-status").textContent = (run.status === "running" ? "● " : "") + st;
+  $("d-status").className = "badge " + cls; if (run.status === "running") { const sp = document.createElement("span"); sp.className = "ascii-spin"; sp.setAttribute("aria-hidden", "true"); $("d-status").replaceChildren(sp, " " + st); } else $("d-status").textContent = st;
   $("d-split").textContent = `${run.split} · ${eps.length} эп. · закрытый режим`;
   $("d-stop").classList.toggle("hidden", run.status !== "running");
   // key numbers: one hero (mean reward, with its gap to the hand-written rules), the rest small
