@@ -59,62 +59,108 @@
   requestAnimationFrame(loop);
 })();
 
-// ---- background: an ASCII "gravity field" that bends toward the pointer; a click sends a shockwave ring.
-// Drawn on one canvas behind the content (cards cover it), faint by design, idles when the pointer rests,
-// stops in hidden tabs, static under reduced motion, off on small screens.
+// ---- background: a quiet dot grid; the pointer is a magnifying glass that reads a hidden ledger under it and shows
+// its figures enlarged. A click sends a ring of characters outward. Fast by design: every glyph is pre-rendered once,
+// a frame only redraws the box around the pointer (well under 1 ms), and nothing is drawn while the pointer rests.
+// Behind the content (cards cover it), off on small screens; under reduced motion the glass stays but rings are off.
 (() => {
   if (matchMedia("(max-width: 860px)").matches) return;
   const STILL = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const RAMP = " .:-=+*#%@";
+  const CW = 14, CH = 18, LR = 118, LM = 1.65, FONT = '12px "JetBrains Mono", ui-monospace, monospace';
+  const CHARS = "·0123456789.,-+:";
+  const IDX = Object.fromEntries([...CHARS].map((c, i) => [c, i]));
   const cv = document.createElement("canvas"); cv.className = "ascii-field"; cv.setAttribute("aria-hidden", "true");
   document.body.prepend(cv);
   const ctx = cv.getContext("2d");
-  const CW = 14, CH = 18, R = 190;                 // cell size, radius of the well (px)
-  let W = 0, H = 0, dpr = 1, mx = -1e4, my = -1e4, tx = -1e4, ty = -1e4, lastMove = 0, ripples = [], ink = "#888", ink2 = "#333";
-  const colours = () => { const cs = getComputedStyle(document.documentElement); ink = cs.getPropertyValue("--txt3").trim() || ink; ink2 = cs.getPropertyValue("--txt").trim() || ink2; };
-  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.font = `12px "JetBrains Mono", ui-monospace, monospace`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; };
-  const bands = [[], [], [], []];                   // batch glyphs by alpha level: few canvas state changes
-  function draw(t) {
-    ctx.clearRect(0, 0, W, H);
-    for (const b of bands) b.length = 0;
-    mx += (tx - mx) * 0.18; my += (ty - my) * 0.18;  // the well follows the pointer with a little lag
-    for (let y = CH / 2; y < H + CH; y += CH) for (let x = CW / 2; x < W + CW; x += CW) {
-      let dx = mx - x, dy = my - y; const r2 = dx * dx + dy * dy, r = Math.sqrt(r2) || 1;
-      if (r < 20) continue;                          // event horizon: the very centre stays empty
-      let f = R * R / (r2 + R * R * 0.35);           // ~1/r² with a soft core
-      let px = x, py = y;
-      if (f > 0.04) {                               // pull toward the pointer, with a slight orbital swirl
-        const pull = Math.min(r * 0.55, 26 * f), sw = 0.35 * f;
-        px += (dx / r) * pull - (dy / r) * pull * sw; py += (dy / r) * pull + (dx / r) * pull * sw;
-      }
-      for (const w of ripples) {                    // shockwave rings push characters outward
-        const d = Math.hypot(x - w.x, y - w.y), k = Math.exp(-((d - w.r) ** 2) / 900) * w.a;
-        if (k > 0.02) { px += (x - w.x) / (d || 1) * 10 * k; py += (y - w.y) / (d || 1) * 10 * k; f = Math.max(f, k * 1.6); }
-      }
-      const breathe = 0.5 + 0.5 * Math.sin(t * 0.6 + x * 0.013 + y * 0.021);
-      const level = Math.min(9, Math.floor(f * 6 + (f < 0.08 ? breathe * 1.4 : 0)));
-      if (level <= 0) continue;
-      bands[Math.min(3, Math.floor(f * 3.2 + (level >= 2 ? 0.4 : 0)))].push(RAMP[level], px, py);
-    }
-    const alpha = [0.16, 0.28, 0.42, 0.6];
-    bands.forEach((b, i) => { ctx.globalAlpha = alpha[i]; ctx.fillStyle = i >= 2 ? ink2 : ink; for (let k = 0; k < b.length; k += 3) ctx.fillText(b[k], b[k + 1], b[k + 2]); });
-    ctx.globalAlpha = 1;
-    ripples = ripples.filter((w) => (w.r += 9, w.a *= 0.955, w.a > 0.03));
-  }
-  addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; lastMove = performance.now(); }, { passive: true });
-  addEventListener("pointerleave", () => { tx = ty = -1e4; });
-  document.addEventListener("pointerdown", (e) => { ripples.push({ x: e.clientX, y: e.clientY, r: 0, a: 1 }); lastMove = performance.now(); }, { passive: true });
-  addEventListener("resize", size);
-  new MutationObserver(colours).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  colours(); size(); draw(0);
-  if (STILL) return;
-  let last = 0;
-  const loop = (ms) => {
-    const busy = ms - lastMove < 1800 || ripples.length;
-    if (!document.hidden && ms - last > (busy ? 33 : 120)) { last = ms; draw(ms / 1000); }
-    requestAnimationFrame(loop);
+  let W = 0, H = 0, dpr = 1, S = 2, cols = 0, rows = 0, layer = null, atlas = {}, bg = "", rim = "";
+  let tx = -1e4, ty = -1e4, px = -1e4, py = -1e4, dirty = null, raf = 0, lastT = 0, ripples = [];
+  const hash = (i, j) => { let h = (i * 374761393 + j * 668265263) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return h ^ (h >>> 16); };
+  const hasDot = (i, j) => hash(i, j) % 5 !== 0;
+  const ledger = (i, j) => {                       // rows of accounting figures: "  4 812.50   -1 204.00"
+    const o = hash(0, j) % 13, n = Math.floor((i + o) / 13), f = hash(n + 7, j);
+    const cell = "  " + (hash(n, j) % 6 === 0 ? "-" : " ") + (1 + f % 9) + " " + (100 + (f >>> 4) % 900) + "." + (10 + (f >>> 12) % 90);
+    return cell.charAt((i + o) % 13);
   };
-  requestAnimationFrame(loop);
+  const tok = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const bake = (ink) => {
+    const c = document.createElement("canvas"); c.width = CHARS.length * CW * S; c.height = CH * S;
+    const x = c.getContext("2d"); x.scale(S, S); x.font = FONT; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = ink;
+    [...CHARS].forEach((ch, i) => x.fillText(ch, i * CW + CW / 2, CH / 2));
+    return c;
+  };
+  const glyph = (c, ch, ink, x, y, a, m = 1) => {
+    const i = IDX[ch]; if (i == null) return;
+    c.globalAlpha = a; const w = CW * m, h = CH * m;
+    c.drawImage(atlas[ink], i * CW * S, 0, CW * S, CH * S, x - w / 2, y - h / 2, w, h);
+  };
+  const union = (a, b) => (!a ? b : !b ? a : { x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1) });
+  const cells = (b, fn) => {
+    const i0 = Math.max(0, Math.floor(b.x0 / CW)), i1 = Math.min(cols - 1, Math.ceil(b.x1 / CW));
+    const j0 = Math.max(0, Math.floor(b.y0 / CH)), j1 = Math.min(rows - 1, Math.ceil(b.y1 / CH));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) fn(i, j, i * CW + CW / 2, j * CH + CH / 2);
+  };
+  function restore(r) {                            // put the static dots back, only inside the box that changed
+    const x0 = Math.max(0, Math.floor(r.x0)), y0 = Math.max(0, Math.floor(r.y0)), x1 = Math.min(W, Math.ceil(r.x1)), y1 = Math.min(H, Math.ceil(r.y1));
+    if (x1 <= x0 || y1 <= y0) return;
+    ctx.globalAlpha = 1; ctx.clearRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.drawImage(layer, x0 * dpr, y0 * dpr, (x1 - x0) * dpr, (y1 - y0) * dpr, x0, y0, x1 - x0, y1 - y0);
+  }
+  function setup() {
+    dpr = Math.min(2, devicePixelRatio || 1); S = dpr * 2;
+    W = innerWidth; H = innerHeight; cols = Math.ceil(W / CW) + 1; rows = Math.ceil(H / CH) + 1;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    bg = tok("--bg"); rim = tok("--txt3"); atlas = { soft: bake(rim), strong: bake(tok("--txt")) };
+    layer = document.createElement("canvas"); layer.width = W * dpr; layer.height = H * dpr;
+    const l = layer.getContext("2d"); l.setTransform(dpr, 0, 0, dpr, 0, 0);
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) if (hasDot(i, j)) glyph(l, "·", "soft", i * CW + CW / 2, j * CH + CH / 2, 0.5);
+    dirty = { x0: 0, y0: 0, x1: W, y1: H }; request();
+  }
+  const lensBox = () => (px < -1e3 ? null : { x0: px - LR - 4, y0: py - LR - 4, x1: px + LR + 4, y1: py + LR + 4 });
+  const ringBox = () => { let b = null; for (const w of ripples) b = union(b, { x0: w.x - w.r - 30, y0: w.y - w.r - 30, x1: w.x + w.r + 30, y1: w.y + w.r + 30 }); return b; };
+  function lens() {
+    if (px < -1e3) return;
+    ctx.globalAlpha = 1; ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(px, py, LR, 0, 7); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.arc(px, py, LR - 1, 0, 7); ctx.clip();
+    const r = LR / LM + CW;
+    cells({ x0: px - r, y0: py - r, x1: px + r, y1: py + r }, (i, j, x, y) => {
+      const ch = ledger(i, j); if (ch === " ") return;
+      const X = px + (x - px) * LM, Y = py + (y - py) * LM, u = Math.hypot(X - px, Y - py) / LR; if (u > 1.05) return;
+      glyph(ctx, ch, u < 0.7 ? "strong" : "soft", X, Y, Math.max(0.12, 0.85 - 0.75 * u * u), LM * 0.95);
+    });
+    ctx.restore();
+    ctx.strokeStyle = rim; ctx.lineWidth = 1; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(px, py, LR, 0, 7); ctx.stroke();
+    ctx.lineWidth = 6; ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(px, py, LR - 3, 0, 7); ctx.stroke();
+  }
+  function rings(dt) {
+    ctx.fillStyle = bg;
+    for (const w of ripples) {
+      cells({ x0: w.x - w.r - 24, y0: w.y - w.r - 24, x1: w.x + w.r + 24, y1: w.y + w.r + 24 }, (i, j, x, y) => {
+        const dx = x - w.x, dy = y - w.y, d = Math.hypot(dx, dy), band = Math.abs(d - w.r); if (band > 20) return;
+        const k = (1 - band / 20) * w.a; if (k < 0.05 || Math.hypot(x - px, y - py) < LR) return;   // the glass stays clean
+        ctx.globalAlpha = 1; ctx.fillRect(x - CW / 2, y - CH / 2, CW, CH);
+        glyph(ctx, k > 0.6 ? "+" : k > 0.3 ? ":" : "·", k > 0.5 ? "strong" : "soft", x + dx / (d || 1) * 6 * k, y + dy / (d || 1) * 6 * k, 0.25 + 0.6 * k);
+      });
+      w.r += 0.75 * dt; w.a *= Math.pow(0.955, dt / 16.7);
+    }
+    ripples = ripples.filter((w) => w.a > 0.05 && w.r < Math.hypot(W, H));
+  }
+  function request() { if (!raf) raf = requestAnimationFrame(frame); }
+  function frame(ms) {
+    raf = 0; const dt = Math.min(50, lastT ? ms - lastT : 16.7); lastT = ms;
+    if (document.hidden) return;
+    px = tx; py = ty;
+    const r = union(dirty, union(lensBox(), ringBox())); if (r) restore(r);
+    lens(); rings(dt);
+    dirty = union(lensBox(), ringBox());
+    if (ripples.length) request();
+  }
+  addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; request(); }, { passive: true });
+  document.documentElement.addEventListener("pointerleave", () => { tx = ty = -1e4; request(); });
+  if (!STILL) document.addEventListener("pointerdown", (e) => { ripples.push({ x: e.clientX, y: e.clientY, r: 0, a: 1 }); lastT = 0; request(); }, { passive: true });
+  addEventListener("resize", setup);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { dirty = { x0: 0, y0: 0, x1: W, y1: H }; request(); } });
+  new MutationObserver(setup).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(setup);
 })();
 
 // ---- page titles decode from random characters into place (the real text is set for assistive tech first)
