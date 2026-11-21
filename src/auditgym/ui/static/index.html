@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f7f7f8">
 <meta name="description" content="AuditGym — офлайн-среда для обучения ИИ-аудиторов: запустите обучение на своём компьютере и смотрите телеметрию.">
-<title>AuditGym — обучение ИИ-аудитора</title>
+<title>AuditGym — готовы обучать?</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23131210%27/%3E%3Crect x=%274.5%27 y=%274.5%27 width=%2723%27 height=%2723%27 rx=%275%27 fill=%27none%27 stroke=%27%23cfb07a%27 stroke-width=%271.4%27/%3E%3Cpath d=%27M9.5 11.5h13M9.5 16h7%27 stroke=%27%23efe9dc%27 stroke-width=%271.5%27 stroke-linecap=%27round%27/%3E%3Cpath d=%27M17 20.5l2.4 2.4L23.5 18.5%27 stroke=%27%23cfb07a%27 stroke-width=%271.8%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
 <link rel="preload" href="/fonts/inter-cyrillic-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/style.css">
@@ -15,42 +15,43 @@
 <body>
 <a class="skip" href="#main">Перейти к содержимому</a>
 <header class="top"><div class="wrap">
-  <a class="brand" href="/" aria-label="AuditGym, главная" aria-current="page">
+  <a class="brand" href="/" aria-label="AuditGym, главная">
     <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="26" height="26" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/><path class="bl" d="M8.5 11h15M8.5 15.5h8"/><path d="M16.5 21.2c1.1.6 1.9 1.6 2.6 2.8 1.5-3 3.4-5.3 5.9-7.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AuditGym</span></a>
-  <nav class="main" aria-label="Разделы"><a href="/train.html">Обучение</a><a href="/runs.html">Запуски</a><a href="/play.html">Расследование</a><a href="/report.html">Отчёт</a></nav>
-  <span class="meta-top">ENV 1.0.0 · только CPU · без сети</span>
-  <button class="theme-t" id="theme" aria-pressed="false" aria-label="Тёмная тема"><i aria-hidden="true"></i><span>Тёмная</span></button>
+  <a class="side-new" href="/train.html"><span aria-hidden="true">+</span> Новое обучение</a>
+  <nav class="main" aria-label="Разделы"><a href="/" aria-current="page"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8.5 10 3l7 5.5V17h-4.5v-5h-5v5H3z"/></svg><span>Главная</span></a><a href="/train.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16h14M5 13l3-4 3 2 4-6"/></svg><span>Обучение</span></a><a href="/runs.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12M4 10h12M4 15h8"/></svg><span>Запуски</span></a><a href="/play.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="5"/><path d="m13 13 4 4"/></svg><span>Расследование</span></a><a href="/report.html"><svg class="ni" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h7l3 3v11H5zM8 9h5M8 12h5"/></svg><span>Отчёт</span></a></nav>
+  <div class="side-recent" id="side-recent"></div>
+  <div class="side-foot"><span class="meta-top">ENV 1.0.0 · только CPU · без сети</span><button class="theme-t" id="theme" aria-pressed="false" aria-label="Тёмная тема"><i aria-hidden="true"></i><span>Тёмная</span></button></div>
 </div></header>
 <main id="main" tabindex="-1" class="wrap home">
-  <section class="home-hero" aria-labelledby="home-h">
-    <p class="kicker">Genesis Hackathon 2026 · FinTech</p>
-    <h1 id="home-h">Обучите ИИ-аудитора на своём компьютере</h1>
-    <p class="lede">Выберите модель и данные — помощник подскажет настройки под вашу машину. Обучение идёт на CPU, без сети, а прогресс честно проверяется на эпизодах, которых модель не видела.</p>
-    <div class="home-cta"><a class="btn primary lg" href="/train.html" id="launch">Запустить обучение <span aria-hidden="true">→</span></a></div>
-    <ol class="home-steps" aria-label="Как это устроено">
-      <li><b>1</b><span>Модель</span></li><li><b>2</b><span>Данные</span></li><li><b>3</b><span>Помощник</span></li><li><b>4</b><span>Телеметрия</span></li>
-    </ol>
+  <section class="ready" aria-labelledby="home-h">
+    <pre class="ascii" id="ascii" aria-hidden="true"></pre>
+    <h1 id="home-h">Готовы обучать?</h1>
+    <p class="lede">Аудитор учится на сгенерированных книгах вымышленных компаний и проверяется на эпизодах, которых не видел. Только CPU, без сети.</p>
+    <form class="launch" id="launch-f">
+      <div class="launch-row">
+        <label class="pill"><span class="pk">Модель</span><select id="l-model" aria-label="Модель"><option value="cem">Аудитор · CEM</option><option value="reinforce">Аудитор · REINFORCE</option></select></label>
+        <label class="pill"><span class="pk">Данные</span><select id="l-data" aria-label="Данные"><option value="mixed">Смешанные</option><option value="simple">Простые ошибки</option><option value="interacting">С взаимодействиями</option></select></label>
+        <label class="pill"><span class="pk">Объём</span><select id="l-size" aria-label="Объём обучения"><option value="fast">Быстро</option><option value="std" selected>Стандарт</option><option value="deep">Тщательно</option></select></label>
+      </div>
+      <div class="launch-foot">
+        <span class="l-hint" id="l-hint">помощник проверяет вашу машину…</span>
+        <a class="l-adv" href="/train.html">Все настройки</a>
+        <button class="l-go" id="l-go" type="submit" aria-label="Запустить обучение"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5"/></svg></button>
+      </div>
+      <p class="l-err hidden" id="l-err" role="alert"></p>
+    </form>
   </section>
-  <section class="home-cards" aria-label="Ещё">
-    <a class="card home-card" href="/train.html" id="last-card">
-      <span class="hc-k">Последнее обучение</span>
-      <span class="hc-v" id="last-v">—</span>
-      <span class="hc-d" id="last-d">ещё не запускалось</span>
-      <span class="hc-spark" id="last-spark" aria-hidden="true"></span>
-    </a>
-    <a class="card home-card" href="/runs.html">
-      <span class="hc-k">Проверить агента</span>
-      <span class="hc-t">Готовая политика или ваша программа на 10 отложенных эпизодах</span>
-      <span class="hc-l">Запуски →</span>
-    </a>
-    <a class="card home-card" href="/play.html">
-      <span class="hc-k">Сыграть эпизод самому</span>
-      <span class="hc-t">Найдите ошибки в книгах вымышленной компании вручную</span>
-      <span class="hc-l">Расследование →</span>
-    </a>
+  <section class="recipes" aria-labelledby="rec-h">
+    <h2 id="rec-h">Наборы данных</h2>
+    <div class="rec-grid">
+      <button type="button" class="card recipe" data-preset="simple"><span class="rb">Начальный</span><b>Простые ошибки</b><span>Дубли счетов, разнесение платежей, курсы и периоды — по одной ошибке, без пересечений.</span><span class="tags"><i>4 типа</i><i>без взаимодействий</i></span></button>
+      <button type="button" class="card recipe" data-preset="mixed"><span class="rb">Рекомендуем</span><b>Смешанные</b><span>Как настоящие книги: чистые компании, отвлекающие записи и смесь ошибок разных типов.</span><span class="tags"><i>чистые случаи</i><i>отвлекающие записи</i></span></button>
+      <button type="button" class="card recipe" data-preset="interacting"><span class="rb">Сложный</span><b>С взаимодействиями</b><span>Ошибки, которые маскируют друг друга: курс и период в одной проводке, частичные оплаты.</span><span class="tags"><i>сценарии A и B</i><i>труднее всего</i></span></button>
+    </div>
   </section>
 </main>
 <footer class="foot-site"><div class="wrap"><span>AuditGym · Genesis Hackathon 2026 · FinTech</span><span>Python 3.11 · только стандартная библиотека · работает без сети · детерминировано по seed</span></div></footer>
+<script src="/shell.js"></script>
 <script src="/home.js"></script>
 </body>
 </html>

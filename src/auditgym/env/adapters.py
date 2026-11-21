@@ -16,7 +16,7 @@ from .env import AuditEnv
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "ui", "static")
 STATIC_WHITELIST = {"/": "index.html", "/index.html": "index.html", "/play.html": "play.html", "/report.html": "report.html", "/runs.html": "runs.html", "/train.html": "train.html",
-                    "/app.js": "app.js", "/home.js": "home.js", "/report.js": "report.js", "/runs.js": "runs.js", "/train.js": "train.js", "/style.css": "style.css"}
+                    "/app.js": "app.js", "/home.js": "home.js", "/shell.js": "shell.js", "/report.js": "report.js", "/runs.js": "runs.js", "/train.js": "train.js", "/style.css": "style.css"}
 FONT_EXT = {".woff2": "font/woff2"}
 CTYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8"}
 
