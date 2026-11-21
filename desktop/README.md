@@ -47,11 +47,15 @@ curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/downl
 The installer downloads the build for your system from the latest GitHub Release, checks it against
 `SHA256SUMS.txt`, installs it in your user folder (no admin rights) and starts it:
 
-| System | Installed to | Shortcut |
-|---|---|---|
-| Windows 10/11 (x64) | `%LOCALAPPDATA%\Programs\AuditGym` | Start menu → AuditGym |
-| macOS (Apple silicon) | `~/Applications/AuditGym.app` | Applications |
-| Linux (x64) | `~/.local/share/auditgym` | app menu, and the `auditgym-app` command |
+| System | Installed to | Shortcut | Terminal command `auditgym` |
+|---|---|---|---|
+| Windows 10/11 (x64) | `%LOCALAPPDATA%\Programs\AuditGym` | Start menu → AuditGym | `…\AuditGym\cli`, added to your user PATH |
+| macOS (Apple silicon) | `~/Applications/AuditGym.app` | Applications | `~/.local/share/auditgym-cli`, linked as `~/.local/bin/auditgym` |
+| Linux (x64) | `~/.local/share/auditgym` | app menu, and the `auditgym-app` command | `…/auditgym/AuditGym/cli`, linked as `~/.local/bin/auditgym` |
+
+The terminal command is the full command line without Python: open a **new** terminal after installing and run
+`auditgym run-agent --policy reconcile` (live trace of every step, score card, saved for the app's «Запуски» page),
+`auditgym run-agent --cmd "python my_agent.py"` for your own agent, or `auditgym --version`.
 
 Options (environment variables): `AUDITGYM_BRANCH=<branch>` for the newest build of a branch,
 `AUDITGYM_VERSION=v1.0.0` for a specific release, `AUDITGYM_NO_LAUNCH=1` to

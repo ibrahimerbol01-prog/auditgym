@@ -71,6 +71,20 @@ jobs:
           AUDITGYM_ZIP="$(ls dist/AuditGym-linux-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
           test -f ~/.local/share/applications/auditgym.desktop
           ~/.local/bin/auditgym-app --smoke
+      - name: The auditgym terminal command (built and installed)
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            Windows) built=dist/AuditGym/cli/auditgym.exe; installed="$LOCALAPPDATA/Programs/AuditGym/cli/auditgym.exe" ;;
+            macOS)   built=dist/auditgym-cli/auditgym; installed="$HOME/.local/bin/auditgym" ;;
+            *)       built=dist/AuditGym/cli/auditgym; installed="$HOME/.local/bin/auditgym" ;;
+          esac
+          "$built" --version
+          "$built" run-agent --policy reconcile --limit 1 --plain
+          "$installed" run-agent --policy flag_all --limit 1 --plain
+          if [ "$RUNNER_OS" = Windows ]; then
+            powershell -NoProfile -Command "if (-not (([Environment]::GetEnvironmentVariable('Path','User') -split ';') -like '*AuditGym\cli')) { throw 'cli folder not on the user PATH' }"
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: release-${{ runner.os }}

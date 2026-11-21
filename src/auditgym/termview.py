@@ -150,7 +150,8 @@ class TermView:
                 for name, v in sorted(rows, key=lambda x: -x[1]):
                     self.w(f"    {name:<26} {self.c('32' if v > 0 else '31', bar(v, 24))} {fmt(v)}")
         self.w(self.dim(f"  сохранено: {self.saved}"))
-        self.w(self.dim("  открыть в приложении: python -m auditgym.cli ui → «Запуски»"))
+        app = "приложение AuditGym" if os.environ.get("AUDITGYM_DATA") else "python -m auditgym.cli ui"  # packaged build or checkout
+        self.w(self.dim(f"  открыть в приложении: {app} → «Запуски»"))
 
 
 def baseline_means(report_path: str) -> Dict[str, float]:

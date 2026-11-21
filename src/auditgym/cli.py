@@ -19,6 +19,9 @@ import sys
 import webbrowser
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# A packaged build (desktop/) points these at its bundled copies; a checkout uses the repository.
+DATA_DIRS = [d for d in (os.environ.get("AUDITGYM_DATA"),) if d]
+CONFIGS = os.environ.get("AUDITGYM_CONFIGS") or os.path.join(ROOT, "configs")
 
 
 def _load_json(path):
@@ -64,13 +67,13 @@ def ui_extra_files() -> dict:
     """Read-only data files the UI may fetch under /data/ (public artefacts only)."""
     extra = {}
     for name in ("report.json", "trajectories.jsonl"):
-        for base in (os.getcwd(), ROOT):  # Docker writes them to /work (cwd); a checkout keeps them at the root
+        for base in (os.getcwd(), *DATA_DIRS, ROOT):  # Docker writes them to /work (cwd); a checkout keeps them at the root
             p = os.path.join(base, name)
             if os.path.exists(p):
                 extra["/data/" + name] = p
                 break
     for split in ("train", "dev"):
-        extra[f"/data/{split}.json"] = os.path.join(ROOT, "configs", f"{split}.json")
+        extra[f"/data/{split}.json"] = os.path.join(CONFIGS, f"{split}.json")
     curve = os.path.join(ROOT, "train", "curve.json")  # written by the trainer (T10) once it exists
     if os.path.exists(curve):
         extra["/data/curve.json"] = curve
@@ -103,7 +106,7 @@ def cmd_run_agent(args) -> int:
         print("give exactly one of --policy NAME or --cmd \"PROGRAM\"", file=sys.stderr)
         return 2
     view = TermView(plain=args.plain)
-    for base in (os.getcwd(), ROOT):
+    for base in (os.getcwd(), *DATA_DIRS, ROOT):
         if os.path.exists(os.path.join(base, "report.json")):
             view.compare = baseline_means(os.path.join(base, "report.json"))
             break

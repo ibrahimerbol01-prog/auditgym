@@ -8,7 +8,7 @@
 #     $env:AUDITGYM_BRANCH='main'; gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.ps1?ref=main" -H "Accept: application/vnd.github.raw" | Out-String | iex
 #
 # Installs into %LOCALAPPDATA%\Programs\AuditGym (no admin rights), checks the download against the release's
-# SHA256SUMS.txt, adds a Start menu shortcut and starts the app.
+# SHA256SUMS.txt, adds a Start menu shortcut, puts the `auditgym` terminal command on the user PATH, and starts the app.
 # Options (environment variables): AUDITGYM_VERSION=v1.0.0 (default: latest release), AUDITGYM_NO_LAUNCH=1,
 # AUDITGYM_BRANCH=<branch> (the newest successful "Desktop app" CI build of that branch instead of a release),
 # AUDITGYM_ZIP=C:\path\AuditGym-windows-x64.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
@@ -73,7 +73,7 @@
         }
 
         $dest = Join-Path $env:LOCALAPPDATA 'Programs\AuditGym'
-        Get-Process -Name AuditGym -ErrorAction SilentlyContinue | Stop-Process -Force
+        Get-Process -Name AuditGym, auditgym -ErrorAction SilentlyContinue | Stop-Process -Force
         if (Test-Path $dest) { Remove-Item -Recurse -Force $dest }
         New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null   # %LOCALAPPDATA%\Programs may not exist yet
         $unpacked = Join-Path $Tmp 'x'
@@ -92,6 +92,17 @@
         $lnk.Save()
 
         Say "installed $dest (Start menu: AuditGym)"
+        $cliDir = Join-Path $dest 'cli'
+        if (Test-Path (Join-Path $cliDir 'auditgym.exe')) {
+            # The terminal command: add its folder to the user PATH once (no admin rights), and to this window now.
+            $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+            if (-not (($userPath -split ';') -contains $cliDir)) {
+                $newPath = if ($userPath) { $userPath.TrimEnd(';') + ';' + $cliDir } else { $cliDir }
+                [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+            }
+            if (-not (($env:Path -split ';') -contains $cliDir)) { $env:Path = $env:Path.TrimEnd(';') + ';' + $cliDir }
+            Say 'terminal command: auditgym   (try: auditgym run-agent --policy reconcile)'
+        }
         if (Test-Path $stamp) { Say "version: $((Get-Content $stamp -Raw).Trim())" } elseif (-not $env:AUDITGYM_ZIP) { Say "version: $Version release" }
         Say 'the app is not code-signed: if SmartScreen asks, choose More info, then Run anyway'
         if (-not $env:AUDITGYM_NO_LAUNCH) { Start-Process -FilePath $exe -WorkingDirectory $dest }

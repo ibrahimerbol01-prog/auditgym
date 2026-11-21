@@ -60,6 +60,21 @@ class DesktopAppTests(unittest.TestCase):
         with open(os.path.join(ROOT, "desktop", "install.ps1"), encoding="utf-8") as fh:
             self.assertIn("-n ($Asset -replace '\\.zip$', '')", fh.read())
 
+    def test_terminal_command_entry(self):
+        spec = importlib.util.spec_from_file_location("auditgym_cli_entry", os.path.join(ROOT, "desktop", "cli_entry.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        with self.assertRaises(SystemExit):  # the same evaluator-only dispatch as the app
+            mod.main(["auditgym", "-m", "os"])
+        self.assertEqual(mod.main(["auditgym", "--version"]), 0)
+        with open(os.path.join(ROOT, "desktop", "build.py"), encoding="utf-8") as fh:
+            build = fh.read()
+        self.assertIn('"cli_entry.py", "auditgym"', build)
+        with open(os.path.join(ROOT, "desktop", "install.ps1"), encoding="utf-8") as fh:
+            self.assertIn("'cli'", fh.read())
+        with open(os.path.join(ROOT, "desktop", "install.sh"), encoding="utf-8") as fh:
+            self.assertIn('"$BIN/auditgym"', fh.read())
+
     def test_desktop_code_never_reads_truth(self):
         with open(os.path.join(ROOT, "desktop", "app.py"), encoding="utf-8") as fh:
             text = fh.read()

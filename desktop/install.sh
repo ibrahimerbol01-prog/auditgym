@@ -89,6 +89,16 @@ if [ "$OS" = macos ]; then
   mv "$TMP/x/AuditGym.app" "$DEST/AuditGym.app"
   APP="$DEST/AuditGym.app"
   say "installed $APP"
+  if [ -d "$TMP/x/auditgym-cli" ]; then
+    CLI="${XDG_DATA_HOME:-$HOME/.local/share}/auditgym-cli"
+    BIN="$HOME/.local/bin"
+    mkdir -p "$(dirname "$CLI")" "$BIN"
+    rm -rf "$CLI"
+    mv "$TMP/x/auditgym-cli" "$CLI"
+    ln -sf "$CLI/auditgym" "$BIN/auditgym"
+    say "terminal command: auditgym   (try: auditgym run-agent --policy reconcile)"
+    case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc" ;; esac
+  fi
   say "it is not notarised: if macOS blocks it, right-click AuditGym in Applications and choose Open once"
   [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || open "$APP"
 else
@@ -99,6 +109,10 @@ else
   mv "$TMP/x/AuditGym" "$DEST/AuditGym"
   chmod +x "$DEST/AuditGym/AuditGym"
   ln -sf "$DEST/AuditGym/AuditGym" "$BIN/auditgym-app"
+  if [ -x "$DEST/AuditGym/cli/auditgym" ]; then
+    ln -sf "$DEST/AuditGym/cli/auditgym" "$BIN/auditgym"
+    say "terminal command: auditgym   (try: auditgym run-agent --policy reconcile)"
+  fi
   APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
   mkdir -p "$APPS"
   cat > "$APPS/auditgym.desktop" <<EOF
@@ -111,7 +125,7 @@ Terminal=false
 Categories=Education;Development;
 EOF
   say "installed $DEST/AuditGym (command: auditgym-app)"
-  case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH to use the auditgym-app command" ;; esac
+  case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH to use the auditgym and auditgym-app commands" ;; esac
   [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || (nohup "$DEST/AuditGym/AuditGym" >/dev/null 2>&1 &)
 fi
 if [ -f "$TMP/BUILD.txt" ]; then say "version: $(cat "$TMP/BUILD.txt")"; elif [ -z "${AUDITGYM_ZIP:-}" ]; then say "version: $VERSION release"; fi
