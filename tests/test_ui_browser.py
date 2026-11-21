@@ -53,7 +53,7 @@ class TestUIBrowser(unittest.TestCase):
 
     def test_full_journey_with_the_mouse(self):
         pg, errors, external = self.page()
-        pg.goto(self.base + "/")
+        pg.goto(self.base + "/play.html")
         pg.wait_for_selector("#ep-rows tr")
         self.assertEqual(pg.locator("#ep-rows tr").count(), 10)
         self.assertIn("RECONCILE", pg.inner_text("#tape"))  # market tape is built from report.json
@@ -116,7 +116,7 @@ class TestUIBrowser(unittest.TestCase):
 
     def test_keyboard_only_journey(self):
         pg, errors, _ = self.page()
-        pg.goto(self.base + "/")
+        pg.goto(self.base + "/play.html")
         pg.wait_for_selector("#ep-rows tr")
         pg.keyboard.press("Tab")
         self.assertEqual(pg.evaluate("document.activeElement.className"), "skip")
@@ -147,11 +147,11 @@ class TestUIBrowser(unittest.TestCase):
 
     def test_deep_link_and_report_page(self):
         pg, errors, external = self.page()
-        pg.goto(self.base + "/?ep=train-3&table=invoices")
+        pg.goto(self.base + "/play.html?ep=train-3&table=invoices")
         pg.wait_for_selector("#records tbody tr")
         self.assertTrue(pg.is_visible("#play"))
         # the hero's "check it yourself" link opens train-03 with the cited invoice selected, at no step cost
-        pg.goto(self.base + "/")
+        pg.goto(self.base + "/play.html")
         pg.click(".case-open")
         pg.wait_for_selector("#records tr.sel")
         self.assertEqual(pg.get_attribute("#records tr.sel", "data-id"), "INV-S3-3287")
@@ -170,7 +170,7 @@ class TestUIBrowser(unittest.TestCase):
     def test_layouts_do_not_overflow(self):
         for width in (390, 768, 1280, 1920):
             pg, errors, _ = self.page(width=width, height=900)
-            for path in ("/", "/report.html"):
+            for path in ("/", "/play.html", "/report.html", "/runs.html", "/train.html"):
                 pg.goto(self.base + path)
                 pg.wait_for_load_state("networkidle")
                 over = pg.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
@@ -179,10 +179,10 @@ class TestUIBrowser(unittest.TestCase):
 
     def test_fonts_actually_load(self):
         pg, _, _ = self.page()
-        pg.goto(self.base + "/")
+        pg.goto(self.base + "/play.html")
         pg.wait_for_selector("#ep-rows tr")
         loaded = pg.evaluate("document.fonts.ready.then(() => [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family))")
-        for fam in ("Inter", "Source Serif 4", "JetBrains Mono"):
+        for fam in ("Inter", "JetBrains Mono"):  # style v2 (Nov 21) uses no serif
             self.assertTrue(any(fam in f for f in loaded), f"{fam} not loaded: {loaded}")
 
 

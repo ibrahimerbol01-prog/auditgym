@@ -13,8 +13,8 @@ import unittest
 from auditgym.cli import ui_extra_files
 from auditgym.env.adapters import STATIC_DIR, STATIC_WHITELIST, make_http_server
 
-HTML = ("index.html", "report.html", "runs.html", "train.html")
-JS = {"index.html": "app.js", "report.html": "report.js", "runs.html": "runs.js", "train.html": "train.js"}
+HTML = ("index.html", "play.html", "report.html", "runs.html", "train.html")
+JS = {"index.html": "home.js", "play.html": "app.js", "report.html": "report.js", "runs.html": "runs.js", "train.html": "train.js"}
 
 
 def read(name):
@@ -140,7 +140,7 @@ class TestUIStatic(unittest.TestCase):
         from decimal import ROUND_HALF_EVEN, Decimal
         ep = "ep_8969ce76c2b8c8da"
         pub = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "episodes", "train", ep, "public")
-        html = read("index.html")
+        html = read("play.html")
         case = re.search(r'<figure class="case.*?</figure>', html, re.S).group(0)
         self.assertIn(ep, case)
 
