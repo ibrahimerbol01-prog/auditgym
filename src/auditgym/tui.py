@@ -41,7 +41,7 @@ T: Dict[str, Dict[str, str]] = {
         "interacting_d": "errors that mask each other: the hardest",
         "fast": "Fast", "std": "Standard", "deep": "Deep",
         "size_d": "{it} iter. × {pop} cand. × {ep} ep. = {total} episodes", "status": "status",
-        "start": "Start training", "new": "New training", "datasets": "Datasets", "population": "Population", "elite": "elite {k} of {p} → next mean", "samples": "{p} samples → gradient step", "recent": "Recent", "no_runs": "No runs yet.",
+        "start": "Start training", "new": "New training", "datasets": "Datasets", "badge_mixed": "recommended", "badge_simple": "beginner", "badge_interacting": "hard", "population": "Population", "elite": "elite {k} of {p} → next mean", "samples": "{p} samples → gradient step", "recent": "Recent", "no_runs": "No runs yet.",
         "machine": "{cpu} · {ram} GB RAM · CPU only · offline", "machine_q": "CPU only · offline",
         "k_home": "↑↓ field   ←→ change   Enter start   Tab section   q quit",
         "busy": "Another training or evaluation is running: wait for it on the Training or Runs page.",
@@ -80,7 +80,7 @@ T: Dict[str, Dict[str, str]] = {
         "interacting_d": "ошибки маскируют друг друга: сложнее всего",
         "fast": "Быстро", "std": "Стандарт", "deep": "Глубоко",
         "size_d": "{it} итер. × {pop} канд. × {ep} эп. = {total} эпизодов", "status": "статус",
-        "start": "Запустить обучение", "new": "Новое обучение", "datasets": "Наборы данных", "population": "Популяция", "elite": "элита {k} из {p} → новое среднее", "samples": "{p} проб → шаг градиента", "recent": "Недавние", "no_runs": "Запусков пока нет.",
+        "start": "Запустить обучение", "new": "Новое обучение", "datasets": "Наборы данных", "badge_mixed": "рекомендуем", "badge_simple": "начальный", "badge_interacting": "сложный", "population": "Популяция", "elite": "элита {k} из {p} → новое среднее", "samples": "{p} проб → шаг градиента", "recent": "Недавние", "no_runs": "Запусков пока нет.",
         "machine": "{cpu} · {ram} ГБ ОЗУ · только CPU · без сети", "machine_q": "только CPU · без сети",
         "k_home": "↑↓ поле   ←→ выбор   Enter запуск   Tab раздел   q выход",
         "busy": "Уже идёт обучение или оценка: дождитесь его на странице «Обучение» или «Запуски».",
@@ -193,6 +193,70 @@ def ledger(i: int, j: int) -> str:
     return cell.ljust(13)[(i + o) % 13]
 
 
+TOKEN = re.compile(r"(\x1b\[[0-9;?]*[A-Za-z])|(.)", re.S)
+
+
+def cells(line: str) -> List[Tuple[str, str]]:
+    """A drawn line as (character, active style) cells."""
+    out, sty = [], ""
+    for m in TOKEN.finditer(line):
+        if m.group(1):
+            sty = "" if m.group(1) == "\x1b[0m" else sty + m.group(1)
+        else:
+            out.append((m.group(2), sty))
+    return out
+
+
+class Backdrop:
+    """The app's background in ASCII, behind every section: two layers of dots drifting left at different speeds
+    (parallax) and a loupe roaming the screen that reads the hidden ledger. Content always wins: the backdrop only
+    shows in empty cells away from text and outside boxes, the way the app's cards cover its canvas."""
+
+    def __init__(self, st: "Style") -> None:
+        self.st = st
+
+    def lens(self, w: int, n: int, t: float) -> Tuple[float, float, float]:
+        r = max(2.5, min(4.5, n / 4))
+        cx = 6 + (math.sin(t * 0.23) + 1) / 2 * (w - 12)
+        cy = r + (math.sin(t * 0.31 + 1.3) + 1) / 2 * max(0.0, n - 1 - 2 * r)
+        return cx, cy, r
+
+    def glyph(self, i: int, j: int, t: float, lens: Tuple[float, float, float]) -> Tuple[str, str]:
+        st = self.st
+        cx, cy, r = lens
+        inside = lambda a, b: math.hypot((a - cx) / 2, b - cy) < r
+        if inside(i, j):
+            dx, dy = (i - cx) / 2, j - cy
+            if not all(inside(a, b) for a, b in ((i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1))):
+                tx, ty = -dy, dx
+                slope = abs(ty) / (abs(tx) * 2 + 1e-9)
+                return ("─" if slope < 0.4 else "│" if slope > 2.5 else ("╱" if tx * ty < 0 else "╲")), st.NEAR
+            return ledger(i + int(t * 1.5), j), (st.B if math.hypot(dx, dy) < r * 0.55 else "")
+        near = i + int(t * 2.0)                      # near layer: every 4th column on even rows, 2 columns/s
+        if j % 2 == 0 and near % 4 == 0 and _h(near // 4, j) % 5:
+            return "·", st.NEAR
+        far = i + int(t * 0.8)                       # far layer: sparser, slower, fainter
+        if j % 2 == 1 and far % 6 == 0 and _h(far // 6, j + 99) % 3 == 0:
+            return "·", st.FAR
+        return " ", ""
+
+    def compose(self, line: str, j: int, n: int, w: int, t: float, lens: Tuple[float, float, float]) -> str:
+        cs = cells(line)
+        cs += [(" ", "")] * (w - len(cs))
+        cs = cs[:w]
+        used = [x for x, (c, _) in enumerate(cs) if c != " "]
+        lo, hi = (used[0] - 2, used[-1] + 2) if used else (w, -1)   # a line's content, edge to edge, plus a margin
+        out, cur = [], ""
+        for x, (c, sty) in enumerate(cs):
+            if c == " " and not (lo <= x <= hi):
+                c, sty = self.glyph(x, j, t, lens)
+            if sty != cur:
+                out.append(self.st.R + sty)
+                cur = sty
+            out.append(c)
+        return "".join(out) + self.st.R
+
+
 def field(w: int, n: int, t: float, st: "Style") -> List[str]:
     """The app's background in ASCII: a quiet dot grid, and a loupe drifting across it that reads the ledger."""
     if n < 5 or w < 30:
@@ -237,6 +301,8 @@ class Style:
         self.INV = "\x1b[7m" if on else ""
         self.POS = "\x1b[38;5;75m" if on else ""    # blue: better (same pair as the app's charts)
         self.NEG = "\x1b[38;5;203m" if on else ""   # red: worse
+        self.FAR = "\x1b[38;5;237m" if on else ""   # background: the slow, far dot layer
+        self.NEAR = "\x1b[38;5;241m" if on else ""  # background: the near layer and the loupe rim
 
     def val(self, v: Optional[float], digits: int = 2, signed: bool = True) -> str:
         if v is None:
@@ -268,9 +334,24 @@ def clip(s: str, w: int) -> str:
 
 def box(title: str, body: List[str], w: int, st: Style) -> List[str]:
     """A rounded frame of width w around body lines."""
+    if not title:
+        return [st.D + "╭" + "─" * (w - 2) + "╮" + st.R] + \
+               [st.D + "│" + st.R + " " + pad(line, w - 4) + " " + st.D + "│" + st.R for line in body] + \
+               [st.D + "╰" + "─" * (w - 2) + "╯" + st.R]
     return [st.D + "╭─ " + st.R + st.B + title + st.R + st.D + " " + "─" * max(0, w - vlen(title) - 5) + "╮" + st.R] + \
            [st.D + "│" + st.R + " " + pad(line, w - 4) + " " + st.D + "│" + st.R for line in body] + \
            [st.D + "╰" + "─" * (w - 2) + "╯" + st.R]
+
+
+def wrap(text: str, w: int) -> List[str]:
+    out, line = [], ""
+    for word in text.split():
+        if line and len(line) + 1 + len(word) > w:
+            out.append(line)
+            line = word
+        else:
+            line = (line + " " + word).strip()
+    return out + ([line] if line else [])
 
 
 def cores(n: int, lang: str) -> str:
@@ -465,6 +546,8 @@ class App:
         self.quitting = False
         self.msg = ""
         self.msg_at = 0.0
+        self.bg = Backdrop(self.st)
+        self.backdrop = True
         self.train_id: Optional[str] = None
         self.machine: Dict[str, Any] = {}
         self.t0 = time.monotonic()
@@ -617,11 +700,11 @@ class App:
         lines = [pad(head, max(0, w - vlen(right) - 1)) + right, st.D + "─" * w + st.R]
         body = getattr(self, "draw_" + TABS[self.tab])(w, h - 4)
         lines += body[: h - 4]
-        while lines and len(lines) > 2 and not ESC.sub("", lines[-1]).strip():
-            lines.pop()                                    # the empty space at the bottom gets the loupe field
-        gap = h - 2 - len(lines)
-        if gap > 0:
-            lines += ([""] + field(w, gap - 2, now, st) + [""]) if gap >= 7 else [""] * gap
+        lines += [""] * (h - 2 - len(lines))
+        if self.st.R and self.backdrop:                    # the drifting backdrop behind the body (not with NO_COLOR)
+            n = h - 4
+            lens = self.bg.lens(w, n, now)
+            lines[2:h - 2] = [self.bg.compose(line, j, n, w, now, lens) for j, line in enumerate(lines[2:h - 2])]
         keys = {"home": "k_home", "train": "k_train", "runs": "k_runs", "settings": "k_settings"}[TABS[self.tab]]
         if TABS[self.tab] == "train":
             r = self.current_training()
@@ -659,7 +742,14 @@ class App:
                 else:
                     s += st.D + ch + st.R
             out.append("  " + s)
-        out += ["", "  " + st.B + tx["ready"] + st.R, "  " + st.D + tx["sub"] + st.R, ""]
+        mark_w = 2 + vlen(wordmark(tick=6)[0]) + 5
+        intro = [st.B + tx["ready"] + st.R] + [st.D + x + st.R for x in wrap(tx["sub"], w - mark_w - 2)]
+        if w - mark_w >= 34 and len(intro) <= 4:          # wide: the intro sits beside the logo
+            for k, line in enumerate(intro):
+                out[1 + k] = pad(out[1 + k], mark_w) + line
+            out.append("")
+        else:
+            out += ["", "  " + st.B + tx["ready"] + st.R, "  " + st.D + tx["sub"] + st.R, ""]
         m = self.machine
         mline = tx["machine"].format(cpu=cores(m["cpu_count"], self.lang), ram=m["ram_gb"]) if m.get("cpu_count") and m.get("ram_gb") else tx["machine_q"]
         size_key = tuple(SIZES)[self.pick["size"]]
@@ -681,17 +771,18 @@ class App:
         go = " ⏎ " + tx["start"] + " "
         body.append(pad(st.D + mline + st.R, bw - 4 - vlen(go) - 2) + ((st.INV + st.B + go + st.R) if self.field == 3 else st.B + go + st.R))
         out += ["  " + line for line in box(tx["new"], body, bw, st)]
-        if h - len(out) >= 9:                                    # the three datasets, as in the app: art + name
-            cw = min(30, (bw - 4) // 3)
+        if h - len(out) >= 11:                                   # the three datasets, as in the app: framed cards
+            cw = (bw - 4) // 3
             cards = []
             for i, d in enumerate(DATASETS):
                 on = i == self.pick["data"]
                 pic = art(d, t * (2.2 if on else 1.0))
-                name = (st.INV + st.B + " " + tx[d] + " " + st.R) if on else (st.D + " " + tx[d] + " " + st.R)
-                cards.append([(st.R if on else st.D) + p + st.R for p in pic] + ["", name])
-            out += ["", "  " + st.B + tx["datasets"] + st.R + st.D + "   ←→ " + tx["data"].lower() + st.R]
-            for row in zip(*cards):
-                out.append("  " + "".join(pad("  " + c, cw) for c in row))
+                badge = st.D + tx["badge_" + d] + st.R
+                name = (st.INV + st.B + " " + tx[d] + " " + st.R) if on else (st.B + tx[d] + st.R)
+                body = [(st.R if on else st.D) + "  " + p + st.R for p in pic] + [pad(name, cw - 4 - vlen(badge)) + badge]
+                frame = box("", body, cw, st) if not on else [c.replace(st.D, st.B) for c in box("", body, cw, st)]
+                cards.append(frame)
+            out += [" " + "  ".join(row) for row in zip(*cards)]
         out += ["", "  " + st.B + tx["recent"] + st.R]
         runs = self.runs()[: max(0, min(5, h - len(out) - 1))]
         if not runs:
