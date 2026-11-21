@@ -352,6 +352,12 @@ class Jobs:
                 agent_name=policy, make=BUILTIN[policy], split=split, limit=limit, run_id=run_id, base=self.base,
                 configs=self.configs, stop=self.stop_ev, pace=float(pace)))
             self.thread.start()
+            # Answer only once run.json exists, so the caller's first read of the run never races the thread.
+            path = os.path.join(self.base or runs_dir(), run_id, "run.json")
+            for _ in range(200):
+                if os.path.exists(path) or not self.thread.is_alive():
+                    break
+                time.sleep(0.025)
         return {"ok": True, "run": run_id}
 
     def stop(self, run_id: str) -> Dict[str, Any]:
