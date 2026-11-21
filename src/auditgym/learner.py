@@ -362,12 +362,48 @@ def episode_specs(seed: int, iteration: int, n: int, preset: str, forbidden: set
     return out
 
 
+# ------------------------------------------------------------------------------------------ fresh test set
+TEST_SALT = "auditgym-test-v1"
+TEST_KINDS = ["clean"] * 5 + ["A", "B", "A+B", "A", "B"] + ["errors"] * 10
+
+
+def test_split(configs: Optional[str] = None) -> List[Dict[str, Any]]:
+    """20 fresh episodes for the final, honest number: never used for training (the trainer generates its own
+    episodes from other seeds) and never used to choose the best model (that is dev). Shaped like the judges'
+    hidden set: 5 clean companies, 5 with interacting errors, 10 with ordinary errors. Fixed, so every training
+    and every policy is measured on the same 20."""
+    forbidden = forbidden_seeds(configs)
+    out = []
+    for k, kind in enumerate(TEST_KINDS):
+        rng = Rng(TEST_SALT, "config", k)
+        cfg = episode_config("simple", rng)
+        cfg.pop("n_invoices", None)
+        if kind == "clean":
+            cfg.update(clean=True, interactions=[], errors={t: 0 for t in ERROR_TYPES})
+        elif kind == "errors":
+            cfg.update(clean=False, interactions=[])
+        else:
+            cfg.update(clean=False, interactions=kind.split("+"), errors={t: min(v, 1) for t, v in cfg.get("errors", {}).items()})
+        errs = cfg.get("errors") or {}
+        issues = 0 if cfg["clean"] else sum(errs.values()) + 3 * ("A" in cfg["interactions"]) + 2 * ("B" in cfg["interactions"])
+        cfg["n_invoices"] = min(100, max(60, 4 * issues))
+        make_config(cfg)                    # raises if a shape is invalid: a test asserts all 20 are valid
+        s, salt = -1, 0
+        while s < 0 or s in forbidden:
+            s = derive_seed(TEST_SALT, "seed", k, salt) % (2 ** 63)
+            salt += 1
+        out.append({"seed": s, "config": cfg, "label": harness.episode_label(cfg)})
+    return out
+
+
 # ------------------------------------------------------------------------------------------ dev evaluation
 def evaluate_dev(make: Callable[[], Policy], limit: Optional[int] = None, configs: Optional[str] = None,
-                 cache: Optional[Dict[str, Any]] = None, run_id: str = "learner-dev") -> Dict[str, Any]:
-    """Held-out dev split in CLOSED mode, the way ``harness.run_split`` does it: a separate evaluator client,
-    no reward in the observations, ``finalize`` per episode, public score fields only."""
-    eps = harness.load_split("dev", configs)[: limit or None]
+                 cache: Optional[Dict[str, Any]] = None, run_id: str = "learner-dev", split: str = "dev",
+                 analysis: Optional["harness.Analysis"] = None) -> Dict[str, Any]:
+    """Held-out dev split (or the fresh test split) in CLOSED mode, the way ``harness.run_split`` does it: a
+    separate evaluator client, no reward in the observations, ``finalize`` per episode, public score fields only.
+    With ``analysis``, the organizer's per-episode results also feed a failure analysis."""
+    eps = harness.load_split(split, configs)[: limit or None]
     svc = _Service(cache)
     env = AuditEnv(mode="closed", service=svc, run_id=run_id)
     rows = []
@@ -378,12 +414,15 @@ def evaluate_dev(make: Callable[[], Policy], limit: Optional[int] = None, config
             continue
         policy = make()
         policy.reset(obs)
-        last, n, done = obs, 0, False
+        last, n, done, action = obs, 0, False, None
         while not done:
-            last, _r, terminated, truncated, _i = env.step(policy.act(last))
+            action = policy.act(last)
+            last, _r, terminated, truncated, _i = env.step(action)
             n += 1
             done = terminated or truncated
         res = svc.call({"cmd": "finalize", "run_id": run_id}).get("results") or [{}]
+        if analysis is not None:
+            analysis.add(res[-1], action, e["label"])
         rows.append({"steps": n, "seconds": time.perf_counter() - t0,
                      "score": {k: res[-1][k] for k in harness.PUBLIC_SCORE if k in res[-1]}})
     env.close()
@@ -392,6 +431,25 @@ def evaluate_dev(make: Callable[[], Policy], limit: Optional[int] = None, config
         return {"reward": -1.0, "f1": 0.0, "precision": 0.0, "recall": 0.0, "fp": 0.0, "steps": 0.0, "episodes": 0}
     return {"reward": s["reward"], "f1": s["f1"], "precision": s["precision"], "recall": s["recall"],
             "fp": round(s["fp"] / s["episodes_done"], 3), "steps": s["steps"], "episodes": s["episodes_done"]}
+
+
+_TEST_BASELINES: Dict[str, Any] = {}
+
+
+def test_results(theta: Sequence[float], configs: Optional[str] = None) -> Dict[str, Any]:
+    """The trained auditor (its best-on-dev parameters) and the baselines on the fresh test split, with a
+    measured failure analysis for the auditor and the Reconciler."""
+    an = harness.Analysis()
+    auditor = evaluate_dev(lambda: AuditorPolicy(list(theta)), configs=configs, run_id="learner-test", split="test", analysis=an)
+    key = configs or ""
+    if key not in _TEST_BASELINES:             # deterministic: computed once per process
+        ar = harness.Analysis()
+        _TEST_BASELINES[key] = {"reconcile": evaluate_dev(ReconcilePolicy, configs=configs, run_id="learner-test-rec", split="test", analysis=ar),
+                                "random": evaluate_dev(RandomPolicy, configs=configs, run_id="learner-test-rnd", split="test"),
+                                "reconcile_analysis": ar.out()}
+    b = _TEST_BASELINES[key]
+    return {"episodes": auditor["episodes"], "auditor": auditor, "reconcile": b["reconcile"], "random": b["random"],
+            "analysis": an.out(), "reconcile_analysis": b["reconcile_analysis"]}
 
 
 def dev_baselines(configs: Optional[str] = None) -> Dict[str, Any]:
@@ -456,8 +514,10 @@ def _mean(xs: Sequence[float]) -> float:
 
 def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None, base: Optional[str] = None,
           on_event: Optional[Callable[[Dict[str, Any]], None]] = None,
-          stop: Optional[threading.Event] = None, configs: Optional[str] = None) -> Dict[str, Any]:
-    """Run a training job, write ``<runs>/<run_id>/run.json`` after every iteration and return the run."""
+          stop: Optional[threading.Event] = None, configs: Optional[str] = None,
+          meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Run a training job, write ``<runs>/<run_id>/run.json`` after every iteration and return the run. At the
+    end, the best-on-dev parameters are measured once on the fresh test split (``run["test"]``)."""
     cfg = normalize_config(config)
     method, n_iter, pop = cfg["method"], cfg["iterations"], cfg["population"]
     n_eps, seed, preset = cfg["episodes_per_candidate"], cfg["seed"], cfg["dataset"]["preset"]
@@ -480,7 +540,8 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
                            "config": cfg, "env_version": ENV_VERSION, "started": time.time(), "finished": None,
                            "iterations": n_iter, "at": 0, "points": [],
                            "best": {"theta": None, "describe": None, "dev": None, "i": None},
-                           "summary": {"dev_start": None, "dev_best": None, "dev_last": None, "episodes": 0, "seconds": 0.0}}
+                           "summary": {"dev_start": None, "dev_best": None, "dev_last": None, "episodes": 0, "seconds": 0.0},
+                           "seed": seed, **(meta or {})}
     harness._write_json(path, run)
 
     rng = Rng("auditgym-learner-search", seed, method)
@@ -565,6 +626,14 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
         run["status"] = "error"
         run["error"] = str(exc)[:200]
     finally:
+        if run["status"] in ("done", "stopped") and run["best"]["theta"]:
+            run["status_note"] = "testing"
+            harness._write_json(path, run)
+            try:
+                run["test"] = test_results(run["best"]["theta"], configs)
+            except Exception as exc:  # noqa: BLE001 - the training itself is still valid
+                run["test"] = {"error": str(exc)[:200]}
+            run.pop("status_note", None)
         run["finished"] = time.time()
         harness._write_json(path, run)
         emit({"type": "run_end", "run": run})

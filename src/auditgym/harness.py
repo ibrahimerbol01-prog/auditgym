@@ -32,7 +32,8 @@ from .version import ENV_VERSION
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BUILTIN = {"reconcile": ReconcilePolicy, "random": RandomPolicy, "flag_all": FlagAllPolicy}
-SPLITS = ("dev", "train")
+SPLITS = ("dev", "train")                 # the open episode files in configs/
+EVAL_SPLITS = ("dev", "train", "test")     # "test": 20 fresh episodes never used for training or model choice
 TRAIN_PRESETS = ("mixed", "simple", "interacting")
 RUN_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,79}$")
 PUBLIC_SCORE = ("status", "reward", "precision", "recall", "f1", "tp", "fp", "fn", "inspection_steps")
@@ -60,8 +61,11 @@ def episode_label(cfg: Dict[str, Any]) -> str:
 
 
 def load_split(split: str, base: Optional[str] = None) -> List[Dict[str, Any]]:
+    if split == "test":
+        from .learner import test_split  # generated, not a file: see learner.test_split
+        return test_split(base)
     if split not in SPLITS:
-        raise ValueError("split must be dev or train")
+        raise ValueError("split must be dev, train or test")
     with open(os.path.join(base or configs_dir(), f"{split}.json"), encoding="utf-8") as fh:
         spec = json.load(fh)
     return [{"seed": e["seed"], "config": e["config"], "label": episode_label(e["config"])} for e in spec["episodes"]]
@@ -166,6 +170,49 @@ def _write_json(path: str, obj: Any) -> None:
     os.replace(tmp, path)
 
 
+class Analysis:
+    """Measured failure analysis of one run, from the organizer's results: which error types were caught or
+    missed, what types the false findings claimed, and the reward by kind of episode. Collected per episode,
+    written to run.json only at the end of the run. Near-miss reasons are deliberately left out: like the
+    evaluator's public report, nothing on disk tells an agent which wrong hypothesis was close."""
+
+    def __init__(self) -> None:
+        self.by_type: Dict[str, Dict[str, int]] = {}
+        self.false_by_type: Dict[str, int] = {}
+        self.by_label: Dict[str, List[float]] = {}
+
+    def add(self, result: Dict[str, Any], action: Any, label: str) -> None:
+        for t, v in (result.get("per_type") or {}).items():
+            d = self.by_type.setdefault(t, {"issues": 0, "found": 0})
+            d["issues"] += int(v.get("issues", 0))
+            d["found"] += int(v.get("found", 0))
+        claims = submitted_findings(action)
+        for pf in result.get("per_finding") or []:
+            if pf.get("matched"):
+                continue
+            i = pf.get("index")
+            t = claims[i].get("type") if isinstance(i, int) and 0 <= i < len(claims) and isinstance(claims[i], dict) else None
+            t = t if isinstance(t, str) and len(t) < 40 else "invalid"
+            self.false_by_type[t] = self.false_by_type.get(t, 0) + 1
+        if isinstance(result.get("reward"), (int, float)):
+            kind = "clean" if label.startswith("чистая") else "interacting" if label.startswith("взаимод") else "errors"
+            self.by_label.setdefault(kind, []).append(float(result["reward"]))
+
+    def out(self) -> Dict[str, Any]:
+        return {"by_type": self.by_type, "false_by_type": self.false_by_type,
+                "by_kind": {k: {"episodes": len(v), "reward": round(sum(v) / len(v), 4)} for k, v in sorted(self.by_label.items())},
+                "episodes": sum(len(v) for v in self.by_label.values())}
+
+
+def submitted_findings(action: Any) -> List[Any]:
+    """The findings list of a submit action (any shape an agent sent; never trusted beyond reading types)."""
+    if not isinstance(action, dict) or action.get("tool") != "submit":
+        return []
+    f = (action.get("args") or {}).get("findings") if isinstance(action.get("args"), dict) else None
+    f = f.get("findings") if isinstance(f, dict) else f
+    return f if isinstance(f, list) else []
+
+
 def summarize(episodes: List[Dict[str, Any]]) -> Dict[str, Any]:
     done = [e for e in episodes if e.get("score")]
     if not done:
@@ -188,7 +235,7 @@ def summarize(episodes: List[Dict[str, Any]]) -> Dict[str, Any]:
 def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", limit: Optional[int] = None,
               run_id: Optional[str] = None, base: Optional[str] = None, configs: Optional[str] = None,
               on_event: Optional[Callable[[Dict[str, Any]], None]] = None, stop: Optional[threading.Event] = None,
-              time_limit: Optional[float] = None, pace: float = 0.0) -> Dict[str, Any]:
+              time_limit: Optional[float] = None, pace: float = 0.0, meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Run ``make()`` on every episode of the split in closed mode; returns the run summary (also on disk).
 
     ``pace`` (seconds) waits before each step so a fast run can be watched; it is recorded in run.json and
@@ -203,14 +250,16 @@ def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", l
     run: Dict[str, Any] = {"id": run_id, "kind": "evaluation", "agent": agent_name, "split": split, "mode": "closed",
                            "env_version": ENV_VERSION, "pace": pace, "status": "running", "started": time.time(), "finished": None,
                            "episodes": [{"index": i, "seed": e["seed"], "label": e["label"], "status": "queued"} for i, e in enumerate(eps)],
-                           "summary": {"episodes_done": 0}}
+                           "summary": {"episodes_done": 0}, **(meta or {})}
     _write_json(os.path.join(folder, "run.json"), run)
+    analysis = Analysis()
     emit({"type": "run_start", "run": run})
     svc = ServiceClient()
     kw = {} if time_limit is None else {"time_limit": time_limit}
     env = AuditEnv(mode="closed", service=svc, run_id=run_id, **kw)
     steps_fh = open(os.path.join(folder, "steps.jsonl"), "w", encoding="utf-8")
     policy = None
+    action: Any = None
     try:
         for i, e in enumerate(eps):
             if stop is not None and stop.is_set():
@@ -255,6 +304,7 @@ def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", l
                 break
             results = svc.call({"cmd": "finalize", "run_id": run_id}).get("results") or [{}]
             score = {k: results[-1][k] for k in PUBLIC_SCORE if k in results[-1]}
+            analysis.add(results[-1], action, e["label"])
             rec.update(status="done", steps=n, seconds=round(time.perf_counter() - t0 - waited, 3), score=score)
             run["summary"] = summarize(run["episodes"])
             _write_json(os.path.join(folder, "run.json"), run)
@@ -271,6 +321,8 @@ def run_split(agent_name: str, make: Callable[[], Policy], split: str = "dev", l
         env.close()
         run["finished"] = time.time()
         run["summary"] = summarize(run["episodes"])
+        if run["summary"].get("episodes_done"):
+            run["analysis"] = analysis.out()
         _write_json(os.path.join(folder, "run.json"), run)
         emit({"type": "run_end", "run": run})
     return run
@@ -290,7 +342,9 @@ def list_runs(base: Optional[str] = None) -> List[Dict[str, Any]]:
                 except (OSError, ValueError):
                     continue
                 out.append({k: r.get(k) for k in ("id", "kind", "agent", "model", "method", "split", "mode", "status", "started",
-                                                   "finished", "summary", "at", "iterations")}
+                                                   "finished", "summary", "at", "iterations", "group", "model_run", "seed")}
+                           | {"test_reward": ((r.get("test") or {}).get("auditor") or {}).get("reward"),
+                              "preset": ((r.get("config") or {}).get("dataset") or {}).get("preset")}
                            | {"episodes": len(r.get("episodes", [])),
                               "rewards": [(e.get("score") or {}).get("reward") for e in r.get("episodes", [])]})
     return sorted(out, key=lambda r: r.get("started") or 0, reverse=True)
@@ -333,11 +387,24 @@ class Jobs:
     def busy(self) -> bool:
         return self.thread is not None and self.thread.is_alive()
 
-    def start(self, policy: Any, split: Any, limit: Any = None, pace: Any = 0.0) -> Dict[str, Any]:
-        if policy not in BUILTIN or split not in SPLITS:
-            return {"ok": False, "error": {"code": "bad_arguments", "message": "policy must be reconcile, random or flag_all; split dev or train"}}
-        if limit is not None and not (isinstance(limit, int) and not isinstance(limit, bool) and 1 <= limit <= 10):
-            return {"ok": False, "error": {"code": "bad_arguments", "message": "limit must be 1..10"}}
+    def start(self, policy: Any, split: Any, limit: Any = None, pace: Any = 0.0, model: Any = None) -> Dict[str, Any]:
+        meta: Dict[str, Any] = {}
+        if model is not None:                      # a trained auditor: the best parameters of a training run
+            r = read_run(model, self.base) if isinstance(model, str) and RUN_ID.match(model) else None
+            theta = ((r or {}).get("best") or {}).get("theta")
+            if not r or r.get("kind") != "training" or not theta:
+                return {"ok": False, "error": {"code": "bad_arguments", "message": "model must be a finished training run"}}
+            from .learner import AuditorPolicy
+            make = (lambda th: (lambda: AuditorPolicy(th)))(list(theta))
+            policy, meta = f"auditor-{r.get('method', 'cem')}", {"model_run": r["id"], "model_method": r.get("method")}
+        elif policy in BUILTIN:
+            make = BUILTIN[policy]
+        else:
+            make = None
+        if make is None or split not in EVAL_SPLITS:
+            return {"ok": False, "error": {"code": "bad_arguments", "message": "policy must be reconcile, random or flag_all (or a trained model); split dev, train or test"}}
+        if limit is not None and not (isinstance(limit, int) and not isinstance(limit, bool) and 1 <= limit <= 20):
+            return {"ok": False, "error": {"code": "bad_arguments", "message": "limit must be 1..20"}}
         if not (isinstance(pace, (int, float)) and not isinstance(pace, bool) and 0 <= pace <= 0.5):
             return {"ok": False, "error": {"code": "bad_arguments", "message": "pace must be 0..0.5 seconds"}}
         with self.lock:
@@ -351,8 +418,8 @@ class Jobs:
             self.stop_ev = threading.Event()
             self.current = run_id
             self.thread = threading.Thread(target=run_split, daemon=True, kwargs=dict(
-                agent_name=policy, make=BUILTIN[policy], split=split, limit=limit, run_id=run_id, base=self.base,
-                configs=self.configs, stop=self.stop_ev, pace=float(pace)))
+                agent_name=policy, make=make, split=split, limit=limit, run_id=run_id, base=self.base,
+                configs=self.configs, stop=self.stop_ev, pace=float(pace), meta=meta))
             self.thread.start()
             # Answer only once run.json exists, so the caller's first read of the run never races the thread.
             path = os.path.join(self.base or runs_dir(), run_id, "run.json")
@@ -363,7 +430,7 @@ class Jobs:
         return {"ok": True, "run": run_id}
 
     def stop(self, run_id: str) -> Dict[str, Any]:
-        if self.busy() and run_id == self.current:
+        if self.busy() and (run_id == self.current or run_id.startswith(str(self.current).rsplit("-s", 1)[0] + "-s")):
             self.stop_ev.set()
             return {"ok": True}
         return {"ok": False, "error": {"code": "not_running", "message": "this run is not running"}}
@@ -390,6 +457,12 @@ class Jobs:
                       "elite_frac": num("elite_frac", 0.05, 0.5, 0.25, integer=False), "seed": num("seed", 0, 1_000_000, 1),
                       "eval_every": num("eval_every", 1, 20, 2), "pace": num("pace", 0, 0.5, 0.0, integer=False),
                       "dataset": {"preset": preset}}
+            seeds = b.get("seeds")
+            if seeds is not None:
+                ok = isinstance(seeds, list) and 2 <= len(seeds) <= 5 and len(set(map(str, seeds))) == len(seeds) and all(
+                    isinstance(x, int) and not isinstance(x, bool) and 0 <= x <= 1_000_000 for x in seeds)
+                if not ok:
+                    raise ValueError("seeds must be 2..5 different integers in 0..1000000")
         except ValueError as exc:
             return {"ok": False, "error": {"code": "bad_arguments", "message": str(exc)}}
         from . import learner  # imported lazily: the evaluation-only app does not need it
@@ -399,15 +472,42 @@ class Jobs:
             run_id = new_run_id(f"auditor-{method}", "train")
             self.stop_ev = threading.Event()
             self.current = run_id
-            self.thread = threading.Thread(target=learner.train, daemon=True,
-                                           kwargs=dict(config=config, run_id=run_id, base=self.base, stop=self.stop_ev))
+            if seeds:
+                group = "g-" + run_id
+                ids = [f"{run_id}-s{x}" for x in seeds]
+                run_id = self.current = ids[0]
+
+                def series() -> None:               # the same configuration on each seed, one after another
+                    for x, rid in zip(seeds, ids):
+                        if self.stop_ev.is_set():
+                            break
+                        self.current = rid
+                        learner.train(config={**config, "seed": x}, run_id=rid, base=self.base, stop=self.stop_ev,
+                                      meta={"group": group, "group_seeds": seeds})
+                self.thread = threading.Thread(target=series, daemon=True)
+            else:
+                self.thread = threading.Thread(target=learner.train, daemon=True,
+                                               kwargs=dict(config=config, run_id=run_id, base=self.base, stop=self.stop_ev))
             self.thread.start()
             path = os.path.join(self.base or runs_dir(), run_id, "run.json")
             for _ in range(200):
                 if os.path.exists(path) or not self.thread.is_alive():
                     break
                 time.sleep(0.025)
-        return {"ok": True, "run": run_id}
+        return {"ok": True, "run": run_id, **({"group": group, "runs": ids} if seeds else {})}
+
+    def export(self, run_id: str, lang: str = "en") -> Dict[str, Any]:
+        """Write a Markdown report of a training run to its folder (report.md) and return it."""
+        r = read_run(run_id, self.base) if RUN_ID.match(run_id or "") else None
+        if not r or r.get("kind") != "training":
+            return {"ok": False, "error": {"code": "not_found", "message": "no such training run"}}
+        group = [read_run(x["id"], self.base) for x in list_runs(self.base) if r.get("group") and x.get("group") == r.get("group")]
+        from .report_md import training_report
+        text = training_report(r, [g for g in group if g], lang if lang in ("en", "ru") else "en")
+        path = os.path.join(self.base or runs_dir(), run_id, "report.md")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        return {"ok": True, "path": path, "markdown": text}
 
     def save_curve(self, run_id: str) -> Dict[str, Any]:
         """Copy a finished training run's learning curve to train/curve.json (shown on the runs page, T-1)."""
@@ -434,7 +534,7 @@ class Jobs:
                 return 200, {"ok": True, "curve": None}
         if path == "/api/runs":
             return 200, {"ok": True, "runs": list_runs(self.base), "running": self.current if self.busy() else None,
-                         "policies": list(BUILTIN), "splits": list(SPLITS)}
+                         "policies": list(BUILTIN), "splits": list(EVAL_SPLITS)}
         m = re.match(r"^/api/runs/([^/]+)$", path)
         if m:
             r = read_run(m.group(1), self.base)
@@ -449,12 +549,16 @@ class Jobs:
     def post(self, path: str, body: Any):
         b = body if isinstance(body, dict) else {}
         if path == "/api/runs":
-            res = self.start(b.get("policy"), b.get("split", "dev"), b.get("limit"), b.get("pace", 0.0))
+            res = self.start(b.get("policy"), b.get("split", "dev"), b.get("limit"), b.get("pace", 0.0), b.get("model"))
             return (200 if res["ok"] else (409 if res["error"]["code"] == "busy" else 400)), res
         m = re.match(r"^/api/runs/([^/]+)/stop$", path)
         if m:
             res = self.stop(m.group(1))
             return (200 if res["ok"] else 409), res
+        m = re.match(r"^/api/runs/([^/]+)/export$", path)
+        if m:
+            res = self.export(m.group(1), b.get("lang", "en"))
+            return (200 if res["ok"] else 404), res
         if path == "/api/train":
             res = self.start_train(body)
             return (200 if res["ok"] else (409 if res["error"]["code"] == "busy" else 400)), res

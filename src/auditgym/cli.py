@@ -200,7 +200,8 @@ def main(argv=None) -> int:
     ra.add_argument("--policy", choices=["reconcile", "random", "flag_all"])
     ra.add_argument("--cmd", dest="agent_cmd", help="external agent: reads observations (JSON lines) on stdin, writes actions on stdout")
     ra.add_argument("--name", help="short name for a --cmd agent (used in the run id)")
-    ra.add_argument("--split", choices=["dev", "train"], default="dev")
+    ra.add_argument("--split", choices=["dev", "train", "test"], default="dev",
+                    help="test: 20 fresh episodes never used for training or model choice")
     ra.add_argument("--limit", type=int, help="only the first N episodes")
     ra.add_argument("--pace", type=float, default=0.0, help="seconds to wait before each step (demos); not counted in time")
     ra.add_argument("--plain", action="store_true", help="plain lines, no colours or redraw")
