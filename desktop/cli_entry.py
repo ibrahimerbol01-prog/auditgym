@@ -58,6 +58,7 @@ def main(argv: list[str] | None = None) -> int:
         data = os.path.join(BASE, "data")
         os.environ.setdefault("AUDITGYM_DATA", data)
         os.environ.setdefault("AUDITGYM_CONFIGS", os.path.join(data, "configs"))
+    os.environ.setdefault("AUDITGYM_BUILD", build_stamp())  # shown in the terminal UI's settings
     if argv[1:2] in (["--version"], ["version"]):
         print(f"auditgym {build_stamp()}")
         return 0

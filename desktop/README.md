@@ -46,6 +46,13 @@ from source. The builds are not code-signed, so Windows SmartScreen or macOS may
 
 To uninstall, delete the folder above (and the Start menu shortcut or `~/.local/share/applications/auditgym.desktop`).
 
+## Terminal UI
+
+The same app in a terminal: type `auditgym` on its own. Tab or 1-4 switch sections (Home, Training, Runs,
+Settings); on Home, ↑↓ pick a field, ←→ change it, Enter starts the training; the Training section shows the live
+reward chart and the key numbers; `e` on Runs evaluates a built-in policy; q quits. English by default, Russian in
+Settings. The other commands (`auditgym run-agent ...`, `auditgym verify`, ...) work as before.
+
 ## Updates
 
 Install once; after that the app keeps itself current. On start it asks GitHub (at most every 6 hours) whether a

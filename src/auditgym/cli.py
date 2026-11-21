@@ -178,8 +178,12 @@ def cmd_evaluate(args) -> int:
 
 
 def main(argv=None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if not argv and sys.stdin.isatty() and sys.stdout.isatty():
+        argv = ["tui"]  # `auditgym` on its own, in a terminal: the interactive terminal UI
     ap = argparse.ArgumentParser(prog="auditgym")
     sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("tui", help="interactive terminal UI (also: auditgym with no arguments)")
     sub.add_parser("verify").add_argument("rest", nargs=argparse.REMAINDER)
     sub.add_parser("demo")
     s = sub.add_parser("serve")
@@ -211,6 +215,9 @@ def main(argv=None) -> int:
     ev.add_argument("--findings", required=True)
     ev.add_argument("--steps", type=int, required=True)
     args = ap.parse_args(argv)
+    if args.cmd == "tui":
+        from .tui import main as tmain
+        return tmain()
     if args.cmd == "verify":
         from .verify import main as vmain
         return vmain(args.rest)
