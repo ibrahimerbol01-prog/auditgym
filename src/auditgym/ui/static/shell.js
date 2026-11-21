@@ -72,7 +72,7 @@
   const cv = document.createElement("canvas"); cv.className = "ascii-field"; cv.setAttribute("aria-hidden", "true");
   document.body.prepend(cv);
   const ctx = cv.getContext("2d");
-  let W = 0, H = 0, dpr = 1, S = 2, cols = 0, rows = 0, layer = null, atlas = {}, bg = "", rim = "";
+  let W = 0, H = 0, dpr = 1, S = 2, cols = 0, rows = 0, layer = null, atlas = {}, rim = "";
   let tx = -1e4, ty = -1e4, px = -1e4, py = -1e4, dirty = null, raf = 0, lastT = 0, ripples = [];
   const hash = (i, j) => { let h = (i * 374761393 + j * 668265263) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return h ^ (h >>> 16); };
   const hasDot = (i, j) => hash(i, j) % 5 !== 0;
@@ -109,7 +109,7 @@
     dpr = Math.min(2, devicePixelRatio || 1); S = dpr * 2;
     W = innerWidth; H = innerHeight; cols = Math.ceil(W / CW) + 1; rows = Math.ceil(H / CH) + 1;
     cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    bg = tok("--bg"); rim = tok("--txt3"); atlas = { soft: bake(rim), strong: bake(tok("--txt")) };
+    rim = tok("--txt3"); atlas = { soft: bake(rim), strong: bake(tok("--txt")) };
     layer = document.createElement("canvas"); layer.width = W * dpr; layer.height = H * dpr;
     const l = layer.getContext("2d"); l.setTransform(dpr, 0, 0, dpr, 0, 0);
     for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) if (hasDot(i, j)) glyph(l, "·", "soft", i * CW + CW / 2, j * CH + CH / 2, 0.5);
@@ -119,25 +119,23 @@
   const ringBox = () => { let b = null; for (const w of ripples) b = union(b, { x0: w.x - w.r - 30, y0: w.y - w.r - 30, x1: w.x + w.r + 30, y1: w.y + w.r + 30 }); return b; };
   function lens() {
     if (px < -1e3) return;
-    ctx.globalAlpha = 1; ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(px, py, LR, 0, 7); ctx.fill();
-    ctx.save(); ctx.beginPath(); ctx.arc(px, py, LR - 1, 0, 7); ctx.clip();
+    ctx.save(); ctx.beginPath(); ctx.arc(px, py, LR, 0, 7); ctx.clip();
+    ctx.clearRect(px - LR, py - LR, LR * 2, LR * 2);   // clear glass: the page shows through, no tint
     const r = LR / LM + CW;
     cells({ x0: px - r, y0: py - r, x1: px + r, y1: py + r }, (i, j, x, y) => {
-      const ch = ledger(i, j); if (ch === " ") return;
-      const X = px + (x - px) * LM, Y = py + (y - py) * LM, u = Math.hypot(X - px, Y - py) / LR; if (u > 1.05) return;
+      const ch = ledger(i, j), X = px + (x - px) * LM, Y = py + (y - py) * LM, u = Math.hypot(X - px, Y - py) / LR; if (u > 1.05) return;
+      if (ch === " ") { if (hasDot(i, j)) glyph(ctx, "·", "soft", X, Y, 0.5, LM * 0.95); return; }   // the dot grid, magnified
       glyph(ctx, ch, u < 0.7 ? "strong" : "soft", X, Y, Math.max(0.12, 0.85 - 0.75 * u * u), LM * 0.95);
     });
     ctx.restore();
-    ctx.strokeStyle = rim; ctx.lineWidth = 1; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(px, py, LR, 0, 7); ctx.stroke();
-    ctx.lineWidth = 6; ctx.globalAlpha = 0.18; ctx.beginPath(); ctx.arc(px, py, LR - 3, 0, 7); ctx.stroke();
+    ctx.strokeStyle = rim; ctx.lineWidth = 1; ctx.globalAlpha = 0.35; ctx.beginPath(); ctx.arc(px, py, LR - 0.5, 0, 7); ctx.stroke();
   }
   function rings(dt) {
-    ctx.fillStyle = bg;
     for (const w of ripples) {
       cells({ x0: w.x - w.r - 24, y0: w.y - w.r - 24, x1: w.x + w.r + 24, y1: w.y + w.r + 24 }, (i, j, x, y) => {
         const dx = x - w.x, dy = y - w.y, d = Math.hypot(dx, dy), band = Math.abs(d - w.r); if (band > 20) return;
         const k = (1 - band / 20) * w.a; if (k < 0.05 || Math.hypot(x - px, y - py) < LR) return;   // the glass stays clean
-        ctx.globalAlpha = 1; ctx.fillRect(x - CW / 2, y - CH / 2, CW, CH);
+        ctx.clearRect(x - CW / 2, y - CH / 2, CW, CH);
         glyph(ctx, k > 0.6 ? "+" : k > 0.3 ? ":" : "·", k > 0.5 ? "strong" : "soft", x + dx / (d || 1) * 6 * k, y + dy / (d || 1) * 6 * k, 0.25 + 0.6 * k);
       });
       w.r += 0.75 * dt; w.a *= Math.pow(0.955, dt / 16.7);
