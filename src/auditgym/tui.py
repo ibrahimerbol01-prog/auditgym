@@ -41,7 +41,7 @@ T: Dict[str, Dict[str, str]] = {
         "interacting_d": "errors that mask each other: the hardest",
         "fast": "Fast", "std": "Standard", "deep": "Deep",
         "size_d": "{it} iter. × {pop} cand. × {ep} ep. = {total} episodes", "status": "status",
-        "start": "Start training", "new": "New training", "recent": "Recent", "no_runs": "No runs yet.",
+        "start": "Start training", "new": "New training", "datasets": "Datasets", "population": "Population", "elite": "elite {k} of {p} → next mean", "samples": "{p} samples → gradient step", "recent": "Recent", "no_runs": "No runs yet.",
         "machine": "{cpu} · {ram} GB RAM · CPU only · offline", "machine_q": "CPU only · offline",
         "k_home": "↑↓ field   ←→ change   Enter start   Tab section   q quit",
         "busy": "Another training or evaluation is running: wait for it on the Training or Runs page.",
@@ -64,7 +64,7 @@ T: Dict[str, Dict[str, str]] = {
         "report_none": "report.json not found: run  python -m auditgym.verify", "data_dir": "Runs folder",
         "k_settings": "←→ language   Tab section   q quit",
         "quit_running": "A run is in progress: press q again to stop it and quit, any other key to stay.",
-        "source": "source checkout",
+        "source": "source checkout", "tagline": "an offline RL environment for audit agents",
         "oracle": "Oracle", "reconcile": "Reconciler", "random": "Intern", "flag_all": "Alarmist",
         "s": "s", "min": "min",
     },
@@ -80,7 +80,7 @@ T: Dict[str, Dict[str, str]] = {
         "interacting_d": "ошибки маскируют друг друга: сложнее всего",
         "fast": "Быстро", "std": "Стандарт", "deep": "Глубоко",
         "size_d": "{it} итер. × {pop} канд. × {ep} эп. = {total} эпизодов", "status": "статус",
-        "start": "Запустить обучение", "new": "Новое обучение", "recent": "Недавние", "no_runs": "Запусков пока нет.",
+        "start": "Запустить обучение", "new": "Новое обучение", "datasets": "Наборы данных", "population": "Популяция", "elite": "элита {k} из {p} → новое среднее", "samples": "{p} проб → шаг градиента", "recent": "Недавние", "no_runs": "Запусков пока нет.",
         "machine": "{cpu} · {ram} ГБ ОЗУ · только CPU · без сети", "machine_q": "только CPU · без сети",
         "k_home": "↑↓ поле   ←→ выбор   Enter запуск   Tab раздел   q выход",
         "busy": "Уже идёт обучение или оценка: дождитесь его на странице «Обучение» или «Запуски».",
@@ -103,7 +103,7 @@ T: Dict[str, Dict[str, str]] = {
         "report_none": "report.json не найден: запустите  python -m auditgym.verify", "data_dir": "Папка запусков",
         "k_settings": "←→ язык   Tab раздел   q выход",
         "quit_running": "Идёт запуск: нажмите q ещё раз, чтобы остановить его и выйти, любую другую клавишу — остаться.",
-        "source": "запуск из исходников",
+        "source": "запуск из исходников", "tagline": "офлайн RL-среда для агентов-аудиторов",
         "oracle": "Эталон", "reconcile": "Сверщик", "random": "Стажёр", "flag_all": "Паникёр",
         "s": "с", "min": "мин",
     },
@@ -125,11 +125,102 @@ FONT = {
 }
 
 
-def wordmark(text: str = "AUDITGYM") -> List[str]:
-    rows = ["".join(FONT[c][y] + "." for c in text) for y in range(7)] + ["." * (6 * len(text))]
+MARK = ["######.", ".......", "###....", "......#", ".#...#.", "..#.#..", "...#..."]   # ledger lines and a tick
+TICK = [(4, 1), (5, 2), (6, 3), (5, 4), (4, 5), (3, 6)]                                # the tick, in stroke order
+
+
+def wordmark(text: str = "AUDITGYM", tick: int = 6, mark: bool = True) -> List[str]:
+    """The logo as half-block text: the mark (its tick drawn up to `tick` pixels), then the letters."""
+    m = [list(r) for r in MARK]
+    for k, (y, x) in enumerate(TICK):
+        if k >= tick:
+            m[y][x] = "."
+    rows = [("".join(m[y]) + "...." if mark else "") + "".join(FONT[c][y] + "." for c in text) for y in range(7)]
+    rows.append("." * len(rows[0]))
     out = []
     for y in range(0, 8, 2):
         out.append("".join({("#", "#"): "█", ("#", "."): "▀", (".", "#"): "▄"}.get((a, b), " ") for a, b in zip(rows[y], rows[y + 1])).rstrip())
+    return out
+
+
+# ---------------------------------------------------------------- small ASCII animations (the app's motifs)
+def beat(t: float, n: int = 18) -> str:
+    """A heartbeat line scrolling left: the app is alive, offline, on the CPU."""
+    line = "▁▁▁▁▁▂▁▁▃▇▁▅▂▁▁▁▁▁▁▁▁▁▁▂▃▂▁▁"
+    k = int(t * 9) % len(line)
+    return (line[k:] + line[:k])[:n]
+
+
+def art(name: str, t: float) -> List[str]:
+    """4×16 pictures of the three datasets (the same ideas as the app's recipe cards)."""
+    if name == "simple":       # one error type at a time: a cursor walks down the ledger and ticks each row
+        n = int(t * 2.2) % 6
+        rows = ["────── ───", "──── ──────", "─────── ──", "─── ───────"]
+        return [(("▸ " if i == n else "  ") + r + (" ✓" if i < n else "  ")).ljust(16) for i, r in enumerate(rows)]
+    if name == "mixed":        # mixed books: rows of entries shuffle, one of them is wrong
+        k = int(t * 2.5)
+        out = []
+        for i in range(4):
+            v = (i * 7 + k * 3) % 5
+            out.append(("  " + "── " * (1 + (i + k) % 3) + ("×" if v == 0 else "·") + "  " + "─" * (2 + v % 3)).ljust(16)[:16])
+        return out
+    g = [[" "] * 16 for _ in range(4)]   # interacting errors: two boxes drift into each other; the overlap is masked
+    a = round(2 + 2 * math.sin(t * 1.6))
+
+    def rect(x: int, y: int, w: int, h: int) -> None:
+        for i in range(w):
+            for j in range(h):
+                edge = "─" if j in (0, h - 1) else "│" if i in (0, w - 1) else None
+                if edge and 0 <= x + i < 16:
+                    c = g[y + j][x + i]
+                    g[y + j][x + i] = "┼" if c not in (" ", edge) else edge
+    rect(a, 0, 7, 3)
+    rect(9 - a, 1, 7, 3)
+    return ["".join(r) for r in g]
+
+
+def _h(i: int, j: int) -> int:
+    h = (i * 374761393 + j * 668265263) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    return h ^ (h >> 16)
+
+
+def ledger(i: int, j: int) -> str:
+    """The hidden ledger under the loupe: rows of accounting figures like '  4 812.50   -1 204.00'."""
+    o = _h(0, j) % 13
+    n, f = (i + o) // 13, _h((i + o) // 13 + 7, j)
+    cell = "  " + ("-" if _h(n, j) % 6 == 0 else " ") + str(1 + f % 9) + " " + str(100 + (f >> 4) % 900) + "." + str(10 + (f >> 12) % 90)
+    return cell.ljust(13)[(i + o) % 13]
+
+
+def field(w: int, n: int, t: float, st: "Style") -> List[str]:
+    """The app's background in ASCII: a quiet dot grid, and a loupe drifting across it that reads the ledger."""
+    if n < 5 or w < 30:
+        return [""] * n
+    r = min(4.5, (n - 1) / 2 + 0.4)                    # radius in rows; a cell is about twice as tall as wide
+    cx = 6 + (math.sin(t * 0.33) + 1) / 2 * (w - 14)
+    cy = (n - 1) / 2 + math.sin(t * 0.21) * max(0.0, (n - 1) / 2 - r)
+    inside = lambda i, j: math.hypot((i - cx) / 2, j - cy) < r
+    out = []
+    for j in range(n):
+        line, cur = [], ""
+        for i in range(w):
+            dx, dy = (i - cx) / 2, j - cy
+            if inside(i, j) and not all(inside(a, b) for a, b in ((i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1))):
+                tx, ty = -dy, dx                           # the rim: one cell thick, drawn along its tangent
+                slope = abs(ty) / (abs(tx) * 2 + 1e-9)     # a cell is about twice as tall as it is wide
+                ch, sty = ("─" if slope < 0.4 else "│" if slope > 2.5 else ("╱" if tx * ty < 0 else "╲")), st.D
+            elif inside(i, j):
+                ch, sty = ledger(i, j), st.B if math.hypot(dx, dy) < r * 0.55 else ""
+            else:
+                ch, sty = ("·" if (i % 4 == 0 and j % 2 == 0 and _h(i, j) % 5) else " "), st.D
+            if ch == " ":
+                sty = ""
+            if sty != cur:
+                line.append(st.R + sty if st.R else "")
+                cur = sty
+            line.append(ch)
+        out.append("".join(line) + st.R)
     return out
 
 
@@ -518,12 +609,19 @@ class App:
         for i, name in enumerate(TABS):
             label = f" {i + 1} {tx[name]} "
             tabs.append(st.INV + st.B + label + st.R if i == self.tab else st.D + label + st.R)
-        right = (st.POS + spin + st.R + " " + tx["running"] if self.jobs.busy() else st.D + "ENV 1.0.0" + st.R)
+        now = time.monotonic() - self.t0
+        right = st.D + beat(now) + st.R + "  " + (st.POS + spin + st.R + " " + tx["running"] if self.jobs.busy() else st.D + "ENV 1.0.0" + st.R)
         head = " " + st.B + "▚▞ AuditGym" + st.R + "   " + "".join(tabs)
+        if vlen(head) + vlen(right) + 2 > w:                 # narrow: the heartbeat gives way to the tabs
+            right = right.split("  ", 1)[-1]
         lines = [pad(head, max(0, w - vlen(right) - 1)) + right, st.D + "─" * w + st.R]
         body = getattr(self, "draw_" + TABS[self.tab])(w, h - 4)
         lines += body[: h - 4]
-        lines += [""] * (h - 2 - len(lines))
+        while lines and len(lines) > 2 and not ESC.sub("", lines[-1]).strip():
+            lines.pop()                                    # the empty space at the bottom gets the loupe field
+        gap = h - 2 - len(lines)
+        if gap > 0:
+            lines += ([""] + field(w, gap - 2, now, st) + [""]) if gap >= 7 else [""] * gap
         keys = {"home": "k_home", "train": "k_train", "runs": "k_runs", "settings": "k_settings"}[TABS[self.tab]]
         if TABS[self.tab] == "train":
             r = self.current_training()
@@ -537,12 +635,29 @@ class App:
 
     def draw_home(self, w: int, h: int) -> List[str]:
         st, tx = self.st, self.tx
-        out: List[str] = [""]
-        phase = (time.monotonic() - self.t0) * 18 % 90 - 20       # a slow sheen across the wordmark
-        for row in wordmark():
+        t = time.monotonic() - self.t0
+        cyc = (t + 3) % 6
+        tick = min(len(TICK), int(cyc * 7))                     # the tick redraws itself every 6 s
+        sparkle = ""
+        if tick == len(TICK) and cyc < 1.6:                     # ...and sparkles when it lands
+            k = int(t * 8) % 3
+            sparkle = " " * 9 + ["✦", "✦ ·", "✦ · ✧"][k]
+        out: List[str] = [("  " + st.B + sparkle + st.R) if sparkle else ""]
+        phase = (t * 16) % 110 - 25                             # a shaded sheen runs across the letters
+        for y, row in enumerate(wordmark(tick=tick)):
             s = ""
             for x, ch in enumerate(row):
-                s += (st.B + ch + st.R) if abs(x - phase) < 3 and ch != " " else (st.D + ch + st.R if ch != " " else " ")
+                d = abs(x - phase - y * 1.5)
+                if ch == " ":
+                    s += " "
+                elif d < 1:
+                    s += st.B + ("░" if ch == "█" else ch) + st.R
+                elif d < 2:
+                    s += st.B + ("▒" if ch == "█" else ch) + st.R
+                elif d < 3.2:
+                    s += ("▓" if ch == "█" else ch)
+                else:
+                    s += st.D + ch + st.R
             out.append("  " + s)
         out += ["", "  " + st.B + tx["ready"] + st.R, "  " + st.D + tx["sub"] + st.R, ""]
         m = self.machine
@@ -566,8 +681,19 @@ class App:
         go = " ⏎ " + tx["start"] + " "
         body.append(pad(st.D + mline + st.R, bw - 4 - vlen(go) - 2) + ((st.INV + st.B + go + st.R) if self.field == 3 else st.B + go + st.R))
         out += ["  " + line for line in box(tx["new"], body, bw, st)]
+        if h - len(out) >= 9:                                    # the three datasets, as in the app: art + name
+            cw = min(30, (bw - 4) // 3)
+            cards = []
+            for i, d in enumerate(DATASETS):
+                on = i == self.pick["data"]
+                pic = art(d, t * (2.2 if on else 1.0))
+                name = (st.INV + st.B + " " + tx[d] + " " + st.R) if on else (st.D + " " + tx[d] + " " + st.R)
+                cards.append([(st.R if on else st.D) + p + st.R for p in pic] + ["", name])
+            out += ["", "  " + st.B + tx["datasets"] + st.R + st.D + "   ←→ " + tx["data"].lower() + st.R]
+            for row in zip(*cards):
+                out.append("  " + "".join(pad("  " + c, cw) for c in row))
         out += ["", "  " + st.B + tx["recent"] + st.R]
-        runs = self.runs()[: max(0, h - len(out) - 1)]
+        runs = self.runs()[: max(0, min(5, h - len(out) - 1))]
         if not runs:
             out.append("  " + st.D + tx["no_runs"] + st.R)
         for r in runs:
@@ -655,6 +781,7 @@ class App:
         ]
         if side_w:
             right_box = box(tx["train"], [pad(st.D + k + st.R, side_w - 4 - vlen(v)) + v for k, v in kv], side_w, st)
+            right_box += box(tx["population"], self.population(cfg, at, status, side_w - 4), side_w, st)
             right_box += [""] * (len(left) - len(right_box))
             out += ["  " + a + "  " + b for a, b in zip(left, right_box)]
         else:
@@ -662,8 +789,36 @@ class App:
         frac = min(1.0, at / n) if n else 0
         bw = w - 12
         fill = int(frac * bw)
-        out += ["", f"  {st.POS}{'█' * fill}{st.R}{st.D}{'░' * (bw - fill)}{st.R} {int(frac * 100):3d}%"]
+        head = ""
+        if status == "running" and fill < bw:                    # a shimmering head on the running bar
+            head = "▓▒░"[: bw - fill]
+            fill = min(fill, bw - len(head))
+        rest = bw - fill - len(head)
+        out += ["", f"  {st.POS}{'█' * fill}{head}{st.R}{st.D}{'·' * rest}{st.R} {int(frac * 100):3d}%"]
         return out
+
+    def population(self, cfg: Dict[str, Any], at: int, status: str, w: int) -> List[str]:
+        """The CEM population in ASCII: every candidate of this iteration, the elite in blue. While training runs, a
+        cursor walks through the candidates as they are evaluated."""
+        st, tx = self.st, self.tx
+        p = int(cfg.get("population") or 16)
+        k = max(1, round(p * float(cfg.get("elite_frac") or 0.25)))
+        per = max(4, (w - 1) // 2)
+        t = time.monotonic() - self.t0
+        cur = int(t * 6) % (p + 4) if status == "running" else p
+        elite = set(sorted(range(p), key=lambda i: _h(i, at + 1))[:k])
+        cells = []
+        for i in range(p):
+            if i < cur:
+                cells.append(st.POS + st.B + "●" + st.R if i in elite else st.D + "○" + st.R)
+            elif i == cur:
+                cells.append(st.B + "⣾⣽⣻⢿⡿⣟⣯⣷"[int(t * 10) % 8] + st.R)
+            else:
+                cells.append(st.D + "·" + st.R)
+        rows = [" ".join(cells[j:j + per]) for j in range(0, p, per)]
+        method = cfg.get("method", "cem")
+        rows.append(st.D + (tx["elite"].format(k=k, p=p) if method == "cem" else tx["samples"].format(p=p)) + st.R)
+        return rows
 
     def draw_runs(self, w: int, h: int) -> List[str]:
         st, tx = self.st, self.tx
@@ -732,7 +887,12 @@ class App:
             rline = tx["report_none"]
         rows = [("language", lang), ("version", ver), ("updates", tx["update_how"]), ("report", rline), ("data_dir", self.base or runs_dir())]
         body = [pad(st.D + tx[k] + st.R, 22) + v for k, v in rows]
-        return [""] + ["  " + line for line in box(tx["settings"], body, min(w - 4, 100), st)]
+        out = [""] + ["  " + line for line in box(tx["settings"], body, min(w - 4, 100), st)]
+        t = time.monotonic() - self.t0
+        mark = wordmark("", tick=min(len(TICK), int(((t + 3) % 6) * 7)))
+        caption = [st.B + "AuditGym" + st.R, st.D + tx["tagline"] + st.R, st.D + beat(t, 24) + st.R, ""]
+        out += [""] + ["  " + st.D + m.ljust(9) + st.R + "  " + c for m, c in zip(mark, caption)]
+        return out
 
 
 def main(argv: Optional[List[str]] = None) -> int:
