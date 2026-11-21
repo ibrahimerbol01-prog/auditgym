@@ -8,43 +8,25 @@ uses it, and `src/` stays standard-library only. The two build tools below are n
 
 ## Install in one line
 
-### Newest version (team): the latest build of a branch
+```powershell
+irm is.gd/auditgym | iex                 # Windows (PowerShell)
+```
+```bash
+curl -fsSL is.gd/auditgym_sh | sh        # macOS / Linux
+```
 
-Every push to `main` or a `task/*` branch builds the app for Windows, macOS and Linux (workflow **Desktop app**).
-This installs the newest successful build of a branch, so you never wait for a release. It needs the GitHub CLI
-(`gh auth login`). Replace `main` with a branch name, e.g. `task/design-and-desktop`, in **both** places:
+The source repository is private. The **Release** workflow publishes every tagged build (zips, installers,
+`SHA256SUMS.txt`) to the public, releases-only repository `ibrahimerbol01-prog/auditgym-releases`, and the two
+short links point at its `releases/latest/download/install.ps1` and `install.sh`. No GitHub login is needed.
 
+### Team: the newest CI build of a branch (before a release)
+
+Needs the GitHub CLI (`gh auth login`). Replace `main` with a branch name in both places:
 ```powershell
 $env:AUDITGYM_BRANCH='main'; gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.ps1?ref=main" -H "Accept: application/vnd.github.raw" | Out-String | iex
 ```
-```bash
-gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.sh?ref=main" -H "Accept: application/vnd.github.raw" | AUDITGYM_BRANCH=main sh
-```
 
-The installer prints what it installed (`version: <branch> @ <commit> · built <time>`); the app shows the same in
-its window title, and `AuditGym --version` prints it. Builds are kept for 30 days.
-
-### Stable version: the latest release
-
-While the repository is **private**, use the GitHub CLI (after `gh auth login`):
-
-```powershell
-gh release download -R ibrahimerbol01-prog/auditgym -p install.ps1 -O - | Out-String | iex    # Windows (PowerShell)
-```
-```bash
-gh release download -R ibrahimerbol01-prog/auditgym -p install.sh -O - | sh                  # macOS / Linux
-```
-
-Once the repository is **public**, no GitHub CLI is needed:
-
-```powershell
-irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex
-```
-```bash
-curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
-```
-
-The installer downloads the build for your system from the latest GitHub Release, checks it against
+The installer downloads the build for your system from the latest public release, checks it against
 `SHA256SUMS.txt`, installs it in your user folder (no admin rights) and starts it:
 
 | System | Installed to | Shortcut | Terminal command `auditgym` |

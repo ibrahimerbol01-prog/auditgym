@@ -118,17 +118,19 @@ jobs:
 
           **Windows (PowerShell):**
           ```
-          irm https://github.com/${{ github.repository }}/releases/latest/download/install.ps1 | iex
+          irm is.gd/auditgym | iex
           ```
           **macOS / Linux:**
           ```
-          curl -fsSL https://github.com/${{ github.repository }}/releases/latest/download/install.sh | sh
-          ```
-          While the repository is private, use the GitHub CLI instead (after `gh auth login`):
-          ```
-          gh release download -R ${{ github.repository }} -p install.ps1 -O - | Out-String | iex
-          gh release download -R ${{ github.repository }} -p install.sh -O - | sh
+          curl -fsSL is.gd/auditgym_sh | sh
           ```
           The installers check every download against `SHA256SUMS.txt`. The builds are not code-signed.
           EOF
           gh release create "$TAG" out/* --target "$GITHUB_SHA" --title "AuditGym $TAG" --notes-file notes.md
+      - name: Publish to the public releases repo (source stays private)
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::warning::RELEASES_TOKEN secret not set: skipped the public releases repo"; exit 0; fi
+          gh release create "$TAG" out/* -R ibrahimerbol01-prog/auditgym-releases --title "AuditGym $TAG" --notes-file notes.md --latest

@@ -1,11 +1,11 @@
 #!/bin/sh
 # AuditGym one-line installer for macOS and Linux.
 #
-#   Private repo (team, GitHub CLI logged in):
-#     gh release download -R ibrahimerbol01-prog/auditgym -p install.sh -O - | sh
-#   Public repo:
-#     curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
-#   Newest build of a branch (no release needed; GitHub CLI logged in):
+#   curl -fsSL is.gd/auditgym_sh | sh
+#
+# (the short link points at https://github.com/ibrahimerbol01-prog/auditgym-releases/releases/latest/download/install.sh;
+#  the source repo is private, builds are published to that public releases-only repo by the Release workflow)
+#   Team, newest CI build of a branch (GitHub CLI logged in):
 #     gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.sh?ref=main" -H "Accept: application/vnd.github.raw" | AUDITGYM_BRANCH=main sh
 #
 # Installs into your home folder (no sudo), checks the download against the release's SHA256SUMS.txt, and adds
@@ -15,7 +15,8 @@
 # AUDITGYM_ZIP=/path/AuditGym-<os>-<arch>.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
 set -eu
 
-REPO="ibrahimerbol01-prog/auditgym"
+REPO="ibrahimerbol01-prog/auditgym"            # private source: CI branch builds (AUDITGYM_BRANCH, needs gh)
+PUBLIC="ibrahimerbol01-prog/auditgym-releases"  # public releases: the default, plain HTTPS, no login
 VERSION="${AUDITGYM_VERSION:-latest}"
 
 say() { printf '%s\n' "AuditGym installer: $*"; }
@@ -57,19 +58,12 @@ elif [ -n "${AUDITGYM_BRANCH:-}" ]; then
   [ -n "$RUN" ] || fail "no successful desktop build of branch '$AUDITGYM_BRANCH' yet (see the Actions tab)"
   say "downloading $ASSET from the newest build of branch '$AUDITGYM_BRANCH' (run $RUN)"
   gh run download "$RUN" -R "$REPO" -n "${ASSET%.zip}" -D "$TMP" && [ -f "$TMP/$ASSET" ] || fail "run $RUN has no $ASSET (it may have expired; push again or run the workflow)"
-elif [ -z "${AUDITGYM_BASE_URL:-}" ] && command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
-  say "downloading $ASSET ($VERSION) with the GitHub CLI"
-  if [ "$VERSION" = latest ]; then
-    gh release download -R "$REPO" -p "$ASSET" -p SHA256SUMS.txt -D "$TMP"
-  else
-    gh release download "$VERSION" -R "$REPO" -p "$ASSET" -p SHA256SUMS.txt -D "$TMP"
-  fi
 else
   if [ -n "${AUDITGYM_BASE_URL:-}" ]; then BASE="$AUDITGYM_BASE_URL"
-  elif [ "$VERSION" = latest ]; then BASE="https://github.com/$REPO/releases/latest/download"
-  else BASE="https://github.com/$REPO/releases/download/$VERSION"; fi
+  elif [ "$VERSION" = latest ]; then BASE="https://github.com/$PUBLIC/releases/latest/download"
+  else BASE="https://github.com/$PUBLIC/releases/download/$VERSION"; fi
   say "downloading $ASSET ($VERSION)"
-  curl -fsSL "$BASE/$ASSET" -o "$TMP/$ASSET" || fail "download failed (a private repo needs: gh auth login)"
+  curl -fsSL "$BASE/$ASSET" -o "$TMP/$ASSET" || fail "download failed from $BASE"
   curl -fsSL "$BASE/SHA256SUMS.txt" -o "$TMP/SHA256SUMS.txt" || fail "could not download SHA256SUMS.txt"
 fi
 

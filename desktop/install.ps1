@@ -1,10 +1,10 @@
 # AuditGym one-line installer for Windows (PowerShell 5.1 or 7).
 #
-#   Private repo (team, GitHub CLI logged in):
-#     gh release download -R ibrahimerbol01-prog/auditgym -p install.ps1 -O - | Out-String | iex
-#   Public repo:
-#     irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex
-#   Newest build of a branch (no release needed; GitHub CLI logged in):
+#   irm is.gd/auditgym | iex
+#
+# (the short link points at https://github.com/ibrahimerbol01-prog/auditgym-releases/releases/latest/download/install.ps1;
+#  the source repo is private, builds are published to that public releases-only repo by the Release workflow)
+#   Team, newest CI build of a branch (GitHub CLI logged in):
 #     $env:AUDITGYM_BRANCH='main'; gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.ps1?ref=main" -H "Accept: application/vnd.github.raw" | Out-String | iex
 #
 # Installs into %LOCALAPPDATA%\Programs\AuditGym (no admin rights), checks the download against the release's
@@ -16,7 +16,8 @@
     # Scoped to this block, so running the one-liner does not change the caller's session settings.
     $ErrorActionPreference = 'Stop'
     $ProgressPreference = 'SilentlyContinue'   # Invoke-WebRequest is much faster without the progress bar
-    $Repo = 'ibrahimerbol01-prog/auditgym'
+    $Repo = 'ibrahimerbol01-prog/auditgym'                 # private source: CI branch builds (AUDITGYM_BRANCH, needs gh)
+    $Public = 'ibrahimerbol01-prog/auditgym-releases'      # public releases: the default, plain HTTPS, no login
     $Version = if ($env:AUDITGYM_VERSION) { $env:AUDITGYM_VERSION } else { 'latest' }
     function Say([string]$Message) { Write-Host "AuditGym installer: $Message" }
     function Fail([string]$Message) { throw "AuditGym installer: error: $Message" }
@@ -49,18 +50,13 @@
             Say "downloading $Asset from the newest build of branch '$Branch' (run $runId)"
             & gh run download $runId -R $Repo -n ($Asset -replace '\.zip$', '') -D $Tmp
             if ($LASTEXITCODE -ne 0 -or -not (Test-Path $zip)) { Fail "run $runId has no $Asset (it may have expired; push again or run the workflow)" }
-        } elseif ($ghReady) {
-            Say "downloading $Asset ($Version) with the GitHub CLI"
-            $tagArgs = @(); if ($Version -ne 'latest') { $tagArgs = @($Version) }
-            & gh release download @tagArgs -R $Repo -p $Asset -p 'SHA256SUMS.txt' -D $Tmp
-            if ($LASTEXITCODE -ne 0) { Fail 'gh release download failed' }
         } else {
-            $base = if ($env:AUDITGYM_BASE_URL) { $env:AUDITGYM_BASE_URL } elseif ($Version -eq 'latest') { "https://github.com/$Repo/releases/latest/download" } else { "https://github.com/$Repo/releases/download/$Version" }
+            $base = if ($env:AUDITGYM_BASE_URL) { $env:AUDITGYM_BASE_URL } elseif ($Version -eq 'latest') { "https://github.com/$Public/releases/latest/download" } else { "https://github.com/$Public/releases/download/$Version" }
             Say "downloading $Asset ($Version)"
             try {
                 Invoke-WebRequest -UseBasicParsing -Uri "$base/$Asset" -OutFile $zip
                 Invoke-WebRequest -UseBasicParsing -Uri "$base/SHA256SUMS.txt" -OutFile $sums
-            } catch { Fail 'download failed (a private repo needs the GitHub CLI: gh auth login)' }
+            } catch { Fail "download failed: $($_.Exception.Message)" }
         }
 
         if (Test-Path $sums) {
