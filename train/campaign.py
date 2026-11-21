@@ -131,7 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     def wait(rid: str) -> dict:
         for _ in range(900):
             r = call(f"/api/runs/{rid}")[1].get("run") or {}
-            if r.get("status") != "running":
+            if r.get("status") != "running" and not r.get("status_note"):   # trainings end with a test measurement
                 return r
             time.sleep(0.2)
         return {}

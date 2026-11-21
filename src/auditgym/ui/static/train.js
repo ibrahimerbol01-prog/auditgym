@@ -444,7 +444,7 @@ function renderDash() {
   renderTable(pts);
   renderTest();
   renderGroup();
-  const finished = r.status !== "running" && r.best && r.best.theta;
+  const finished = r.status !== "running" && !r.status_note && r.best && r.best.theta;
   $("d-eval").classList.toggle("hidden", !finished);
   $("d-export").classList.toggle("hidden", !finished);
 }
