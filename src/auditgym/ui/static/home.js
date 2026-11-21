@@ -1,5 +1,5 @@
 "use strict";
-// Home: "ready when you are". An ASCII ledger book turning in place, a launch bar that starts training directly
+// Home: "ready when you are". The ASCII logo with a shimmer, a launch bar that starts training directly
 // (settings from the assistant/scout), and dataset recipes.
 const $ = (id) => document.getElementById(id);
 
@@ -7,45 +7,34 @@ const $ = (id) => document.getElementById(id);
   const sync = () => { const dark = document.documentElement.dataset.theme === "dark"; b.setAttribute("aria-pressed", String(dark)); b.setAttribute("aria-label", dark ? "Светлая тема" : "Тёмная тема"); lbl.textContent = dark ? "Светлая" : "Тёмная"; tc.setAttribute("content", dark ? "#0e0e11" : "#f7f7f8"); };
   sync(); b.addEventListener("click", () => { const dark = document.documentElement.dataset.theme !== "dark"; if (dark) document.documentElement.dataset.theme = "dark"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", dark ? "dark" : "light"); } catch { /* private mode */ } sync(); }); })();
 
-// ---- ASCII: a ray-marched ledger book (box with ruled pages), shaded with a character ramp
-const RAMP = " .:-=+*#%@";
-const COLS = 60, ROWS = 22;
-function sdBox(p, b) { const q = p.map((v, i) => Math.abs(v) - b[i]); const o = Math.hypot(...q.map((v) => Math.max(v, 0))); return o + Math.min(Math.max(...q), 0); }
-function scene(p, t) {
-  const [ca, sa, cb, sb] = [Math.cos(t), Math.sin(t), Math.cos(0.95), Math.sin(0.95)];
-  let [x, y, z] = p; [x, z] = [x * ca - z * sa, x * sa + z * ca]; [y, z] = [y * cb - z * sb, y * sb + z * cb];
-  const pages = sdBox([x + 0.03, y, z], [1.0, 0.17, 0.72]) - 0.02;             // page block
-  const top = sdBox([x, y - 0.2, z], [1.06, 0.03, 0.78]) - 0.01;                // front cover
-  const bottom = sdBox([x, y + 0.2, z], [1.06, 0.03, 0.78]) - 0.01;             // back cover
-  const spine = sdBox([x + 1.04, y, z], [0.04, 0.22, 0.78]) - 0.01;             // spine
-  return Math.min(pages, top, bottom, spine);
-}
+// ---- ASCII logo: the pixel mark and "AUDITGYM" in a 5x7 block font; a shimmer wave runs through the characters
+const FONT = {
+  A: [".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"], U: ["#...#", "#...#", "#...#", "#...#", "#...#", "#...#", ".###."],
+  D: ["####.", "#...#", "#...#", "#...#", "#...#", "#...#", "####."], I: ["#####", "..#..", "..#..", "..#..", "..#..", "..#..", "#####"],
+  T: ["#####", "..#..", "..#..", "..#..", "..#..", "..#..", "..#.."], G: [".####", "#....", "#....", "#.###", "#...#", "#...#", ".###."],
+  Y: ["#...#", "#...#", ".#.#.", "..#..", "..#..", "..#..", "..#.."], M: ["#...#", "##.##", "#.#.#", "#.#.#", "#...#", "#...#", "#...#"],
+};
+const MARK = ["######.", ".......", "###....", "......#", ".#...#.", "..#.#..", "...#..."];  // same as the logo
+const BITS = (() => {  // 7 rows of 0/1; each glyph pixel becomes 2 characters wide
+  const rows = MARK.map((r) => r + "....");
+  for (const ch of "AUDITGYM") FONT[ch].forEach((r, i) => { rows[i] += r + ".."; });
+  return rows.map((r) => [...r].flatMap((c) => [c === "#", c === "#"]));
+})();
 function frame(t) {
-  const L = [-0.45, 0.62, -0.64], out = [];
-  for (let j = 0; j < ROWS; j++) {
-    let row = "";
-    for (let i = 0; i < COLS; i++) {
-      const x = (i / COLS - 0.5) * 2.7, y = -(j / ROWS - 0.5) * 2.0;
-      let z = -3, hit = false;
-      for (let k = 0; k < 34; k++) { const d = scene([x, y, z], t); if (d < 0.008) { hit = true; break; } z += d; if (z > 3) break; }
-      if (!hit) { row += " "; continue; }
-      const e = 0.01, p = [x, y, z], n = [0, 1, 2].map((a) => { const p1 = p.slice(), p2 = p.slice(); p1[a] += e; p2[a] -= e; return scene(p1, t) - scene(p2, t); });
-      const len = Math.hypot(...n) || 1, lum = Math.max(0, (n[0] * L[0] + n[1] * L[1] + n[2] * L[2]) / len);
-      row += RAMP[Math.min(9, 1 + Math.floor(lum * 8.9))];
-    }
-    out.push(row);
-  }
-  return out.join("\n");
+  return BITS.map((row, y) => row.map((on, x) => {
+    const w = Math.sin(t * 2.2 - x * 0.16 + y * 0.35);          // a diagonal wave sweeping left to right
+    if (on) return w > 0.9 ? "░" : w > 0.7 ? "▒" : w > 0.45 ? "▓" : "█";   // solid letters, a sheen passes over
+    return w > 0.985 && (x + y) % 5 === 0 ? "·" : " ";
+  }).join("")).join("\n");
 }
 (() => {
   const el = $("ascii"); if (!el) return;
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let t = 0.7, on = true, last = 0;
-  el.textContent = frame(t);
-  if (still) return;
+  el.textContent = frame(0.6);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let on = true, last = 0, t = 0.6;
   new IntersectionObserver((es) => { on = es[0].isIntersecting; }).observe(el);
   document.addEventListener("visibilitychange", () => { on = !document.hidden; });
-  const loop = (ms) => { if (on && ms - last > 33) { last = ms; t += 0.018; el.textContent = frame(t); } requestAnimationFrame(loop); };
+  const loop = (ms) => { if (on && ms - last > 40) { last = ms; t += 0.03; el.textContent = frame(t); } requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 })();
 
