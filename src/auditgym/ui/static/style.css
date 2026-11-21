@@ -1199,3 +1199,6 @@ main.arena{display:flex;flex-direction:column;gap:16px;padding-top:32px;padding-
 /* sidebar layout (no top header): the investigation's episode bar sticks to the very top; anchors and scrolled-into-view
    controls stop below it */
 @media (min-width:1101px){.epbar{top:0}html{scroll-padding-top:140px}}
+
+/* decorative ASCII never widens the page: symbols such as ✦ ◂ fall back to system fonts whose widths vary by machine */
+pre.ascii,pre.ascii-art,pre.ascii-beat,.ar-shield{max-width:100%;overflow:hidden}
