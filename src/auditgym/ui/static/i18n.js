@@ -1,27 +1,20 @@
 "use strict";
-// Language: Russian is the source text of every page; English is applied in place from the dictionary below.
+// Language: English by default, Russian in Settings. Russian is the source text of every page; English is applied
+// in place from the dictionary below.
 // Static text, attributes and everything the page scripts add later (a MutationObserver) are translated, so the
 // page scripts need no changes. A string with {0}, {1}… is a template: the pieces it captures are translated too.
 // Strings missing from the dictionary stay in Russian, and known phrases inside a longer text are still replaced.
 // To add a string: put "Русский текст": "English text" in EN. The choice is stored in localStorage "ag-lang".
 (() => {
   const KEY = "ag-lang";
-  let lang = "ru";
-  try { if (localStorage.getItem(KEY) === "en") lang = "en"; } catch { /* private mode: Russian */ }
+  let lang = "en";
+  try { if (localStorage.getItem(KEY) === "ru") lang = "ru"; } catch { /* private mode: English */ }
   document.documentElement.lang = lang;
   window.AG_LANG = lang;
   const setLang = (l) => { try { localStorage.setItem(KEY, l); } catch { /* private mode */ } location.reload(); };
 
-  // the switch: a small RU/EN button in the sidebar footer, and any [data-lang-pick] control (the settings page)
+  // the switch: the [data-lang-pick] buttons on the settings page
   const wire = () => {
-    for (const f of document.querySelectorAll(".side-foot")) {
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "lang-t"; b.textContent = lang === "en" ? "RU" : "EN";
-      b.setAttribute("aria-label", lang === "en" ? "Русский язык" : "English language");
-      b.addEventListener("click", () => setLang(lang === "en" ? "ru" : "en"));
-      const t = f.querySelector(".theme-t");
-      if (t) { const row = document.createElement("div"); row.className = "foot-row"; t.replaceWith(row); row.append(t, b); } else f.append(b);
-    }
     for (const p of document.querySelectorAll("[data-lang-pick]")) {
       p.setAttribute("aria-pressed", String(p.dataset.langPick === lang));
       p.addEventListener("click", () => { if (p.dataset.langPick !== lang) setLang(p.dataset.langPick); });

@@ -1124,10 +1124,7 @@ main.settings h1{margin:0 0 4px;font-size:28px;font-weight:600;letter-spacing:-.
 .seg button[aria-pressed=true]{background:var(--s1);color:var(--txt);box-shadow:var(--shadow)}
 @media (max-width:560px){.set-row{flex-direction:column;align-items:flex-start}}
 
-/* ---------- language switch (i18n.js) and English text drawn by CSS ---------- */
-.foot-row{display:flex;align-items:center;gap:8px}
-.lang-t{font:600 12px var(--mono);color:var(--txt2);background:none;border:1px solid var(--line2);border-radius:var(--r);padding:6px 10px;cursor:pointer}
-.lang-t:hover{color:var(--txt);border-color:var(--rule)}
+/* ---------- English text drawn by CSS (i18n.js sets <html lang>) ---------- */
 :lang(en) .log:empty::before{content:"No steps yet. Every action will appear here."}
 :lang(en) .bench:empty::before{content:"report.json not found: comparison unavailable"}
 @media (max-width:640px){
