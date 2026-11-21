@@ -89,7 +89,7 @@ function render() {
     t.setAttribute("aria-label", `${e.label}, сид ${e.seed}: ${r == null ? "нет оценки" : "награда " + f2(r)}. Открыть журнал`);
     return el("li", {}, t);
   }));
-  const rows = [[agentName(run.agent) + " — этот запуск", done ? s.reward : null, true]].concat(Object.entries(base).map(([k, v]) => [agentName(k), v, false]));
+  const rows = [[agentName(run.agent) + " — этот запуск", done ? s.reward : null, true]].concat(Object.entries(base).map(([k, v]) => [agentName(k) + (k === run.agent ? " — report.json" : ""), v, false]));
   rows.sort((a, b) => (b[1] ?? -9) - (a[1] ?? -9));
   $("d-cmp").replaceChildren(...rows.map(([n, v, me]) => el("tr", { class: me ? "me" : "" }, el("td", {}, n),
     el("td", { class: "bar-c" }, el("span", { class: "zb" }, el("i", { class: v != null && v < 0 ? "neg" : "", style: v == null ? "width:0" : v >= 0 ? `left:50%;width:${v * 50}%` : `left:${50 + v * 50}%;width:${-v * 50}%` }), el("b", {}))),
@@ -105,19 +105,21 @@ function axes(host, W, H, m, ymin, ymax) {
 }
 
 function drawChart(eps) {
-  const host = $("d-chart"), W = Math.max(320, host.clientWidth || 640), H = 230, m = { l: 44, r: 14, t: 12, b: 26 };
+  const host = $("d-chart"), W = Math.max(320, host.clientWidth || 640), H = 248, m = { l: 44, r: W < 480 ? 64 : 96, t: 14, b: 42 };
   const key = run.id + "|" + W + "|" + eps.map((e) => (e.score ? e.score.reward : e.status)).join(",");
   if (key === drawnFor) return;
   drawnFor = key;
   const { s, Y } = axes(host, W, H, m, -1, 1);
   s.setAttribute("aria-label", "Награда по эпизодам: " + eps.map((e) => (e.score ? `${e.label} ${f2(e.score.reward)}` : `${e.label} нет оценки`)).join("; "));
   for (const [k, v] of Object.entries(base)) { if (k === run.agent || !["reconcile", "random"].includes(k)) continue;
-    svg("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: "ref" }, s);
-    svg("text", { x: W - m.r - 4, y: Y(v) - 6, "text-anchor": "end", class: "ref-l" }, s).textContent = `${NAMES[k]} ${f2(v)}`; }
+    svg("line", { x1: m.l, x2: W - m.r + 4, y1: Y(v), y2: Y(v), class: "ref" }, s);
+    const lab = svg("text", { x: W - m.r + 8, y: Y(v) + 4, class: "ref-l" }, s);  // in the right gutter, never on a bar
+    lab.append(svg("tspan", { x: W - m.r + 8 }), svg("tspan", { x: W - m.r + 8, dy: 13 }));
+    lab.firstChild.textContent = NAMES[k]; lab.lastChild.textContent = f2(v); }
   const n = Math.max(eps.length, 1), slot = (W - m.l - m.r) / n, bw = Math.min(46, slot * 0.56);
   eps.forEach((e, i) => {
     const x = m.l + slot * i + (slot - bw) / 2;
-    svg("text", { x: x + bw / 2, y: H - 8, "text-anchor": "middle" }, s).textContent = i + 1;
+    svg("text", { x: x + bw / 2, y: H - 6, "text-anchor": "middle" }, s).textContent = i + 1;
     if (!e.score) { if (e.status === "running") svg("rect", { x, y: Y(1), width: bw, height: Y(-1) - Y(1), class: "slot-now" }, s); return; }
     const v = e.score.reward, y0 = Y(0), y1 = Y(v);
     const r = svg("rect", { x, width: bw, y: Math.min(y0, y1), height: Math.max(1, Math.abs(y1 - y0)), class: v >= 0 ? "b-pos" : "b-neg" }, s);
@@ -131,7 +133,7 @@ function drawTraining() {
   const host = $("train-chart");
   host.classList.toggle("hidden", !curve);
   if (!curve || !Array.isArray(curve.points || curve)) {
-    host.replaceChildren(); $("train-note").replaceChildren("Тренер ещё не запускался. Кривая появится здесь, когда он запишет train/curve.json: ", el("code", {}, "python train/learn_rules.py --seed 1"), ".");
+    host.replaceChildren(); $("train-note").replaceChildren("Тренер ещё не запускался. Кривая награды на отложенных эпизодах появится здесь, когда он запишет ", el("code", {}, "train/curve.json"), ".");
     return;
   }
   const pts = (curve.points || curve).map((p) => [p.iteration, p.dev_reward]).filter((p) => p.every(Number.isFinite));
