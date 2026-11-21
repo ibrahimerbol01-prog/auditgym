@@ -170,7 +170,7 @@ class TestUIBrowser(unittest.TestCase):
     def test_layouts_do_not_overflow(self):
         for width in (390, 768, 1280, 1920):
             pg, errors, _ = self.page(width=width, height=900)
-            for path in ("/", "/play.html", "/report.html", "/runs.html", "/train.html"):
+            for path in ("/", "/play.html", "/report.html", "/runs.html", "/train.html", "/settings.html"):
                 pg.goto(self.base + path)
                 pg.wait_for_load_state("networkidle")
                 over = pg.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
