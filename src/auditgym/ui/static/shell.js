@@ -58,3 +58,78 @@
   const loop = (ms) => { if (!document.hidden && ms - last > 60) { last = ms; t += 0.06; draw(t); } requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
 })();
+
+// ---- background: an ASCII "gravity field" that bends toward the pointer; a click sends a shockwave ring.
+// Drawn on one canvas behind the content (cards cover it), faint by design, idles when the pointer rests,
+// stops in hidden tabs, static under reduced motion, off on small screens.
+(() => {
+  if (matchMedia("(max-width: 860px)").matches) return;
+  const STILL = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const RAMP = " .:-=+*#%@";
+  const cv = document.createElement("canvas"); cv.className = "ascii-field"; cv.setAttribute("aria-hidden", "true");
+  document.body.prepend(cv);
+  const ctx = cv.getContext("2d");
+  const CW = 14, CH = 18, R = 190;                 // cell size, radius of the well (px)
+  let W = 0, H = 0, dpr = 1, mx = -1e4, my = -1e4, tx = -1e4, ty = -1e4, lastMove = 0, ripples = [], ink = "#888", ink2 = "#333";
+  const colours = () => { const cs = getComputedStyle(document.documentElement); ink = cs.getPropertyValue("--txt3").trim() || ink; ink2 = cs.getPropertyValue("--txt").trim() || ink2; };
+  const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.font = `12px "JetBrains Mono", ui-monospace, monospace`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; };
+  const bands = [[], [], [], []];                   // batch glyphs by alpha level: few canvas state changes
+  function draw(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (const b of bands) b.length = 0;
+    mx += (tx - mx) * 0.18; my += (ty - my) * 0.18;  // the well follows the pointer with a little lag
+    for (let y = CH / 2; y < H + CH; y += CH) for (let x = CW / 2; x < W + CW; x += CW) {
+      let dx = mx - x, dy = my - y; const r2 = dx * dx + dy * dy, r = Math.sqrt(r2) || 1;
+      if (r < 20) continue;                          // event horizon: the very centre stays empty
+      let f = R * R / (r2 + R * R * 0.35);           // ~1/r² with a soft core
+      let px = x, py = y;
+      if (f > 0.04) {                               // pull toward the pointer, with a slight orbital swirl
+        const pull = Math.min(r * 0.55, 26 * f), sw = 0.35 * f;
+        px += (dx / r) * pull - (dy / r) * pull * sw; py += (dy / r) * pull + (dx / r) * pull * sw;
+      }
+      for (const w of ripples) {                    // shockwave rings push characters outward
+        const d = Math.hypot(x - w.x, y - w.y), k = Math.exp(-((d - w.r) ** 2) / 900) * w.a;
+        if (k > 0.02) { px += (x - w.x) / (d || 1) * 10 * k; py += (y - w.y) / (d || 1) * 10 * k; f = Math.max(f, k * 1.6); }
+      }
+      const breathe = 0.5 + 0.5 * Math.sin(t * 0.6 + x * 0.013 + y * 0.021);
+      const level = Math.min(9, Math.floor(f * 6 + (f < 0.08 ? breathe * 1.4 : 0)));
+      if (level <= 0) continue;
+      bands[Math.min(3, Math.floor(f * 3.2 + (level >= 2 ? 0.4 : 0)))].push(RAMP[level], px, py);
+    }
+    const alpha = [0.16, 0.28, 0.42, 0.6];
+    bands.forEach((b, i) => { ctx.globalAlpha = alpha[i]; ctx.fillStyle = i >= 2 ? ink2 : ink; for (let k = 0; k < b.length; k += 3) ctx.fillText(b[k], b[k + 1], b[k + 2]); });
+    ctx.globalAlpha = 1;
+    ripples = ripples.filter((w) => (w.r += 9, w.a *= 0.955, w.a > 0.03));
+  }
+  addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; lastMove = performance.now(); }, { passive: true });
+  addEventListener("pointerleave", () => { tx = ty = -1e4; });
+  document.addEventListener("pointerdown", (e) => { ripples.push({ x: e.clientX, y: e.clientY, r: 0, a: 1 }); lastMove = performance.now(); }, { passive: true });
+  addEventListener("resize", size);
+  new MutationObserver(colours).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  colours(); size(); draw(0);
+  if (STILL) return;
+  let last = 0;
+  const loop = (ms) => {
+    const busy = ms - lastMove < 1800 || ripples.length;
+    if (!document.hidden && ms - last > (busy ? 33 : 120)) { last = ms; draw(ms / 1000); }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+})();
+
+// ---- page titles decode from random characters into place (the real text is set for assistive tech first)
+(() => {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const GLYPHS = "░▒▓█#%@*+=-:.";
+  for (const h of document.querySelectorAll("main h1")) {
+    const text = h.textContent; if (!text.trim() || text.length > 60) continue;
+    h.setAttribute("aria-label", text);
+    const t0 = performance.now(), dur = 650;
+    const step = (ms) => {
+      const k = Math.min(1, (ms - t0) / dur), n = Math.floor(k * text.length);
+      h.textContent = text.slice(0, n) + [...text.slice(n)].map((c) => (c === " " ? " " : GLYPHS[Math.floor(Math.random() * GLYPHS.length)])).join("");
+      if (k < 1) requestAnimationFrame(step); else { h.textContent = text; h.removeAttribute("aria-label"); }
+    };
+    requestAnimationFrame(step);
+  }
+})();
