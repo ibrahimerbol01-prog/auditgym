@@ -205,3 +205,38 @@ class TestUIStatic(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EnglishTranslationTests(unittest.TestCase):
+    """i18n.js: every Russian text of the HTML pages has an English translation (page scripts may add more)."""
+
+    def test_every_static_russian_text_is_translated(self):
+        import json as _json
+        import re as _re
+        from html.parser import HTMLParser
+        js = open(os.path.join(STATIC_DIR, "i18n.js"), encoding="utf-8").read()
+        en = _json.loads(_re.search(r"const EN = (\{.*?\n\});", js, _re.S).group(1))
+        cyr = _re.compile("[А-Яа-яЁё]")
+        missing = []
+
+        class P(HTMLParser):
+            skip = 0
+
+            def handle_starttag(self, tag, attrs):
+                self.skip += tag in ("script", "style", "code", "pre")
+                for k, v in attrs:
+                    if k in ("aria-label", "title", "placeholder", "alt") and v and cyr.search(v) and " ".join(v.split()) not in en:
+                        missing.append(v)
+
+            def handle_endtag(self, tag):
+                self.skip -= tag in ("script", "style", "code", "pre")
+
+            def handle_data(self, data):
+                t = " ".join(data.split())
+                if not self.skip and cyr.search(t) and t not in en and t not in ("Русский",):
+                    missing.append(t)
+
+        for name in HTML:
+            with open(os.path.join(STATIC_DIR, name), encoding="utf-8") as fh:
+                P().feed(fh.read())
+        self.assertEqual(missing, [], "add these to EN in i18n.js")

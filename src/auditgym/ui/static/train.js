@@ -20,7 +20,7 @@ const f2 = (v) => num(v, 2);
 const sgn = (v) => (v == null || !Number.isFinite(v) ? "—" : (v >= 0 ? "+" : MINUS) + Math.abs(v).toFixed(2));
 const plural = (n, a, b, c) => { const k = n % 100, d = n % 10; return `${n} ${k >= 11 && k <= 14 ? c : d === 1 ? a : d >= 2 && d <= 4 ? b : c}`; };
 const thin = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-const when = (t) => (t ? new Date(t * 1000).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
+const when = (t) => (t ? new Date(t * 1000).toLocaleString((window.AG_LANG === "en" ? "en-GB" : "ru-RU"), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
 const dur = (s) => (s == null || !Number.isFinite(s) ? "—" : s < 60 ? `${s.toFixed(s < 10 ? 1 : 0)} с` : `${Math.floor(s / 60)} мин ${String(Math.round(s % 60)).padStart(2, "0")} с`);
 
 let step = 1, scout = null, scoutState = "loading", base = { reconcile: 0.97, random: -1 }, recent = [];
@@ -416,7 +416,9 @@ function renderDash() {
   // KPI row: one hero (best held-out reward and its gaps), the rest small
   const best = s.dev_best ?? (r.best && r.best.dev ? r.best.dev.reward : null), start = s.dev_start ?? (devs[0] ? devs[0].dev.reward : null);
   setKpi("k-best", f2(best), best == null ? "ждём первую проверку на dev" :
-    `${best - base.reconcile >= 0 ? "на " + Math.abs(best - base.reconcile).toFixed(2) + " выше" : "на " + Math.abs(best - base.reconcile).toFixed(2) + " ниже"} Сверщика (${f2(base.reconcile)})\n${start == null ? "" : sgn(best - start) + " от старта (" + f2(start) + ")"}`);
+    window.AG_LANG === "en"
+      ? `${Math.abs(best - base.reconcile).toFixed(2)} ${best - base.reconcile >= 0 ? "above" : "below"} Reconciler (${f2(base.reconcile)})\n${start == null ? "" : sgn(best - start) + " from start (" + f2(start) + ")"}`
+      : `${best - base.reconcile >= 0 ? "на " + Math.abs(best - base.reconcile).toFixed(2) + " выше" : "на " + Math.abs(best - base.reconcile).toFixed(2) + " ниже"} Сверщика (${f2(base.reconcile)})\n${start == null ? "" : sgn(best - start) + " от старта (" + f2(start) + ")"}`);
   const at = last ? last.i : -1;  // index of the last finished iteration (run.at counts finished iterations)
   setKpi("k-it", at >= 0 ? `${at + 1} / ${n}` : `0 / ${n}`, `проверок на dev: ${devs.length}`);
   setKpi("k-mean", last ? f2(last.train_mean) : "—", last ? `лучший кандидат ${f2(last.train_best)}` : "открытый режим");

@@ -16,7 +16,7 @@ const REF = { ledger: "A-1", invoices: "A-2", payments: "A-3", fx: "A-4" };
   const sync = () => { const dark = document.documentElement.dataset.theme === "dark"; b.setAttribute("aria-pressed", String(dark)); b.setAttribute("aria-label", dark ? "Светлая тема" : "Тёмная тема"); if (lbl) lbl.textContent = dark ? "Светлая" : "Тёмная"; if (tc) tc.setAttribute("content", dark ? "#0e0e11" : "#f7f7f8"); };
   sync(); b.addEventListener("click", () => { const dark = document.documentElement.dataset.theme !== "dark"; if (dark) document.documentElement.dataset.theme = "dark"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", dark ? "dark" : "light"); } catch { /* private mode */ } sync(); }); })();
 const EXP = { KZT: 2, USD: 2, EUR: 2, UZS: 2, GBP: 2, CNY: 2, JPY: 0, KWD: 3 };
-const fmt = (minor, ccy) => { const e = EXP[ccy] ?? 2; const s = minor < 0 ? "-" : ""; const a = Math.abs(minor); if (!e) return s + a.toLocaleString("ru-RU"); return s + Math.floor(a / 10 ** e).toLocaleString("ru-RU") + "." + String(a % 10 ** e).padStart(e, "0"); };
+const fmt = (minor, ccy) => { const e = EXP[ccy] ?? 2; const s = minor < 0 ? "-" : ""; const a = Math.abs(minor); if (!e) return s + a.toLocaleString(window.AG_LANG === "en" ? "en-US" : "ru-RU"); return s + Math.floor(a / 10 ** e).toLocaleString(window.AG_LANG === "en" ? "en-US" : "ru-RU") + "." + String(a % 10 ** e).padStart(e, "0"); };
 const COLS = {
   ledger: ["row_id", "timestamp", "account", "debit_minor", "credit_minor", "entity_id", "invoice_id", "payment_id"],
   invoices: ["invoice_id", "doc_id", "entity_id", "issued_at", "currency", "total_minor"],
