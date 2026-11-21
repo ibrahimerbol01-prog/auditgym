@@ -41,8 +41,8 @@
 
     <div id="detail" class="hidden">
       <div class="con-head">
-        <p class="kicker">Запуски / <span class="mono" id="d-id"></span></p>
-        <span class="badge" id="d-status"></span>
+        <div class="con-title"><h2 id="d-title">—</h2>
+          <p class="con-sub"><span class="badge" id="d-status"></span><span class="sep" aria-hidden="true">·</span><span id="d-split"></span><span class="sep" aria-hidden="true">·</span><span class="mono" id="d-id"></span></p></div>
         <span class="con-sp"></span>
         <button class="btn outline small hidden" id="d-stop">Остановить</button>
       </div>
@@ -52,38 +52,39 @@
       </div>
 
       <div id="pane-ov" role="tabpanel" aria-labelledby="tab-ov">
-        <div class="res-top">
-          <section class="reward crop" aria-labelledby="sum-h">
-            <div class="wp-head"><div class="wp-code">L-2<small>W/P</small></div><div class="wp-title" id="sum-h">Итог запуска · средняя награда</div><dl class="wp-meta"><div><dt>Подготовил</dt><dd id="d-agent">агент</dd></div><div><dt>Проверил</dt><dd>оценщик, отдельный процесс</dd></div></dl></div>
-            <div class="inner">
-              <div class="big" id="s-big" aria-live="polite">—</div>
-              <div class="verdict" id="s-verdict"></div>
-              <div class="gauge" aria-hidden="true"><div class="g-track"><i class="g-zero"></i><i class="g-mark" id="s-mark"></i></div><div class="g-l"><span>−1</span><span>0</span><span>+1</span></div></div>
-              <div class="segs" id="d-segs" aria-hidden="true"></div>
-              <div class="formula" id="s-formula"></div>
-            </div>
+        <section class="kpis card" aria-label="Показатели запуска">
+          <div class="kpi main"><span class="k">Средняя награда</span><span class="v" id="k-rew">—</span><span class="d" id="k-rew-d"></span></div>
+          <div class="kpi"><span class="k">F1 находок</span><span class="v" id="k-f1">—</span><span class="d" id="k-f1-d"></span></div>
+          <div class="kpi"><span class="k">Точность</span><span class="v" id="k-p">—</span><span class="d" id="k-p-d"></span></div>
+          <div class="kpi"><span class="k">Полнота</span><span class="v" id="k-r">—</span><span class="d" id="k-r-d"></span></div>
+          <div class="kpi"><span class="k">Ложные находки</span><span class="v" id="k-fp">—</span><span class="d">за запуск</span></div>
+          <div class="kpi"><span class="k">Шагов в среднем</span><span class="v" id="k-st">—</span><span class="d">из 100 на эпизод</span></div>
+          <div class="kpi-prog"><div class="segs" id="d-segs" aria-hidden="true"></div><span class="d" id="k-prog"></span></div>
+        </section>
+        <div class="viz">
+          <section class="card chart-card" aria-labelledby="ch-h">
+            <div class="chart-h"><div><h3 id="ch-h">Награда по эпизодам</h3><p>от −1 до +1 · закрытый режим</p></div>
+              <ul class="lgd" aria-label="Легенда"><li><i class="sw pos"></i>награда &gt; 0</li><li><i class="sw neg"></i>награда ≤ 0</li><li><i class="sw ref"></i>средняя политики</li></ul></div>
+            <div id="d-chart" class="chart"></div>
           </section>
-          <div class="tiles" id="s-tiles"></div>
+          <section class="card chart-card" aria-labelledby="cmp-h">
+            <div class="chart-h"><div><h3 id="cmp-h">Сравнение с политиками</h3><p>средняя награда · report.json</p></div></div>
+            <div class="cmp" id="d-cmp"></div>
+          </section>
         </div>
-        <section class="card" aria-labelledby="ch-h">
-          <div class="card-h"><h2 id="ch-h"><span class="wpref">L-3</span>Награда по эпизодам</h2><span class="tag" id="d-split"></span></div>
-          <p class="muted small cap">Награда от −1 до 1: верные находки с доказательствами минус ложные, минус 0.002 за каждый шаг. Пунктир — средние базовых политик из report.json.</p>
-          <div id="d-chart" class="chart"></div>
+        <section class="card table-card" aria-labelledby="eps-h">
+          <div class="chart-h"><div><h3 id="eps-h">Эпизоды</h3><p>тип эпизода — из публичной конфигурации; ответы не показываются. Строка открывает журнал шагов.</p></div></div>
+          <div class="scroll"><table class="eps-t"><caption class="sr-only">Результаты по эпизодам</caption>
+            <thead><tr><th scope="col" class="num">№</th><th scope="col">Эпизод</th><th scope="col" class="num">Сид</th><th scope="col" class="num">Награда</th><th scope="col"><span class="sr-only">Шкала</span></th><th scope="col" class="num">F1</th><th scope="col" class="num">Верных</th><th scope="col" class="num">Ложных</th><th scope="col" class="num">Пропущено</th><th scope="col" class="num">Шагов</th><th scope="col" class="num">Время</th></tr></thead>
+            <tbody id="d-eps"></tbody></table></div>
         </section>
-        <section aria-labelledby="eps-h">
-          <div class="sec-h2"><h2 id="eps-h"><span class="wpref">L-4</span>Эпизоды</h2><span class="muted small">Тип эпизода — из публичной конфигурации; ответы не показываются. Нажмите, чтобы открыть журнал.</span></div>
-          <ol class="ep-tiles" id="d-eps" aria-label="Эпизоды запуска"></ol>
-        </section>
-        <section class="card" aria-labelledby="cmp-h">
-          <div class="card-h"><h2 id="cmp-h"><span class="wpref">R-2</span>Рядом с базовыми политиками</h2><span class="muted small">средняя награда из report.json</span></div>
-          <div class="bench" id="d-cmp"></div>
-        </section>
-        <section class="card" id="train-card" aria-labelledby="tr-h">
-          <div class="card-h"><h2 id="tr-h"><span class="wpref">T-1</span>Обучение</h2><span class="muted small">кривая обучаемого аудитора на отложенных эпизодах</span></div>
+        <section class="card chart-card" id="train-card" aria-labelledby="tr-h">
+          <div class="chart-h"><div><h3 id="tr-h">Обучение</h3><p>кривая обучаемого аудитора на отложенных эпизодах</p></div></div>
           <div id="train-chart" class="chart"></div><p class="muted small" id="train-note"></p>
         </section>
         <dl class="run-meta" id="d-kv"></dl>
       </div>
+      <div class="tip" id="tip" role="tooltip" hidden></div>
 
       <div id="pane-log" role="tabpanel" aria-labelledby="tab-log" class="hidden">
         <div class="card log-card">

@@ -65,9 +65,8 @@ function renderList() {
   }
 }
 
-const tick = (kind) => { const t = svg("svg", { class: "tm sm " + (kind === "exc" ? "exc" : "") + " p", viewBox: "0 0 16 16", "aria-hidden": "true" }); svg("use", { href: "#tm-" + kind }, t); return t; };
-const row = (k, v, cls = "") => el("div", { class: "fr " + cls }, el("span", {}, k), el("b", {}, v));
-const tile = (label, value, note, cls = "") => el("div", { class: "card" }, el("span", { class: "tl" }, label), el("span", { class: "disp " + cls }, value), el("span", { class: "tn" }, note));
+const signCls = (v) => (v == null ? "" : v > 0 ? "pos" : "neg");
+const setKpi = (id, v, d, cls = "") => { $(id).textContent = v; $(id).className = "v " + cls; if (d != null) $(id + "-d").textContent = d; };
 
 function render() {
   $("empty").classList.toggle("hidden", !!run);
@@ -75,84 +74,115 @@ function render() {
   if (!run) return;
   const eps = run.episodes || [], done = eps.filter((e) => e.score).length, s = run.summary || {};
   const [st, cls] = STATUS[run.status] || [run.status, "dim"];
+  $("d-title").textContent = agentName(run.agent);
   $("d-id").textContent = run.id;
   $("d-status").className = "badge " + cls; $("d-status").textContent = (run.status === "running" ? "● " : "") + st;
+  $("d-split").textContent = `${run.split} · ${eps.length} эп. · закрытый режим`;
   $("d-stop").classList.toggle("hidden", run.status !== "running");
+  // key numbers: one hero (mean reward, with its gap to the hand-written rules), the rest small
+  const ref = run.agent !== "reconcile" ? base.reconcile : null;
+  const gap = done && ref != null ? s.reward - ref : null;
+  setKpi("k-rew", done ? f2(s.reward) : "—", gap == null ? (done ? "лучший возможный — 1.00" : "") : `${gap >= 0 ? "+" : "−"}${Math.abs(gap).toFixed(2)} к Сверщику (${f2(ref)})`, signCls(done ? s.reward : null));
+  setKpi("k-f1", done ? f2(s.f1) : "—", done ? `верных ${s.tp ?? 0} · пропущено ${s.fn ?? 0}` : "");
+  setKpi("k-p", done ? f2(s.precision) : "—", done ? `${s.tp ?? 0} из ${(s.tp ?? 0) + (s.fp ?? 0)} заявленных верны` : "");
+  setKpi("k-r", done ? f2(s.recall) : "—", done ? `найдено ${s.tp ?? 0} из ${(s.tp ?? 0) + (s.fn ?? 0)}` : "");
+  setKpi("k-fp", done ? String(s.fp ?? 0) : "—", null, done && s.fp ? "neg" : "");
+  setKpi("k-st", done ? s.steps.toFixed(1) : "—", null);
   const cur = eps.find((e) => e.status === "running");
-  const gen = eps.length % 10 === 1 && eps.length % 100 !== 11 ? "эпизода" : "эпизодов";
-  const big = $("s-big"); big.textContent = done ? f2(s.reward) : "—"; big.className = "big " + (done ? (s.reward > 0 ? "pos" : "neg") : "");
-  $("s-mark").style.left = done ? `${(s.reward + 1) * 50}%` : "50%";
-  const good = done && s.reward > 0;
-  $("s-verdict").replaceChildren(...(run.status === "running"
-    ? [el("span", { class: "live-dot", "aria-hidden": "true" }), `Идёт эпизод ${cur ? cur.index + 1 : done + 1} из ${eps.length}` + (cur ? ` · #${cur.seed} ${cur.label}` : "")]
-    : done ? [tick(good ? "agree" : "exc"), good ? `Награда на ${eps.filter((e) => e.score && e.score.reward > 0).length} из ${eps.length} ${gen}` : "Агент не заработал награды"]
-      : [run.status === "error" ? "Запуск прервался с ошибкой" : "Ни один эпизод не завершён"]));
-  $("s-verdict").classList.toggle("neg", done > 0 && !good);
-  $("d-segs").replaceChildren(...eps.map((e) => el("i", { class: e.score ? (e.score.reward > 0 ? "pos" : "neg") : e.status === "running" ? "now" : "" })));
-  $("s-formula").replaceChildren(
-    row("эпизодов оценено", `${done} из ${eps.length}`), row("верных · ложных · пропусков", done ? `${s.tp ?? 0} · ${s.fp ?? 0} · ${s.fn ?? 0}` : "—"),
-    row("шагов в среднем (бюджет 100)", done ? s.steps.toFixed(1) : "—"), row("средняя награда", done ? f2(s.reward) : "—", "tot"));
-  $("s-tiles").replaceChildren(
-    tile("Точность", done ? f2(s.precision) : "—", done ? `precision · ${s.tp ?? 0} из ${(s.tp ?? 0) + (s.fp ?? 0)} верны` : "precision"),
-    tile("Полнота", done ? f2(s.recall) : "—", done ? `recall · ${s.tp ?? 0} из ${(s.tp ?? 0) + (s.fn ?? 0)} найдены` : "recall"),
-    tile("F1", done ? f2(s.f1) : "—", "все находки запуска"),
-    tile("Ложные находки", done ? String(s.fp ?? 0) : "—", "каждая снижает награду", done && s.fp ? "neg" : ""),
-    tile("Шагов в среднем", done ? s.steps.toFixed(1) : "—", "из 100 на эпизод"),
-    tile("Время агента", s.seconds != null ? dur(s.seconds) : "—", run.pace ? `плюс показ ${Math.round(run.pace * 1000)} мс на шаг` : "без пауз"));
-  $("d-split").textContent = `${run.split} · закрытый режим`;
-  $("d-agent").textContent = "агент " + run.agent;
+  $("d-segs").replaceChildren(...eps.map((e) => el("i", { class: e.score ? signCls(e.score.reward) : e.status === "running" ? "now" : "" })));
+  $("k-prog").textContent = run.status === "running" ? `эпизод ${cur ? cur.index + 1 : done + 1} из ${eps.length}${cur ? " · " + cur.label : ""}` : `${done} из ${eps.length} эпизодов оценено`;
   const secs = ((run.finished || Date.now() / 1000) - run.started);
-  const kv = [["Запуск", run.id], ["Эпизоды", `${run.split} · ${eps.length}`], ["Режим", "закрытый: агент не видит награду"], ["Версия среды", run.env_version], ["Начат", when(run.started)], ["Длительность", dur(Math.max(0, secs))]];
+  const kv = [["Начат", when(run.started)], ["Длительность", dur(Math.max(0, secs))], ["Время агента", s.seconds != null ? dur(s.seconds) : "—"], ["Версия среды", run.env_version], ["Режим", "закрытый: агент не видит награду"]];
+  if (run.pace) kv.push(["Темп показа", `${Math.round(run.pace * 1000)} мс на шаг`]);
   $("d-kv").replaceChildren(...kv.map(([k, v]) => el("div", {}, el("dt", {}, k), el("dd", {}, v))));
   drawChart(eps);
-  $("d-eps").replaceChildren(...eps.map((e) => {
-    const r = e.score ? e.score.reward : null;
-    const t = el("button", { class: "ep-t " + (e.score ? (r > 0 ? "pos" : "neg") : e.status), onclick: () => { logEp = e.index; setTab("log"); } },
-      el("span", { class: "et-h" }, el("span", {}, e.label), el("span", { class: "mono" }, "#" + e.seed)),
-      el("span", { class: "et-v mono" }, r == null ? (e.status === "running" ? "идёт…" : "в очереди") : f2(r)),
-      el("span", { class: "et-m" }, el("i", { style: r == null ? "width:0" : r >= 0 ? `left:50%;width:${r * 50}%` : `left:${50 + r * 50}%;width:${-r * 50}%` })),
-      el("span", { class: "et-s" }, ...(e.score ? [tick(r > 0 ? "agree" : "exc"), `${plural(e.steps, "шаг", "шага", "шагов")} · ложных ${e.score.fp ?? 0}`] : [" "])));
-    t.setAttribute("aria-label", `${e.label}, сид ${e.seed}: ${r == null ? "нет оценки" : "награда " + f2(r)}. Открыть журнал`);
-    return el("li", {}, t);
-  }));
-  const rows = [[(NAMES[run.agent] || run.agent) + " · этот запуск", done ? s.reward : null, true]].concat(Object.entries(base).map(([k, v]) => [k === run.agent ? `${NAMES[k]} · report.json` : agentName(k), v, false]));
-  rows.sort((a, b) => (b[1] ?? -9) - (a[1] ?? -9));
-  $("d-cmp").replaceChildren(...rows.map(([n, v, me]) => el("div", { class: "bn" + (me ? " you" : "") }, el("span", { class: "nm" }, n),
-    el("span", { class: "zb" }, el("i", { class: v != null && v < 0 ? "neg" : "", style: v == null ? "width:0" : v >= 0 ? `left:50%;width:${v * 50}%` : `left:${50 + v * 50}%;width:${-v * 50}%` }), el("b", {})),
-    el("span", { class: "vv " + (v == null ? "" : v > 0 ? "ok" : "bad") }, f2(v)))));
+  drawCompare(done ? s.reward : null);
+  drawTable(eps);
   drawTraining();
 }
 
-function axes(host, W, H, m, ymin, ymax) {
+// ---- tooltip (values lead, labels follow); text only via textContent
+const tip = $("tip");
+function showTip(ev, title, value, lines) {
+  tip.replaceChildren(el("b", {}, value), el("span", { class: "tt" }, title), ...lines.map((l) => el("span", {}, l)));
+  tip.hidden = false;
+  const r = tip.getBoundingClientRect(), x = Math.min(innerWidth - r.width - 12, ev.clientX + 14), y = Math.max(12, ev.clientY - r.height - 12);
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+
+function axes(host, W, H, m) {
   host.replaceChildren(); const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: H, class: "ch", role: "img" }, host);
-  const Y = (v) => m.t + ((ymax - v) / (ymax - ymin)) * (H - m.t - m.b);
-  for (const t of [-1, -0.5, 0, 0.5, 1]) { svg("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t), class: t === 0 ? "zero" : "grid" }, s); svg("text", { x: m.l - 8, y: Y(t) + 4, "text-anchor": "end" }, s).textContent = f2(t); }
+  const Y = (v) => m.t + ((1 - v) / 2) * (H - m.t - m.b);
+  for (const t of [-1, -0.5, 0, 0.5, 1]) { svg("line", { x1: m.l, x2: W - m.r, y1: Y(t), y2: Y(t), class: t === 0 ? "zero" : "grid" }, s); svg("text", { x: m.l - 10, y: Y(t) + 4, "text-anchor": "end", class: "tick" }, s).textContent = t === 0 ? "0" : f2(t); }
   return { s, Y };
+}
+// a column with a 4px rounded data end and a square end at the zero line
+function column(x, w, y0, y1) {
+  const r = Math.min(4, w / 2, Math.abs(y1 - y0)), up = y1 < y0;
+  return up ? `M${x},${y0}V${y1 + r}Q${x},${y1} ${x + r},${y1}H${x + w - r}Q${x + w},${y1} ${x + w},${y1 + r}V${y0}Z`
+            : `M${x},${y0}V${y1 - r}Q${x},${y1} ${x + r},${y1}H${x + w - r}Q${x + w},${y1} ${x + w},${y1 - r}V${y0}Z`;
 }
 
 function drawChart(eps) {
-  const host = $("d-chart"), W = Math.max(320, host.clientWidth || 640), H = 248, m = { l: 44, r: W < 480 ? 64 : 96, t: 14, b: 42 };
+  const host = $("d-chart"), W = Math.max(300, host.clientWidth || 600), H = 232, m = { l: 40, r: 8, t: 10, b: 26 };
   const key = run.id + "|" + W + "|" + eps.map((e) => (e.score ? e.score.reward : e.status)).join(",");
   if (key === drawnFor) return;
   drawnFor = key;
-  const { s, Y } = axes(host, W, H, m, -1, 1);
-  s.setAttribute("aria-label", "Награда по эпизодам: " + eps.map((e) => (e.score ? `${e.label} ${f2(e.score.reward)}` : `${e.label} нет оценки`)).join("; "));
-  for (const [k, v] of Object.entries(base)) { if (k === run.agent || !["reconcile", "random"].includes(k)) continue;
-    svg("line", { x1: m.l, x2: W - m.r + 4, y1: Y(v), y2: Y(v), class: "ref" }, s);
-    const lab = svg("text", { x: W - m.r + 8, y: Y(v) + 4, class: "ref-l" }, s);  // in the right gutter, never on a bar
-    lab.append(svg("tspan", { x: W - m.r + 8 }), svg("tspan", { x: W - m.r + 8, dy: 13 }));
-    lab.firstChild.textContent = NAMES[k]; lab.lastChild.textContent = f2(v); }
-  const n = Math.max(eps.length, 1), slot = (W - m.l - m.r) / n, bw = Math.min(46, slot * 0.56);
+  hideTip();
+  const { s, Y } = axes(host, W, H, m);
+  s.setAttribute("aria-label", "Награда по эпизодам: " + eps.map((e, i) => `${i + 1}. ${e.label} ${e.score ? f2(e.score.reward) : "нет оценки"}`).join("; "));
+  // reference lines: mean of the base policies (solid hairline, label inside the plot at the left, on a surface chip)
+  for (const k of ["reconcile", "random"]) { const v = base[k]; if (v == null || k === run.agent) continue;
+    svg("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: "ref" }, s);
+    const t = svg("text", { x: m.l + 8, y: Y(v) + (v > 0 ? 14 : -6), class: "ref-l" }, s); t.textContent = `${NAMES[k]} ${f2(v)}`; }
+  const n = Math.max(eps.length, 1), slot = (W - m.l - m.r) / n, bw = Math.min(24, slot * 0.5);
   eps.forEach((e, i) => {
-    const x = m.l + slot * i + (slot - bw) / 2;
-    svg("text", { x: x + bw / 2, y: H - 6, "text-anchor": "middle" }, s).textContent = i + 1;
-    if (!e.score) { if (e.status === "running") svg("rect", { x, y: Y(1), width: bw, height: Y(-1) - Y(1), class: "slot-now" }, s); return; }
-    const v = e.score.reward, y0 = Y(0), y1 = Y(v);
-    const r = svg("rect", { x, width: bw, y: Math.min(y0, y1), height: Math.max(1, Math.abs(y1 - y0)), class: v >= 0 ? "b-pos" : "b-neg" }, s);
-    const ak = run.id + ":" + i;
-    if (!RM && !animated.has(ak)) { animated.add(ak); r.style.transformOrigin = `${x}px ${y0}px`; r.style.transform = "scaleY(0)"; requestAnimationFrame(() => requestAnimationFrame(() => { r.style.transition = "transform .55s cubic-bezier(.3,.7,.2,1)"; r.style.transform = "scaleY(1)"; })); }
-    if (slot >= 38) svg("text", { x: x + bw / 2, y: v >= 0 ? y1 - 6 : y1 + 14, "text-anchor": "middle", class: "b-l" }, s).textContent = f2(v);
+    const cx = m.l + slot * (i + 0.5), x = cx - bw / 2;
+    svg("text", { x: cx, y: H - 6, "text-anchor": "middle", class: "tick" }, s).textContent = i + 1;
+    const g = svg("g", { class: "col", tabindex: "0" }, s);
+    svg("rect", { x: m.l + slot * i, y: m.t, width: slot, height: H - m.t - m.b, class: "hit" }, g);  // hit target bigger than the mark
+    if (e.score) {
+      const v = e.score.reward, y0 = Y(0), y1 = Y(v);
+      const p = svg("path", { d: column(x, bw, y0, Math.abs(y1 - y0) < 1 ? y0 - 1 : y1), class: "bar " + signCls(v) }, g);
+      const ak = run.id + ":" + i;
+      if (!RM && !animated.has(ak)) { animated.add(ak); p.style.transformOrigin = `${cx}px ${y0}px`; p.style.transform = "scaleY(0)"; requestAnimationFrame(() => requestAnimationFrame(() => { p.style.transition = "transform .5s cubic-bezier(.3,.7,.2,1)"; p.style.transform = "scaleY(1)"; })); }
+    } else if (e.status === "running") svg("rect", { x, y: Y(1), width: bw, height: Y(-1) - Y(1), rx: 4, class: "now" }, g);
+    const show = (ev) => showTip(ev, `${i + 1}. ${e.label} · сид ${e.seed}`, e.score ? f2(e.score.reward) : e.status === "running" ? "идёт…" : "в очереди",
+      e.score ? [`F1 ${f2(e.score.f1)} · верных ${e.score.tp ?? 0} · ложных ${e.score.fp ?? 0} · пропущено ${e.score.fn ?? 0}`, `${plural(e.steps, "шаг", "шага", "шагов")} · ${e.seconds.toFixed(2)} с`] : []);
+    g.addEventListener("pointermove", show); g.addEventListener("pointerleave", hideTip);
+    g.addEventListener("focus", (ev) => { const r = ev.target.getBoundingClientRect(); show({ clientX: r.left + r.width / 2, clientY: r.top + 40 }); });
+    g.addEventListener("blur", hideTip);
+    g.addEventListener("click", () => { hideTip(); logEp = e.index; setTab("log"); });
   });
+}
+
+function drawCompare(mine) {
+  const rows = [{ name: NAMES[run.agent] || run.agent, code: "этот запуск", v: mine, me: true }]
+    .concat(Object.entries(base).map(([k, v]) => ({ name: NAMES[k] || k, code: k === run.agent ? "report.json" : k, v, me: false })));
+  rows.sort((a, b) => (b.v ?? -9) - (a.v ?? -9));
+  $("d-cmp").replaceChildren(...rows.map((r) => {
+    const w = r.v == null ? 0 : Math.abs(r.v) * 50;
+    return el("div", { class: "cmp-r" + (r.me ? " me" : "") },
+      el("span", { class: "cmp-n" }, el("b", {}, r.name), " ", el("small", {}, r.code)),
+      el("span", { class: "cmp-t" }, el("i", { class: "z" }), el("i", { class: "b " + signCls(r.v), style: r.v == null ? "width:0" : r.v >= 0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%` })),
+      el("span", { class: "cmp-v mono" }, f2(r.v)));
+  }), el("div", { class: "cmp-r cmp-ax mono", "aria-hidden": "true" }, el("span", {}), el("span", { class: "ax" }, el("span", {}, "−1"), el("span", {}, "0"), el("span", {}, "+1")), el("span", {})));
+}
+
+function drawTable(eps) {
+  $("d-eps").replaceChildren(...eps.map((e, i) => {
+    const sc = e.score, v = sc ? sc.reward : null, w = v == null ? 0 : Math.abs(v) * 50;
+    const tr = el("tr", { tabindex: "0", class: e.status === "running" ? "now" : sc ? "" : "q", onclick: () => { logEp = e.index; setTab("log"); }, onkeydown: (ev) => { if (ev.key === "Enter") { logEp = e.index; setTab("log"); } } },
+      el("td", { class: "num mono" }, i + 1), el("td", {}, e.label), el("td", { class: "num mono" }, e.seed),
+      el("td", { class: "num mono strong" }, sc ? f2(v) : e.status === "running" ? "идёт…" : "—"),
+      el("td", { class: "mini" }, el("span", { class: "cmp-t" }, el("i", { class: "z" }), el("i", { class: "b " + signCls(v), style: v == null ? "width:0" : v >= 0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%` }))),
+      el("td", { class: "num mono" }, sc ? f2(sc.f1) : "—"), el("td", { class: "num mono" }, sc ? sc.tp ?? 0 : "—"),
+      el("td", { class: "num mono" + (sc && sc.fp ? " bad" : "") }, sc ? sc.fp ?? 0 : "—"), el("td", { class: "num mono" }, sc ? sc.fn ?? 0 : "—"),
+      el("td", { class: "num mono" }, sc ? e.steps : "—"), el("td", { class: "num mono" }, sc ? e.seconds.toFixed(2) + " с" : "—"));
+    tr.setAttribute("aria-label", `${i + 1}. ${e.label}: ${sc ? "награда " + f2(v) : "нет оценки"}. Открыть журнал`);
+    return tr;
+  }));
 }
 
 function drawTraining() {
@@ -164,9 +194,9 @@ function drawTraining() {
   }
   const pts = (curve.points || curve).map((p) => [p.iteration, p.dev_reward]).filter((p) => p.every(Number.isFinite));
   const W = Math.max(320, host.clientWidth || 640), H = 200, m = { l: 44, r: 14, t: 12, b: 26 };
-  const { s, Y } = axes(host, W, H, m, -1, 1); const xmax = Math.max(1, ...pts.map((p) => p[0]));
+  const { s, Y } = axes(host, W, H, m); const xmax = Math.max(1, ...pts.map((p) => p[0]));
   const X = (x) => m.l + (x / xmax) * (W - m.l - m.r);
-  if (base.reconcile != null) { svg("line", { x1: m.l, x2: W - m.r, y1: Y(base.reconcile), y2: Y(base.reconcile), class: "ref" }, s); svg("text", { x: W - m.r - 4, y: Y(base.reconcile) - 6, "text-anchor": "end", class: "ref-l" }, s).textContent = "Сверщик " + f2(base.reconcile); }
+  if (base.reconcile != null) { svg("line", { x1: m.l, x2: W - m.r, y1: Y(base.reconcile), y2: Y(base.reconcile), class: "ref" }, s); svg("text", { x: m.l + 8, y: Y(base.reconcile) + 14, class: "ref-l" }, s).textContent = "Сверщик " + f2(base.reconcile); }
   svg("path", { d: pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join(" "), class: "ln" }, s);
   s.setAttribute("aria-label", `Награда на dev по итерациям: от ${f2(pts[0][1])} до ${f2(pts[pts.length - 1][1])}`);
   $("train-note").textContent = `${plural(pts.length, "точка", "точки", "точек")} из train/curve.json · награда на отложенных эпизодах`;
