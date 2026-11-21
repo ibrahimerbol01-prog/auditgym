@@ -168,3 +168,21 @@ class UpdaterTests(unittest.TestCase):
         status, res = r.post("/api/update", {})
         self.assertEqual((status, res["error"]["code"]), (409, "no_update"))
         self.assertEqual(exits, [])
+
+
+class LicenceTests(unittest.TestCase):
+    """The desktop builds ship the licences of what they bundle, at the versions actually pinned."""
+
+    def test_notices_match_the_pinned_desktop_dependencies_and_ship_in_builds(self):
+        with open(os.path.join(ROOT, "desktop", "THIRD_PARTY_NOTICES.md"), encoding="utf-8") as fh:
+            notices = fh.read()
+        with open(os.path.join(ROOT, "desktop", "requirements-desktop.txt"), encoding="utf-8") as fh:
+            pins = [line.split("==") for line in fh if "==" in line and not line.startswith("#")]
+        for name, version in pins:
+            self.assertIn(f"{version.strip()}", notices, f"{name}: update THIRD_PARTY_NOTICES.md for the new version")
+        with open(os.path.join(ROOT, "desktop", "build.py"), encoding="utf-8") as fh:
+            build = fh.read()
+        self.assertIn("THIRD_PARTY_NOTICES.md", build)
+        self.assertIn('"LICENSE"', build)
+        with open(os.path.join(ROOT, "LICENSE"), encoding="utf-8") as fh:
+            self.assertTrue(fh.read().startswith("MIT License"))

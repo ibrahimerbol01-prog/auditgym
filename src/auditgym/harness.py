@@ -175,12 +175,11 @@ def summarize(episodes: List[Dict[str, Any]]) -> Dict[str, Any]:
     tp, fp, fn = (sum(e["score"].get(k, 0) for e in scored) for k in ("tp", "fp", "fn"))
     # Micro averages over all findings of scored episodes: a clean episode (nothing to find, nothing claimed)
     # adds nothing; an invalid or truncated submission has no findings to count and is reported separately.
-    if scored:
-        p = tp / (tp + fp) if tp + fp else (1.0 if fn == 0 else 0.0)
-        r = tp / (tp + fn) if tp + fn else 1.0
-    else:
-        p = r = 0.0
-    f1 = 2 * p * r / (p + r) if p + r else 0.0
+    # The brief's definitions (section 05, as in eval.scoring.prf1): P or R is 0 when its denominator is 0;
+    # F1 = 2TP/(2TP+FP+FN), and 1 when there was nothing to find and nothing was claimed.
+    p = tp / (tp + fp) if tp + fp else 0.0
+    r = tp / (tp + fn) if tp + fn else 0.0
+    f1 = (2 * tp / (2 * tp + fp + fn) if tp + fp + fn else 1.0) if scored else 0.0
     return {"episodes_done": len(done), "reward": mean("reward"), "precision": round(p, 4), "recall": round(r, 4),
             "f1": round(f1, 4), "tp": tp, "fp": fp, "fn": fn, "not_scored": len(done) - len(scored), "steps": round(sum(e["steps"] for e in done) / len(done), 2),
             "seconds": round(sum(e["seconds"] for e in done), 2)}

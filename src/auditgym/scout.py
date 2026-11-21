@@ -22,10 +22,10 @@ from typing import Any, Dict, List, Optional
 PRESETS = ["mixed", "simple", "interacting"]
 PRESET_RU = {"mixed": "смешанные", "simple": "простые", "interacting": "с взаимодействиями"}
 
-# Measured on the reference container (Linux, Python 3.11): one generated episode played to the end by a
-# baseline policy in open mode takes ~0.07 s in a single process (generation dominates). The estimate assumes
-# one process; it is an estimate, shown as such.
-SEC_PER_EPISODE = 0.07
+# Measured (Nov 21, Linux, Python 3.11, one process): a standard training, 1 920 training episodes plus 16 dev
+# checks of 10 episodes, takes 21-23 s, i.e. ~0.011 s per episode. 0.015 leaves room for slower laptops and
+# Windows; it is an estimate, shown as such.
+SEC_PER_EPISODE = 0.015
 DEV_EPISODES = 10
 EVAL_EVERY = 2  # learner default
 

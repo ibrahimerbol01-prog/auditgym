@@ -53,6 +53,7 @@ def main() -> int:
         fh.write(build_stamp() + "\n")
     data += ["--add-data", f"{stamp_file}{SEP}data"]
     data += add("desktop/icon.png", "data")  # Linux menu entry and window icon
+    data += add("LICENSE", "data") + add("desktop/THIRD_PARTY_NOTICES.md", "data")  # licences travel with the app
     for name in ("report.json", "trajectories.jsonl"):
         if os.path.exists(os.path.join(ROOT, name)):
             data += add(name, "data")
@@ -86,11 +87,15 @@ def main() -> int:
         os.makedirs(stage)
         for name in ("AuditGym.app", "auditgym-cli"):  # ditto keeps symlinks and permissions; a plain zip would not
             subprocess.run(["ditto", os.path.join(dist, name), os.path.join(stage, name)], check=True)
+        for name in ("LICENSE", "desktop/THIRD_PARTY_NOTICES.md"):
+            shutil.copy(os.path.join(ROOT, name), os.path.join(stage, os.path.basename(name)))
         subprocess.run(["ditto", "-c", "-k", stage, archive], check=True)
     else:
         target = os.path.join(dist, "AuditGym", "cli")
         shutil.rmtree(target, ignore_errors=True)
         shutil.copytree(os.path.join(cli_dist, "auditgym"), target, symlinks=True)
+        for name in ("LICENSE", "desktop/THIRD_PARTY_NOTICES.md"):  # visible next to the program, too
+            shutil.copy(os.path.join(ROOT, name), os.path.join(dist, "AuditGym", os.path.basename(name)))
         shutil.make_archive(archive[: -len(".zip")], "zip", dist, "AuditGym")
     shutil.copy(stamp_file, os.path.join(dist, "BUILD.txt"))
     with open(archive, "rb") as fh:

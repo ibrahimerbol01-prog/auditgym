@@ -37,13 +37,15 @@ Other entry points:
 | Command | What it does |
 |---|---|
 | `python -m auditgym.cli demo` | one episode played by the reconciliation baseline, printed as text |
-| `python -m auditgym.cli ui` | thin offline web UI on http://127.0.0.1:8000 (Play, Replay + Report) |
+| `python -m auditgym.cli ui` | offline app in the browser on http://127.0.0.1:8000: train an auditor with live telemetry, runs, investigation, settings (English / Russian) |
+| `python -m auditgym.cli tui` | the same flow in the terminal (also `auditgym` with no arguments in the desktop build) |
 | `docker run --rm -p 8000:8000 auditgym ui --host 0.0.0.0 --no-browser` | the same UI from the image |
 | `python -m auditgym.cli serve --stdio` | JSON-lines front door: `{"op":"reset","seed":1,"config":{}}`, `{"op":"step","action":{...}}`, `{"op":"state"}` |
 | `python -m auditgym.cli serve --http --port 8080` | HTTP front door on 127.0.0.1: `POST /reset`, `POST /step`, `GET /state` |
 | `python -m auditgym.cli evaluate --private DIR --findings FILE --steps N` | organizer scoring of one submission |
 | `python -m auditgym.cli build-suite` | regenerate the 10 train + 10 dev episodes (golden hashes are tested) |
 | `python -m unittest discover -s tests -q` | the test suite |
+| `python train/campaign.py` | end-to-end harness check before a submission (~3 min): verify, every policy, an external agent, trainings on held-out dev, the app's API, the desktop smoke test |
 
 ## The environment in one screen
 
@@ -104,4 +106,4 @@ AuditGym — воспроизводимая среда для обучения �
 
 ## License
 
-MIT (see `LICENSE`). Bundled fonts: SIL Open Font License (`src/auditgym/ui/static/fonts/OFL-*.txt`). All data is synthetic: no real companies, people, bank records or payments.
+MIT (see `LICENSE`). Bundled fonts: SIL Open Font License (`src/auditgym/ui/static/fonts/OFL-*.txt`). The downloadable desktop app also bundles a Python runtime, pywebview and the PyInstaller bootloader (permissive licences; the bootloader's GPL exception allows MIT distribution): see `desktop/THIRD_PARTY_NOTICES.md`, which ships inside every build. All data is synthetic: no real companies, people, bank records or payments.

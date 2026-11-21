@@ -106,7 +106,7 @@ jobs:
           merge-multiple: true
       - name: Collect installers and checksums
         run: |
-          cp desktop/install.sh desktop/install.ps1 out/
+          cp desktop/install.sh desktop/install.ps1 LICENSE desktop/THIRD_PARTY_NOTICES.md out/
           cd out && sha256sum AuditGym-*.zip install.sh install.ps1 > SHA256SUMS.txt && cat SHA256SUMS.txt
       - name: Create the release
         env:

@@ -85,11 +85,11 @@ class TestUIStatic(unittest.TestCase):
 
     def test_every_font_family_ships_its_licence(self):
         files = os.listdir(os.path.join(STATIC_DIR, "fonts"))
-        for fam in ("inter", "source-serif-4", "jetbrains-mono"):
+        for fam in ("inter", "jetbrains-mono"):
             self.assertTrue(any(f.startswith(fam) for f in files), fam)
             self.assertIn(f"OFL-{fam}.txt", files)
         for f in (x for x in files if x.endswith(".woff2")):
-            self.assertTrue(any(f.startswith(fam) for fam in ("inter", "source-serif-4", "jetbrains-mono")), f"unlicensed font {f}")
+            self.assertTrue(any(f.startswith(fam) for fam in ("inter", "jetbrains-mono")), f"unlicensed font {f}")
 
     def test_no_network_dependencies(self):
         for name in HTML + tuple(JS.values()) + ("style.css",):
