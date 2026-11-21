@@ -186,8 +186,9 @@ class TestUIStatic(unittest.TestCase):
         self.assertIn(f'data-count="{diff}"', case)
 
     def test_colour_contrast_meets_wcag_aa(self):
-        light = re.search(r"\[data-theme=light\]\{(.*?)\}", read("style.css"), re.S)
-        themes = [("dark", css_vars())] + ([("light", {**css_vars(), **dict(re.findall(r"--([\w-]+):(#[0-9a-fA-F]{6})", light.group(1)))})] if light else [])
+        dark = re.search(r"\[data-theme=dark\]\{(.*?)\}", read("style.css"), re.S)
+        self.assertIsNotNone(dark, "the dark theme must exist")
+        themes = [("light", css_vars()), ("dark", {**css_vars(), **dict(re.findall(r"--([\w-]+):(#[0-9a-fA-F]{6})", dark.group(1)))})]
         for name, v in themes:
             with self.subTest(theme=name):
                 self._contrast(v)

@@ -13,8 +13,8 @@ const tm = (kind, label, cls = "") => { const s = document.createElementNS(SVGNS
 const REF = { ledger: "A-1", invoices: "A-2", payments: "A-3", fx: "A-4" };
 // Theme: graphite by default, warm paper on request; remembered when storage is available.
 (() => { const b = document.getElementById("theme"); if (!b) return; const tc = document.querySelector('meta[name="theme-color"]'); const lbl = b.querySelector("span");
-  const sync = () => { const light = document.documentElement.dataset.theme === "light"; b.setAttribute("aria-pressed", String(light)); b.setAttribute("aria-label", light ? "Тёмная тема «графит»" : "Светлая тема «бумага»"); if (lbl) lbl.textContent = light ? "Графит" : "Бумага"; if (tc) tc.setAttribute("content", light ? "#f1ece1" : "#131210"); };
-  sync(); b.addEventListener("click", () => { const light = document.documentElement.dataset.theme !== "light"; if (light) document.documentElement.dataset.theme = "light"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", light ? "light" : "dark"); } catch { /* private mode */ } sync(); }); })();
+  const sync = () => { const dark = document.documentElement.dataset.theme === "dark"; b.setAttribute("aria-pressed", String(dark)); b.setAttribute("aria-label", dark ? "Светлая тема" : "Тёмная тема"); if (lbl) lbl.textContent = dark ? "Светлая" : "Тёмная"; if (tc) tc.setAttribute("content", dark ? "#0e0e11" : "#f7f7f8"); };
+  sync(); b.addEventListener("click", () => { const dark = document.documentElement.dataset.theme !== "dark"; if (dark) document.documentElement.dataset.theme = "dark"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", dark ? "dark" : "light"); } catch { /* private mode */ } sync(); }); })();
 const EXP = { KZT: 2, USD: 2, EUR: 2, UZS: 2, GBP: 2, CNY: 2, JPY: 0, KWD: 3 };
 const fmt = (minor, ccy) => { const e = EXP[ccy] ?? 2; const s = minor < 0 ? "-" : ""; const a = Math.abs(minor); if (!e) return s + a.toLocaleString("ru-RU"); return s + Math.floor(a / 10 ** e).toLocaleString("ru-RU") + "." + String(a % 10 ** e).padStart(e, "0"); };
 const COLS = {

@@ -4,6 +4,16 @@ The UI is the jury's first impression. It must look like a design studio made it
 AI-generated SaaS template. The concept is **"auditor's working papers"**: dark graphite paper, ivory ink, one brass
 accent, a red pen for exceptions.
 
+## Style decision v2: neutral & clean (Мади, Nov 21) — current
+Replaces the "working papers" look (dark graphite, brass, serif) on every page, which the owner did not like.
+- **Light by default**, `[data-theme=dark]` mirrors it (toggle "Тёмная / Светлая", saved as `ag-theme`).
+- White cards (`--s1`) on an off-white page (`--bg`), thin lines, 8 / 12 px radii, quiet shadows.
+- **Inter** for all text and headings (600–700, tight tracking); **JetBrains Mono** for numbers and identifiers.
+- **One accent:** blue `--gold` (the token name is historical) for actions, links, focus and ticks. Green / red only
+  for results. No grain, no crop marks, no W/P code boxes, no gradients.
+- Every colour is still a token in `style.css`; WCAG AA is checked for both themes by `tests/test_ui_static.py`.
+- The sections below that describe the working-papers identity are kept for history; where they conflict, this wins.
+
 ## Layout decision v2: training harness (Мади, Nov 20, evening) — current
 Chosen from three options after a market study (`docs/design-research/harness/`: TensorBoard, MLflow, Aim, Optuna and
 Trackio run locally; 26 product sites). **B for the app, C for the terminal.** It replaces the chat layout below.

@@ -21,8 +21,8 @@ let runs = [], current = null, run = null, base = {}, curve = null, tab = "ov", 
 
 // theme toggle (same as the other pages)
 (() => { const b = $("theme"); const tc = document.querySelector('meta[name="theme-color"]'); const lbl = b.querySelector("span");
-  const sync = () => { const light = document.documentElement.dataset.theme === "light"; b.setAttribute("aria-pressed", String(light)); b.setAttribute("aria-label", light ? "Тёмная тема «графит»" : "Светлая тема «бумага»"); lbl.textContent = light ? "Графит" : "Бумага"; tc.setAttribute("content", light ? "#f1ece1" : "#131210"); };
-  sync(); b.addEventListener("click", () => { const light = document.documentElement.dataset.theme !== "light"; if (light) document.documentElement.dataset.theme = "light"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", light ? "light" : "dark"); } catch { /* private mode */ } sync(); drawnFor = ""; render(); }); })();
+  const sync = () => { const dark = document.documentElement.dataset.theme === "dark"; b.setAttribute("aria-pressed", String(dark)); b.setAttribute("aria-label", dark ? "Светлая тема" : "Тёмная тема"); lbl.textContent = dark ? "Светлая" : "Тёмная"; tc.setAttribute("content", dark ? "#0e0e11" : "#f7f7f8"); };
+  sync(); b.addEventListener("click", () => { const dark = document.documentElement.dataset.theme !== "dark"; if (dark) document.documentElement.dataset.theme = "dark"; else delete document.documentElement.dataset.theme; try { localStorage.setItem("ag-theme", dark ? "dark" : "light"); } catch { /* private mode */ } sync(); drawnFor = ""; render(); }); })();
 
 async function getJSON(url) { const r = await fetch(url, { cache: "no-store" }); if (!r.ok) throw new Error(url + " " + r.status); return r.json(); }
 async function postJSON(url, body) { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); return r.json(); }
