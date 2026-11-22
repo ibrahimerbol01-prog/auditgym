@@ -487,6 +487,11 @@ dl.kv dd.wide{grid-column:1/-1;padding-top:0}
 .rep-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end}
 .rep-head h1{font-size:48px;line-height:1.05;font-weight:300;letter-spacing:-.025em;margin-top:10px}
 .rep-head p{margin:12px 0 0;color:var(--txt2);max-width:600px}
+.vrun{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 24px;align-items:center;margin-top:24px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--s1)}
+.vrun h2{font-size:17px;font-weight:600}
+.vrun p{margin:4px 0 0;color:var(--txt2);font-size:14px;max-width:640px}
+.vrun-log{grid-column:1/-1;margin:0;max-height:260px;overflow:auto;white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--txt2);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+@media (max-width:640px){.vrun{grid-template-columns:1fr}}
 .seal{display:flex;align-items:center;gap:18px;padding:18px 24px}
 .seal #est{font-family:var(--serif);font-weight:300;font-size:64px;line-height:.9;color:var(--txt);letter-spacing:-.03em;font-variant-numeric:lining-nums}
 .seal .sl{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--txt2)}
@@ -1156,6 +1161,19 @@ main.settings h1{margin:0 0 4px;font-size:28px;font-weight:600;letter-spacing:-.
 .kbd-help dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;font-size:13.5px;align-items:center}
 .kbd-help dt{display:flex;gap:4px}.kbd-help dd{margin:0;color:var(--txt2)}
 .kbd-help kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--s2);color:var(--txt)}
+.tour{border:1px solid var(--line2);border-radius:var(--r);background:var(--s1);color:var(--txt);padding:22px 24px 18px;width:min(520px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.tour::backdrop{background:rgba(0,0,0,.4)}
+.tour-n{margin:0;font:12px var(--mono);color:var(--txt2)}
+.tour h2{margin:8px 0 10px;font-size:22px;font-weight:600;letter-spacing:-.01em}
+.tour-p{margin:0;color:var(--txt2);font-size:15px;line-height:1.55}
+.tour-go{display:inline-block;margin-top:12px;font-size:14px;color:var(--txt);text-decoration:underline;text-underline-offset:3px}
+.tour-dots{display:flex;gap:6px;margin:18px 0 14px}
+.tour-dots i{width:18px;height:4px;border-radius:2px;background:var(--line2)}
+.tour-dots i.on{background:var(--txt)}
+.tour-bar{display:flex;gap:8px;justify-content:flex-end}
+.tour-bar .btn.ghost{margin-right:auto}
+.tour-open{display:block;width:100%;margin:0 0 8px;padding:6px 8px;border:1px dashed var(--line2);border-radius:8px;background:none;color:var(--txt2);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.tour-open:hover{color:var(--txt);border-color:var(--txt2)}
 
 /* ---------- red team arena ---------- */
 main.arena{display:flex;flex-direction:column;gap:16px;padding-top:32px;padding-bottom:64px}
@@ -1243,3 +1261,35 @@ pre.ascii,pre.ascii-art,pre.ascii-beat,.ar-shield{max-width:100%;overflow:hidden
 @media (max-width:900px){.live-grid{grid-template-columns:1fr}}
 @media (max-width:560px){.la-t{grid-template-columns:auto minmax(24px,1fr) auto;gap:8px}.la-tv{font-size:10.5px}.la-f{grid-template-columns:16px minmax(0,1fr) auto}.la-id{grid-column:2/-1;grid-row:2}}
 @media (prefers-reduced-motion:reduce){.live-beat.on>i,.la-t.in,.la-f.in,.la-out.in,.pop-ch .pop-col.new{animation:none}}
+/* custom option lists (shell.js): the native <select> stays in the page as the value, hidden behind .ags-b / .ags-l,
+   so the open list follows the app's theme instead of the operating system's */
+.ags{position:relative;display:block;width:100%;min-width:0}
+.ags-native{position:absolute!important;inset:0;width:100%!important;height:100%!important;opacity:0;pointer-events:none;z-index:-1}
+.ags-b{display:flex;align-items:center;width:100%;min-width:0;font:inherit;font-size:14px;color:var(--txt);background-color:var(--deep);border:1px solid var(--line2);border-radius:var(--r);padding:8px 32px 8px 11px;min-height:40px;text-align:left;cursor:pointer;
+  transition:border-color var(--t-fast),box-shadow var(--t-fast);
+  background-image:linear-gradient(45deg,transparent 50%,var(--txt2) 50%),linear-gradient(135deg,var(--txt2) 50%,transparent 50%);background-position:calc(100% - 16px) 52%,calc(100% - 11px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.ags-b:hover{border-color:var(--rule)}
+.ags-b:focus-visible{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.ags-b:disabled{opacity:.55;cursor:not-allowed}
+.ags.open .ags-b{border-color:var(--gold);background-image:linear-gradient(135deg,transparent 50%,var(--txt2) 50%),linear-gradient(45deg,var(--txt2) 50%,transparent 50%)}
+.ags-v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ags-l{position:fixed;left:0;top:0;z-index:60;width:max-content;max-width:min(420px,calc(100vw - 16px));max-height:300px;overflow:auto;margin:0;padding:4px;list-style:none;
+  background:var(--s1);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:13.5px;outline:none}
+.ags-o{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 28px;border-radius:6px;cursor:pointer;white-space:nowrap;position:relative}
+.ags-o.on{background:var(--s3)}
+.ags-o[aria-selected="true"]{font-weight:600}
+.ags-o[aria-selected="true"]::before{content:"";position:absolute;left:10px;top:50%;width:9px;height:5px;margin-top:-4px;border-left:2px solid var(--txt);border-bottom:2px solid var(--txt);transform:rotate(-45deg)}
+.ags-o[aria-disabled="true"]{color:var(--txt3);cursor:default}
+.ags-g{padding:8px 10px 4px;font-size:11.5px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
+/* the page contexts that restyled their selects */
+.log-h .ags{width:auto}.log-h .ags-b{font-size:13px;background-color:var(--s2);padding:6px 30px 6px 8px;min-height:36px}
+.fgrid .ags-b{font-size:13.5px;background-color:var(--s2);padding:8px 32px 8px 10px}
+.pill .ags{width:auto}
+.pill .ags-b{border:0;background-color:transparent;min-height:34px;padding:4px 26px 4px 2px;font-weight:500;box-shadow:none;background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%}
+.pill .ags-b:focus-visible{box-shadow:none;outline:2px solid var(--gold);outline-offset:2px;border-radius:999px}
+.pill .ags.open .ags-b{border:0}
+@media (prefers-reduced-motion:no-preference){.ags-l{animation:ags-in var(--t-fast) var(--ease-std)}}
+@keyframes ags-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+/* a select that is never enhanced (no script) still shows a readable native list in the dark theme */
+:root[data-theme="dark"]{color-scheme:dark}
+option,optgroup{background-color:var(--s1);color:var(--txt)}

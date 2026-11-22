@@ -256,3 +256,69 @@ class FeatureTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ModelAtWorkTests(unittest.TestCase):
+    """Training shows the real search: the population box draws the candidates' recorded scores and elite (not a
+    picture), the model-at-work box the recorded audit with the evaluator's verdicts, and the weights box σ(θ)."""
+
+    RUN = {"id": "t", "kind": "training", "status": "running", "iterations": 4, "at": 2, "config": {"method": "cem", "population": 6},
+           "points": [{"i": 0, "train_mean": -0.5, "episodes": 6, "seconds": 1.0, "cpu_seconds": 0.97, "eps_per_sec": 60.0,
+                       "scores": [-1.0, -0.5, 0.9, 0.8, -1.0, 0.1], "elite": [2, 3], "mu": [3.0] * 10 + [-3.0] * 10, "dev": None},
+                      {"i": 1, "train_mean": -0.4, "episodes": 6, "seconds": 1.0, "cpu_seconds": 0.98, "eps_per_sec": 61.0,
+                       "scores": [-1.0, 0.7, 0.95, 0.85, -1.0, 0.2], "elite": [2, 3], "mu": [4.0] * 10 + [-4.0] * 10, "dev": None}],
+           "live": {"i": 1, "candidate": 2, "steps": 21, "reward": 0.41, "pages": {"fx": 2, "invoices": 1, "payments": 0, "ledger": 9},
+                    "rows": {"fx": 100, "invoices": 50, "payments": 0, "ledger": 450}, "issues": 3, "clean": False,
+                    "tp": 2, "fp": 1, "fn": 1, "findings": [
+                        {"type": "duplicate_invoice", "ids": ["INV-1", "INV-2"], "amount_minor": 123456, "currency": "KZT", "matched": True},
+                        {"type": "date_or_fx", "ids": ["INV-9"], "amount_minor": 500, "currency": "EUR", "matched": True},
+                        {"type": "period_classification", "ids": ["INV-7"], "amount_minor": 100, "currency": "EUR", "matched": False}]}}
+
+    def setUp(self):
+        self.app = tui.App(base=tempfile.mkdtemp(), colour=False, lang="en", scout=False)
+
+    def test_population_draws_the_recorded_scores_and_elite(self):
+        title, rows = self.app.population(self.RUN, 28)
+        self.assertIn("iteration 2", title)
+        dots = "".join(rows[:-3])
+        self.assertEqual(dots.count("●"), 2)               # exactly the recorded elite of the last iteration
+        self.assertEqual(dots.count("●") + dots.count("○"), 6)
+        self.assertIn("best +0.95", "".join(rows))
+        old = {k: v for k, v in self.RUN.items() if k != "points"} | {"points": [{"i": 0, "train_mean": 0.0}]}
+        self.assertEqual(self.app.population(old, 28)[1], [], "a run without recorded scores gets no invented population")
+
+    def test_model_at_work_shows_the_audit_and_the_weights(self):
+        text = "\n".join(self.app.model_at_work(self.RUN, 116, 14))
+        for needle in ("iteration 2 · candidate #3", "Ledger", "9 p · 450 rows", "not read", "✓ duplicates", "INV-1, INV-2",
+                       "1 234.56 KZT", "✗ periods", "2 correct", "1 false", "missed 1 of 3", "reward +0.41", "Weights", "0.98", "0.02"):
+            self.assertIn(needle, text)
+        narrow = "\n".join(self.app.model_at_work(self.RUN, 70, 14))
+        self.assertIn("reward +0.41", narrow)
+        self.assertNotIn("Weights", narrow)
+        clean = dict(self.RUN, live=dict(self.RUN["live"], findings=[], tp=0, fp=0, fn=0, issues=0))
+        self.assertIn("correctly submitted nothing", "\n".join(self.app.model_at_work(clean, 116, 14)))
+
+    def test_training_page_fits_with_the_new_boxes(self):
+        self.app.train_id = "t"
+        self.app.run = lambda run_id: self.RUN
+        self.app.current_training = lambda: self.RUN
+        self.app.tab = 1
+        for lang in ("en", "ru"):
+            self.app.lang = lang
+            for w, h in ((80, 24), (100, 30), (120, 40), (160, 50)):
+                lines = self.app.render(w, h)
+                self.assertLessEqual(len(lines), h, (lang, w, h))
+                self.assertTrue(all(tui.vlen(x) <= w for x in lines), (lang, w, h))
+        self.app.lang = "en"
+        text = tui.ESC.sub("", "\n".join(self.app.render(140, 50)))
+        self.assertIn("Model at work", text)
+        self.assertIn("CPU 97%", text.replace("98%", "97%"))
+
+    def test_the_loupe_hides_beside_content(self):
+        bd = tui.Backdrop(tui.Style(True))
+        empty = [""] * 12
+        self.assertTrue(bd.clear(empty, (40.0, 5.0, 3.0)))
+        busy = [""] * 5 + [" " * 44 + "0.27"] + [""] * 6
+        self.assertFalse(bd.clear(busy, (40.0, 5.0, 3.0)))
+        far = [""] * 5 + ["0.27"] + [""] * 6
+        self.assertTrue(bd.clear(far, (60.0, 5.0, 3.0)))

@@ -161,3 +161,44 @@ class RunAgentCliTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InterruptedRunTests(unittest.TestCase):
+    """A run whose process is gone (the app closed mid-run) reads as "interrupted" instead of spinning forever."""
+
+    def setUp(self):
+        import tempfile
+        self.base = tempfile.mkdtemp()
+
+    def make(self, rid, **extra):
+        import json
+        d = os.path.join(self.base, rid)
+        os.makedirs(d)
+        with open(os.path.join(d, "run.json"), "w", encoding="utf-8") as fh:
+            json.dump({"id": rid, "kind": "training", "status": "running", "status_note": "testing", "started": 1, **extra}, fh)
+        return d
+
+    def test_a_dead_process_means_interrupted(self):
+        import subprocess, sys
+        p = subprocess.Popen([sys.executable, "-c", "pass"])
+        p.wait()
+        self.make("train-dead", pid=p.pid)
+        r = harness.read_run("train-dead", self.base)
+        self.assertEqual(r["status"], "interrupted")
+        self.assertNotIn("status_note", r)
+        self.assertEqual([x["status"] for x in harness.list_runs(self.base)], ["interrupted"])
+
+    def test_a_live_process_keeps_running(self):
+        self.make("train-live", pid=os.getpid())
+        self.assertEqual(harness.read_run("train-live", self.base)["status"], "running")
+
+    def test_without_a_pid_only_a_stale_run_is_interrupted(self):
+        d = self.make("train-old")
+        self.assertEqual(harness.read_run("train-old", self.base)["status"], "running")
+        old = __import__("time").time() - harness.STALE_SECONDS - 5
+        os.utime(os.path.join(d, "run.json"), (old, old))
+        self.assertEqual(harness.read_run("train-old", self.base)["status"], "interrupted")
+
+    def test_finished_runs_are_untouched(self):
+        self.make("train-done", pid=999999999, **{"status": "done"})
+        self.assertEqual(harness.read_run("train-done", self.base)["status"], "done")

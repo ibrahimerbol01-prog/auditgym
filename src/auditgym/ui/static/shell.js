@@ -242,3 +242,207 @@
     if (e.key === "n" && !/\/runs\.html$/.test(location.pathname)) { e.preventDefault(); location.href = "/train.html"; }
   });
 })();
+
+// ---- "How it works": a short tour in plain words. Opens once on the first visit to Home (never under automation,
+// so tests and screenshots are not covered by it), and from the sidebar's «Как это работает» button on every page.
+(() => {
+  const STEPS = [
+    ["Что это", "AuditGym — тренажёр для ИИ-аудиторов. Каждый эпизод — книги вымышленной компании: счета, платежи, курсы валют и главная книга. В них спрятаны ошибки четырёх типов: дубли счетов, неверная разноска платежей, неверный курс или дата и проводка не в том периоде.", null],
+    ["Что делает агент", "Агент читает записи пятью инструментами только для чтения — до 100 шагов — и отправляет выводы: тип ошибки, ID записей, сумму и доказательства. Попробуйте сами на странице «Расследование».", ["/play.html", "Открыть «Расследование»"]],
+    ["Как считается награда", "Оценщик сверяет выводы со скрытым эталоном. Награда = 2·F1 − 1 − 0.002·шаги, от −1 до +1: все ошибки с доказательствами и ничего лишнего — около +1; пометить всё подряд — −1. Награда только за доказанное, а не за угаданное.", null],
+    ["Запуски", "Оцените любого агента на 10 отложенных эпизодах или на свежем тестовом наборе из 20: встроенные политики, готовые и обученные модели, локальные LLM или вашу программу. Каждый шаг можно переиграть.", ["/runs.html", "Открыть «Запуски»"]],
+    ["Обучение и Red team", "«Обучение»: небольшой аудитор учится на награде примерно за 30 секунд; итог проверяется на тестовом наборе и против контроля, где вместо награды шум. «Red team»: девять атак пытаются обмануть награду — ни одна не лучше молчания.", ["/train.html", "Открыть «Обучение»"]],
+    ["Режим жюри", "Та же проверка, что запускает жюри: python -m auditgym.verify — 85 проверок по пяти областям брифа, без сети, около 20 секунд. Результат — 100 из 100.", ["/report.html", "Открыть проверку"]],
+  ];
+  const KEY = "ag-tour-seen";
+  let box = null;
+  const open = () => {
+    if (box) return;
+    let i = 0;
+    box = document.createElement("dialog");
+    box.className = "tour";
+    box.setAttribute("aria-labelledby", "tour-h");
+    const n = document.createElement("p"); n.className = "tour-n";
+    const h = document.createElement("h2"); h.id = "tour-h";
+    const p = document.createElement("p"); p.className = "tour-p";
+    const go = document.createElement("a"); go.className = "tour-go";
+    const dots = document.createElement("div"); dots.className = "tour-dots"; dots.setAttribute("aria-hidden", "true");
+    const bar = document.createElement("div"); bar.className = "tour-bar";
+    const skip = document.createElement("button"); skip.type = "button"; skip.className = "btn ghost small"; skip.textContent = "Пропустить";
+    const back = document.createElement("button"); back.type = "button"; back.className = "btn outline small"; back.textContent = "Назад";
+    const next = document.createElement("button"); next.type = "button"; next.className = "btn primary small";
+    bar.append(skip, back, next);
+    const t = window.agT || ((x) => x);  // built after the page's translation pass: translate here
+    const show = () => {
+      const [title, text, link] = STEPS[i];
+      n.textContent = t(`Как это работает · ${i + 1} из ${STEPS.length}`);
+      h.textContent = t(title); p.textContent = t(text);
+      go.classList.toggle("hidden", !link);
+      if (link) { go.href = link[0]; go.textContent = t(link[1]) + " →"; }
+      dots.replaceChildren(...STEPS.map((_, k) => { const d = document.createElement("i"); if (k === i) d.className = "on"; return d; }));
+      back.disabled = i === 0;
+      next.textContent = t(i === STEPS.length - 1 ? "Готово" : "Далее");
+      skip.textContent = t("Пропустить"); back.textContent = t("Назад");
+    };
+    const done = () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } box.close(); };
+    skip.addEventListener("click", done);
+    back.addEventListener("click", () => { if (i > 0) { i--; show(); } });
+    next.addEventListener("click", () => { if (i < STEPS.length - 1) { i++; show(); } else done(); });
+    go.addEventListener("click", () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } });
+    box.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") next.click(); if (e.key === "ArrowLeft") back.click(); });
+    box.addEventListener("close", () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } box.remove(); box = null; });
+    box.addEventListener("click", (e) => { if (e.target === box) done(); });
+    box.append(n, h, p, go, dots, bar);
+    document.body.append(box);
+    show();
+    box.showModal();
+    next.focus();
+  };
+  window.agTour = open;
+  const foot = document.querySelector(".side-foot");
+  if (foot) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tour-open"; b.textContent = "Как это работает";
+    b.addEventListener("click", open);
+    foot.prepend(b);
+  }
+  let seen = false;
+  try { seen = localStorage.getItem(KEY) === "1"; } catch { seen = true; }
+  const home = location.pathname === "/" || /\/index\.html$/.test(location.pathname);
+  if (home && !seen && !navigator.webdriver) setTimeout(open, 400);
+})();
+
+// ---- custom option lists for every <select>. The native popup is drawn by the operating system in its own theme,
+// so with the app's dark theme (a page toggle, not the OS setting) it showed light text on a white list. Each select
+// stays in the page as the source of truth (pages keep reading and setting .value), hidden behind a button and a
+// listbox that follow the app's theme. Keyboard: Enter / Space / arrows open; arrows, Home, End, letters move;
+// Enter / Space pick; Escape and Tab close.
+(() => {
+  const P = HTMLSelectElement.prototype;
+  const DV = Object.getOwnPropertyDescriptor(P, "value"), DI = Object.getOwnPropertyDescriptor(P, "selectedIndex");
+  let uid = 0, open = null, follow = null;
+  const labelOf = (sel) => {
+    const a = sel.getAttribute("aria-label"); if (a) return a;
+    const l = sel.labels && sel.labels[0]; if (!l) return "";
+    let t = ""; for (const n of l.childNodes) if (n !== sel && n.nodeType === 3) t += n.nodeValue;
+    return t.trim() || [...l.childNodes].filter((n) => n !== sel && n.nodeType === 1 && !n.contains(sel)).map((n) => n.textContent).join(" ").trim();
+  };
+  function enhance(sel) {
+    if (sel.dataset.ags || sel.multiple || sel.size > 1) return;
+    sel.dataset.ags = "1";
+    const id = "ags" + (++uid);
+    const wrap = document.createElement("span"); wrap.className = "ags"; if (sel.getAttribute("style")) wrap.setAttribute("style", sel.getAttribute("style"));
+    const btn = document.createElement("button"); btn.type = "button"; btn.className = "ags-b"; btn.id = id + "-b";
+    btn.setAttribute("aria-haspopup", "listbox"); btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-controls", id + "-l");
+    const sr = document.createElement("span"); sr.className = "sr-only";
+    const val = document.createElement("span"); val.className = "ags-v";
+    btn.append(sr, val);
+    const list = document.createElement("ul"); list.className = "ags-l"; list.id = id + "-l"; list.setAttribute("role", "listbox"); list.tabIndex = -1; list.hidden = true;
+    sel.parentNode.insertBefore(wrap, sel); wrap.append(sel, btn, list);
+    sel.classList.add("ags-native"); sel.tabIndex = -1; sel.setAttribute("aria-hidden", "true");
+    let items = [], active = -1;
+    const opts = () => items.filter((x) => x.opt);
+    function sync() {
+      const o = sel.options[DI.get.call(sel)];
+      val.textContent = o ? o.textContent : "";
+      for (const x of opts()) x.li.setAttribute("aria-selected", String(x.opt === o));
+      btn.disabled = sel.disabled;
+    }
+    function build() {
+      const label = labelOf(sel); sr.textContent = label ? label + ": " : ""; list.setAttribute("aria-label", label || "");
+      list.replaceChildren(); items = [];
+      for (const node of sel.children) {
+        const group = node.tagName === "OPTGROUP" ? [...node.children] : [node];
+        if (node.tagName === "OPTGROUP") { const g = document.createElement("li"); g.className = "ags-g"; g.setAttribute("role", "presentation"); g.textContent = node.label; list.append(g); items.push({ li: g }); }
+        for (const o of group) {
+          if (o.tagName !== "OPTION" || o.hidden) continue;
+          const li = document.createElement("li"); li.className = "ags-o"; li.id = id + "-o" + items.length; li.setAttribute("role", "option");
+          li.textContent = o.textContent; if (o.disabled || (node.tagName === "OPTGROUP" && node.disabled)) li.setAttribute("aria-disabled", "true");
+          li.addEventListener("mousedown", (e) => e.preventDefault());
+          li.addEventListener("click", () => pick(o));
+          li.addEventListener("mousemove", () => setActive(opts().findIndex((x) => x.opt === o)));
+          list.append(li); items.push({ li, opt: o });
+        }
+      }
+      sync();
+    }
+    function setActive(i) {
+      const os = opts(); if (!os.length) return;
+      active = Math.max(0, Math.min(os.length - 1, i));
+      os.forEach((x, k) => x.li.classList.toggle("on", k === active));
+      list.setAttribute("aria-activedescendant", os[active].li.id);
+      const li = os[active].li, top = li.offsetTop, bottom = top + li.offsetHeight;
+      if (top < list.scrollTop) list.scrollTop = top; else if (bottom > list.scrollTop + list.clientHeight) list.scrollTop = bottom - list.clientHeight;
+    }
+    function move(from, step) {  // the next option that is not disabled
+      const os = opts(); for (let i = from + step; i >= 0 && i < os.length; i += step) if (!os[i].li.hasAttribute("aria-disabled")) return setActive(i);
+    }
+    function show() {
+      if (btn.disabled || !opts().length) return;
+      if (open && open !== hide) open();
+      list.hidden = false; btn.setAttribute("aria-expanded", "true"); wrap.classList.add("open");
+      place();
+      setActive(Math.max(0, opts().findIndex((x) => x.opt === sel.options[DI.get.call(sel)])));
+      list.focus({ preventScroll: true }); open = hide; follow = () => {
+        const r = btn.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > innerHeight) hide(false); else place();
+      };
+    }
+    function place() {  // fixed to the window, so a card with overflow:hidden never clips it; kept on screen
+      const anchor = (wrap.closest(".pill") || btn).getBoundingClientRect(), r = btn.getBoundingClientRect();
+      list.style.minWidth = Math.max(r.width, anchor.right - anchor.left) + "px";
+      const w = list.offsetWidth, h = list.offsetHeight, below = innerHeight - r.bottom - 8, above = r.top - 8;
+      const up = below < h + 4 && above > below;
+      list.style.left = Math.max(8, Math.min(anchor.left, innerWidth - w - 8)) + "px";
+      list.style.top = (up ? Math.max(8, r.top - h - 4) : r.bottom + 4) + "px";
+      list.style.maxHeight = Math.max(120, Math.min(300, (up ? above : below) - 4)) + "px";
+    }
+    function hide(focusBtn = true) {
+      if (list.hidden) return;
+      list.hidden = true; btn.setAttribute("aria-expanded", "false"); wrap.classList.remove("open"); list.removeAttribute("aria-activedescendant");
+      if (open === hide) open = follow = null;
+      if (focusBtn) btn.focus({ preventScroll: true });
+    }
+    function pick(o) {
+      if (!o || o.disabled) return;
+      const changed = !o.selected; DI.set.call(sel, o.index); sync(); hide();
+      if (changed) { sel.dispatchEvent(new Event("input", { bubbles: true })); sel.dispatchEvent(new Event("change", { bubbles: true })); }
+    }
+    let typed = "", typedAt = 0;
+    function typeahead(ch) {
+      const now = Date.now(); typed = (now - typedAt > 700 ? "" : typed) + ch.toLowerCase(); typedAt = now;
+      const os = opts(), start = typed.length > 1 ? active : active + 1;
+      for (let k = 0; k < os.length; k++) { const i = (Math.max(0, start) + k) % os.length; if (!os[i].li.hasAttribute("aria-disabled") && os[i].li.textContent.trim().toLowerCase().startsWith(typed)) return setActive(i); }
+    }
+    btn.addEventListener("click", () => (list.hidden ? show() : hide()));
+    btn.addEventListener("keydown", (e) => { if (["ArrowDown", "ArrowUp", "Enter", " "].includes(e.key)) { e.preventDefault(); show(); } });
+    list.addEventListener("keydown", (e) => {
+      const os = opts();
+      if (e.key === "ArrowDown") { e.preventDefault(); move(active, 1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); move(active, -1); }
+      else if (e.key === "Home") { e.preventDefault(); move(-1, 1); }
+      else if (e.key === "End") { e.preventDefault(); move(os.length, -1); }
+      else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (os[active]) pick(os[active].opt); }
+      else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); hide(); }
+      else if (e.key === "Tab") hide(false);
+      else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) typeahead(e.key);
+    });
+    list.addEventListener("blur", () => setTimeout(() => { if (!wrap.contains(document.activeElement)) hide(false); }, 0));
+    // pages set .value / .selectedIndex directly and add options later: follow both
+    Object.defineProperty(sel, "value", { configurable: true, get() { return DV.get.call(this); }, set(v) { DV.set.call(this, v); sync(); } });
+    Object.defineProperty(sel, "selectedIndex", { configurable: true, get() { return DI.get.call(this); }, set(v) { DI.set.call(this, v); sync(); } });
+    sel.addEventListener("change", sync);
+    sel.addEventListener("focus", () => btn.focus());  // a click on the <label> focuses the select: hand it to the button
+    new MutationObserver(build).observe(sel, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["disabled", "label", "hidden", "aria-label"] });
+    build();
+  }
+  const scan = (root) => { if (root.nodeType !== 1) return; if (root.tagName === "SELECT") enhance(root); else for (const s of root.querySelectorAll("select")) enhance(s); };
+  scan(document.body);
+  new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) scan(n); }).observe(document.body, { childList: true, subtree: true });
+  document.addEventListener("mousedown", (e) => { if (open && !e.target.closest(".ags.open")) open(false); });
+  // the open list is fixed to the window: it follows its button while the page scrolls and closes once the button is
+  // off screen; a resize closes it
+  addEventListener("scroll", (e) => { if (follow && !(e.target.closest && e.target.closest(".ags-l"))) follow(); }, true);
+  addEventListener("resize", () => { if (open) open(false); });
+  window.agSelect = enhance;
+})();

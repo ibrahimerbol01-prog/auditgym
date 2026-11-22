@@ -139,14 +139,13 @@ def check_separation(ep: Dict[str, Any]) -> List[str]:
 
 
 def check_cross_process(seed: int, config: Any) -> List[str]:
-    code = ("import json,sys,hashlib;from auditgym.gen.build import generate;"
-            "e=generate(%d, json.loads(sys.argv[1]));"
-            "print(hashlib.sha256(json.dumps(e,sort_keys=True).encode()).hexdigest())" % seed)
+    from . import crossproc  # the child's code; imported here so packaged builds include it
     src = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     outs = []
     for hs in ("1", "4242"):
         env = dict(os.environ, PYTHONHASHSEED=hs, PYTHONPATH=src)
-        r = subprocess.run([sys.executable, "-c", code, json.dumps(config)], capture_output=True, text=True, env=env, timeout=120)
+        r = subprocess.run([sys.executable, "-m", crossproc.__name__, str(seed), json.dumps(config)], capture_output=True,
+                           text=True, env=env, timeout=120)
         outs.append(r.stdout.strip())
     return [] if outs[0] and outs[0] == outs[1] else ["generation differs across processes"]
 

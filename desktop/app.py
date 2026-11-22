@@ -31,7 +31,7 @@ BASE = getattr(sys, "_MEIPASS", None) or os.path.dirname(os.path.dirname(os.path
 if not FROZEN:
     sys.path.insert(0, os.path.join(BASE, "src"))
 
-CHILD_MODULES = ("auditgym.eval.service",)
+CHILD_MODULES = ("auditgym.eval.service", "auditgym.verify", "auditgym.gen.crossproc")  # the evaluator; the official check (judge mode)
 
 
 def build_stamp() -> str:

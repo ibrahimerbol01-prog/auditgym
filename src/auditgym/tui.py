@@ -48,7 +48,7 @@ T: Dict[str, Dict[str, str]] = {
         "k_home": "↑↓ field   ←→ change   Enter start   Tab section   q quit",
         "busy": "Another training or evaluation is running: wait for it on the Training or Runs page.",
         "started": "Started {id}", "failed": "Could not start: {msg}",
-        "running": "running", "done": "done", "stopped": "stopped", "error": "error",
+        "running": "running", "done": "done", "stopped": "stopped", "error": "error", "interrupted": "interrupted",
         "iteration": "iteration {i}/{n}",
         "chart": "Reward on held-out dev episodes", "l_dev": "dev reward", "l_train": "population mean", "l_ref": "Reconciler",
         "best": "best (dev)", "last": "last (dev)", "vs": "vs Reconciler", "f1": "F1 (dev)", "fp": "false findings / ep.",
@@ -85,6 +85,15 @@ T: Dict[str, Dict[str, str]] = {
         "k_replay": "←→ episode   ↑↓ scroll   Esc back   Tab section   q quit",
         "c_tool": "tool", "c_args": "arguments", "c_ok": "result", "c_rows": "rows", "c_left": "left",
         "truncated": "out of steps", "steps_n": "steps", "replay_hint": "Enter: replay it step by step",
+        "pop_title": "Population · iteration {i}", "pop_best": "best {b} · worst {w}",
+        "pop_elite": "kept (elite {k})", "pop_top": "top {k}", "pop_rest": "dropped", "pop_wait": "first iteration: the candidates are playing",
+        "maw": "Model at work · iteration {i} · candidate #{c}", "maw_wait": "Model at work",
+        "t_fx": "FX rates", "t_invoices": "Invoices", "t_payments": "Payments", "t_ledger": "Ledger",
+        "pages": "{p} p · {r} rows", "not_read": "not read", "ev": "evaluator", "correct": "correct", "false": "false",
+        "missed_of": "missed {fn} of {n}", "clean_ok": "clean company: it correctly submitted nothing",
+        "nothing": "submitted nothing: only misses count", "more": "+{n} more", "first_it": "the first iteration is running…",
+        "weights": "Weights σ(θ) · the whole model", "cpu": "CPU {cpu}%", "eps_s": "{n}/s",
+        "w_labels": "read FX|read invoices|read payments|read ledger|FX pages|invoice pages|payment pages|ledger pages|check dups|check payments|check FX|check period|dup match|FX tolerance|FX local date|period local|strict alloc.|evidence|min amount|max findings",
     },
     "ru": {
         "home": "Главная", "train": "Обучение", "runs": "Запуски", "settings": "Настройки",
@@ -103,7 +112,7 @@ T: Dict[str, Dict[str, str]] = {
         "k_home": "↑↓ поле   ←→ выбор   Enter запуск   Tab раздел   q выход",
         "busy": "Уже идёт обучение или оценка: дождитесь его на странице «Обучение» или «Запуски».",
         "started": "Запущено: {id}", "failed": "Не удалось запустить: {msg}",
-        "running": "идёт", "done": "завершено", "stopped": "остановлено", "error": "ошибка",
+        "running": "идёт", "done": "завершено", "stopped": "остановлено", "error": "ошибка", "interrupted": "прервано",
         "iteration": "итерация {i}/{n}",
         "chart": "Награда на отложенных dev-эпизодах", "l_dev": "награда dev", "l_train": "среднее популяции", "l_ref": "Сверщик",
         "best": "лучшая (dev)", "last": "последняя (dev)", "vs": "против Сверщика", "f1": "F1 (dev)", "fp": "ложных находок / эп.",
@@ -140,6 +149,15 @@ T: Dict[str, Dict[str, str]] = {
         "k_replay": "←→ эпизод   ↑↓ прокрутка   Esc назад   Tab раздел   q выход",
         "c_tool": "инструмент", "c_args": "аргументы", "c_ok": "результат", "c_rows": "строк", "c_left": "ост.",
         "truncated": "шаги кончились", "steps_n": "шагов", "replay_hint": "Enter: повтор по шагам",
+        "pop_title": "Популяция · итерация {i}", "pop_best": "лучший {b} · худший {w}",
+        "pop_elite": "оставлены (элита {k})", "pop_top": "лучшие {k}", "pop_rest": "отброшены", "pop_wait": "первая итерация: кандидаты играют",
+        "maw": "Модель в работе · итерация {i} · кандидат №{c}", "maw_wait": "Модель в работе",
+        "t_fx": "Курсы", "t_invoices": "Счета", "t_payments": "Платежи", "t_ledger": "Книга",
+        "pages": "стр {p} · строк {r}", "not_read": "не читал", "ev": "оценщик", "correct": "верно", "false": "ложных",
+        "missed_of": "пропущено {fn} из {n}", "clean_ok": "чистая компания: модель верно ничего не отправила",
+        "nothing": "ничего не отправила: считаются только пропуски", "more": "ещё {n}", "first_it": "идёт первая итерация…",
+        "weights": "Веса σ(θ) · вся модель", "cpu": "CPU {cpu}%", "eps_s": "{n}/с",
+        "w_labels": "читать курсы|читать счета|читать платежи|читать книгу|стр. курсов|стр. счетов|стр. платежей|стр. книги|дубли|разноска|курсы|период|критерий дубля|допуск курса|дата курса|дата периода|строгая разн.|доказательства|порог суммы|предел находок",
     },
 }
 TABS = ("home", "train", "runs", "settings")
@@ -258,11 +276,23 @@ class Backdrop:
         cy = r + (math.sin(t * 0.31 + 1.3) + 1) / 2 * max(0.0, n - 1 - 2 * r)
         return cx, cy, r
 
-    def glyph(self, i: int, j: int, t: float, lens: Tuple[float, float, float]) -> Tuple[str, str]:
-        st = self.st
+    @staticmethod
+    def clear(lines: List[str], lens: Tuple[float, float, float], margin: int = 4) -> bool:
+        """True when the loupe's circle, plus a margin, covers only empty cells: its fake ledger figures must never
+        appear next to the real numbers of a page, where they would read as data."""
         cx, cy, r = lens
+        x0, x1 = int(cx - 2 * r) - margin, int(cx + 2 * r) + margin
+        for j in range(max(0, int(cy - r) - 1), min(len(lines), int(cy + r) + 2)):
+            cs = cells(lines[j])
+            if any(c != " " for c, _ in cs[max(0, x0): max(0, x1 + 1)]):
+                return False
+        return True
+
+    def glyph(self, i: int, j: int, t: float, lens: Optional[Tuple[float, float, float]]) -> Tuple[str, str]:
+        st = self.st
+        cx, cy, r = lens if lens else (-99.0, -99.0, 0.0)
         inside = lambda a, b: math.hypot((a - cx) / 2, b - cy) < r
-        if inside(i, j):
+        if lens and inside(i, j):
             dx, dy = (i - cx) / 2, j - cy
             if not all(inside(a, b) for a, b in ((i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1))):
                 tx, ty = -dy, dx
@@ -277,7 +307,7 @@ class Backdrop:
             return "·", st.FAR
         return " ", ""
 
-    def compose(self, line: str, j: int, n: int, w: int, t: float, lens: Tuple[float, float, float]) -> str:
+    def compose(self, line: str, j: int, n: int, w: int, t: float, lens: Optional[Tuple[float, float, float]]) -> str:
         cs = cells(line)
         cs += [(" ", "")] * (w - len(cs))
         cs = cs[:w]
@@ -819,6 +849,8 @@ class App:
         if self.st.R and self.backdrop:                    # the drifting backdrop behind the body (not with NO_COLOR)
             n = h - 4
             lens = self.bg.lens(w, n, now)
+            if not self.bg.clear(lines[2:h - 2], lens):    # the loupe never sits beside real numbers: it hides
+                lens = None
             lines[2:h - 2] = [self.bg.compose(line, j, n, w, now, lens) for j, line in enumerate(lines[2:h - 2])]
         keys = {"home": "k_home", "train": "k_train", "runs": "k_runs", "settings": "k_settings"}[TABS[self.tab]]
         if TABS[self.tab] == "train":
@@ -866,7 +898,7 @@ class App:
                 out[1 + k] = pad(out[1 + k], mark_w) + line
             out.append("")
         else:
-            out += ["", "  " + st.B + tx["ready"] + st.R, "  " + st.D + tx["sub"] + st.R, ""]
+            out += ["", "  " + st.B + tx["ready"] + st.R] + ["  " + st.D + x + st.R for x in wrap(tx["sub"], w - 4)[:2]] + [""]
         m = self.machine
         mline = tx["machine"].format(cpu=cores(m["cpu_count"], self.lang), ram=m["ram_gb"]) if m.get("cpu_count") and m.get("ram_gb") else tx["machine_q"]
         size_key = tuple(SIZES)[self.pick["size"]]
@@ -962,7 +994,10 @@ class App:
         state = (st.POS + spin + " " + tx["running"] + st.R) if status == "running" else \
             (st.POS + spin + " " + tx["testing_state"] + st.R) if testing else \
             ((st.NEG if status == "error" else st.D) + tx.get(status, status) + st.R)
-        right = f"{tx['iteration'].format(i=at, n=n)}  {state}"
+        lp = pts[-1] if pts else None
+        cpu = (min(100, round(100 * lp["cpu_seconds"] / lp["seconds"])) if lp and lp.get("cpu_seconds") is not None and lp.get("seconds") else None)
+        proc = (st.D + tx["cpu"].format(cpu=cpu) + " · " + st.R) if cpu is not None and status == "running" else ""
+        right = f"{proc}{tx['iteration'].format(i=at, n=n)}  {state}"
         out = ["", "  " + pad(st.B + title + st.R, max(0, w - 4 - vlen(right))) + right, ""]
 
         s = r.get("summary") or {}
@@ -979,9 +1014,9 @@ class App:
             (tx["f1"], f"{last_dev['f1']:.2f}" if last_dev else "—"),
             (tx["fp"], f"{last_dev['fp']:.1f}" if last_dev else "—"),
             (tx["steps"], f"{last_dev['steps']:.1f}" if last_dev else "—"),
-            (tx["episodes"], str(sum(p.get("episodes", 0) for p in pts))),
-            (tx["elapsed"], fmt_time(elapsed, tx)),
-            (tx["eta"], ("≈ " + fmt_time(eta, tx)) if eta is not None else "—"),
+            (tx["episodes"], str(sum(p.get("episodes", 0) for p in pts)) +
+             (st.D + " · " + tx["eps_s"].format(n=round(lp["eps_per_sec"])) + st.R if lp and lp.get("eps_per_sec") and status == "running" else "")),
+            (tx["elapsed"], fmt_time(elapsed, tx) + (st.D + " · " + tx["eta"] + " ≈ " + fmt_time(eta, tx) + st.R if eta is not None else "")),
         ]
         has_test = bool(r.get("test")) or testing
         test_title = tx["test_box"].format(n=(r.get("test") or {}).get("episodes") or 20)
@@ -989,14 +1024,20 @@ class App:
         side_w = 32
         kv_box = box(tx["train"], [pad(st.D + k + st.R, side_w - 4 - vlen(v)) + v for k, v in kv], side_w, st)
         test_box = box(test_title, self.test_body(r, side_w - 4), side_w, st) if has_test else []
+        pop_t, pop_rows = self.population(r, side_w - 4)
+        pop = box(pop_t, pop_rows, side_w, st) if pop_rows else []
         if w >= 90 and len(kv_box) + len(test_box) <= avail:
-            # wide: the numbers, the test and the population in a column beside the chart
+            # wide: the numbers, the test and the population in a column beside the chart; under both, the model at
+            # work (what the best candidate just did, and the weights) in the rows the column and a chart can spare
+            need = max(12, len(kv_box) + len(test_box) + (len(pop) if not has_test else 0))
+            maw = self.model_at_work(r, w - 4, min(14, avail - need - 1))
+            if maw:
+                avail -= len(maw) + 1
             cw = w - 4 - side_w - 2
             leg = self.legend(cw, ref)
-            left = self.chart_box(r, cw, max(4, min(16, h - 12, avail - 3 - len(leg))), leg)
+            left = self.chart_box(r, cw, max(4, min(24, h - 12, avail - 3 - len(leg))), leg)
             col = kv_box + test_box
-            pop = box(tx["population"], self.population(cfg, at, status, side_w - 4), side_w, st)
-            if len(col) + len(pop) <= max(len(left), avail):
+            if pop and len(col) + len(pop) <= max(len(left), avail):
                 col += pop
             if len(col) > len(left):                         # let the chart grow to the column's height
                 left = self.chart_box(r, cw, max(4, min(avail, len(col)) - 3 - len(leg)), leg)
@@ -1004,6 +1045,8 @@ class App:
             left += [" " * cw] * (rows - len(left))
             col += [""] * (rows - len(col))
             out += ["  " + a + "  " + b for a, b in zip(left, col)]
+            if maw:
+                out += [""] + ["  " + x for x in maw]
         else:
             # narrow or short: the test beside the chart (or under it), the numbers in two columns below
             ncol = 2 if w >= 60 else 1
@@ -1027,6 +1070,9 @@ class App:
             else:
                 out += ["  " + a for a in left + under]
             out += kv_rows
+            maw = self.model_at_work(r, w - 4, min(10, h - 3 - len(out) - 3))
+            if maw:
+                out += [""] + ["  " + x for x in maw]
         frac = min(1.0, at / n) if n else 0
         bw = w - 12
         fill = int(frac * bw)
@@ -1117,28 +1163,116 @@ class App:
             out.append(line)
         return out
 
-    def population(self, cfg: Dict[str, Any], at: int, status: str, w: int) -> List[str]:
-        """The CEM population in ASCII: every candidate of this iteration, the elite in blue. While training runs, a
-        cursor walks through the candidates as they are evaluated."""
+    def population(self, r: Dict[str, Any], w: int) -> Tuple[str, List[str]]:
+        """Every candidate of the last finished iteration on a reward line from −1 to +1, as the trainer scored them
+        (run.json points: scores, elite). Candidates in the same cell stack; the elite is blue. Runs recorded before
+        the trainer kept the scores have no population box."""
         st, tx = self.st, self.tx
-        p = int(cfg.get("population") or 16)
-        k = max(1, round(p * float(cfg.get("elite_frac") or 0.25)))
-        per = max(4, (w - 1) // 2)
-        t = time.monotonic() - self.t0
-        cur = int(t * 6) % (p + 4) if status == "running" else p
-        elite = set(sorted(range(p), key=lambda i: _h(i, at + 1))[:k])
-        cells = []
-        for i in range(p):
-            if i < cur:
-                cells.append(st.POS + st.B + "●" + st.R if i in elite else st.D + "○" + st.R)
-            elif i == cur:
-                cells.append(st.B + "⣾⣽⣻⢿⡿⣟⣯⣷"[int(t * 10) % 8] + st.R)
+        pts = [p for p in (r.get("points") or []) if isinstance(p.get("scores"), list) and p["scores"]]
+        if not pts:
+            return tx["population"], [st.D + tx["pop_wait"] + st.R] if r.get("status") == "running" and not r.get("points") else []
+        p = pts[-1]
+        sc, el = p["scores"], set(p.get("elite") or [])
+        cols: List[List[bool]] = [[] for _ in range(w)]
+        for k in sorted(range(len(sc)), key=lambda k: k not in el):          # the elite first in each cell
+            cols[max(0, min(w - 1, round((max(-1.0, min(1.0, sc[k])) + 1) / 2 * (w - 1))))].append(k in el)
+        def row(level: int) -> str:
+            out = []
+            for c in cols:
+                if len(c) > level:
+                    out.append((st.POS + st.B + "●" if c[level] else st.D + "○") + st.R)
+                else:
+                    out.append(" ")
+            return "".join(out)
+        axis = "−1" + "0".center(w - 4, "─") + "+1"
+        method = (r.get("config") or {}).get("method", "cem")
+        keep = tx["pop_elite" if method == "cem" else "pop_top"].format(k=len(el))
+        leg_a, leg_b = st.POS + "●" + st.R + st.D + " " + keep + st.R, st.D + "○ " + tx["pop_rest"] + st.R
+        legend = [leg_a + "  " + leg_b] if vlen(leg_a) + 2 + vlen(leg_b) <= w else [leg_a, leg_b]
+        rows = [row(2) if any(len(c) > 2 for c in cols) else None, row(1), row(0), st.D + axis + st.R,
+                st.D + tx["pop_best"].format(b=f"{max(sc):+.2f}", w=f"{min(sc):+.2f}") + st.R] + legend
+        return tx["pop_title"].format(i=p["i"] + 1), [x for x in rows if x is not None]
+
+    def model_at_work(self, r: Dict[str, Any], w: int, rows: int) -> List[str]:
+        """What the best candidate of the last iteration actually did (run.json "live": the trainer replays it on a
+        training episode and the evaluator scores it): pages read per table, every finding with ✓ / ✗, the
+        evaluator's line. Beside it, when there is room, the 20 weights of the model as σ(θ). At most `rows` lines."""
+        st, tx = self.st, self.tx
+        L = r.get("live")
+        pts = [p for p in (r.get("points") or []) if isinstance(p.get("mu"), list)]
+        if rows < 6 or (not L and not (r.get("status") == "running" and not r.get("points"))):
+            return []
+        ww = 2 * (16 + 7 + 5) + 2 + 4                                          # two columns of label, bar, value
+        show_w = bool(pts) and rows >= 12 and w - ww - 2 >= 46
+        aw = w - (ww + 2 if show_w else 0)
+        iw = aw - 4
+        body: List[str] = []
+        if not L:
+            body = [st.D + tx["first_it"] + st.R]
+            title = tx["maw_wait"]
+        elif L.get("error"):
+            body = [st.NEG + str(L["error"])[: iw] + st.R]
+            title = tx["maw_wait"]
+        else:
+            title = tx["maw"].format(i=L.get("i", 0) + 1, c=(L.get("candidate") or 0) + 1)
+            pages, nrows = L.get("pages") or {}, L.get("rows") or {}
+            mp = max([1] + [int(v or 0) for v in pages.values()])
+            half = (iw - 2) // 2
+            cells = []
+            for t in ("fx", "invoices", "payments", "ledger"):
+                pg = int(pages.get(t) or 0)
+                name = pad(tx["t_" + t], 9)
+                if pg:
+                    bw = 6
+                    k = max(1, round(bw * pg / mp))
+                    val = tx["pages"].format(p=pg, r=nrows.get(t, 0))
+                    cells.append(name + st.POS + "█" * k + st.R + st.D + "░" * (bw - k) + st.R + " " + st.D + val + st.R)
+                else:
+                    cells.append(st.D + name + "      " + " " + tx["not_read"] + st.R)
+            if half >= 36:
+                body += [pad(cells[0], half) + "  " + cells[1], pad(cells[2], half) + "  " + cells[3]]
             else:
-                cells.append(st.D + "·" + st.R)
-        rows = [" ".join(cells[j:j + per]) for j in range(0, p, per)]
-        method = cfg.get("method", "cem")
-        rows.append(st.D + (tx["elite"].format(k=k, p=p) if method == "cem" else tx["samples"].format(p=p)) + st.R)
-        return rows
+                body += cells
+            fs = L.get("findings") or []
+            issues = L.get("issues", (L.get("tp") or 0) + (L.get("fn") or 0))
+            room = max(1, rows - 2 - len(body) - 1)
+            if not fs:
+                body.append((st.POS if not issues else st.D) + (tx["clean_ok"] if not issues else tx["nothing"]) + st.R)
+            for f in fs[: room if len(fs) <= room else room - 1]:
+                ok = bool(f.get("matched"))
+                amt = f.get("amount_minor")
+                money = (f"{abs(amt) // 100:,}".replace(",", " ") + f".{abs(amt) % 100:02d} {f.get('currency') or ''}").strip() if isinstance(amt, int) else ""
+                head = (st.POS + "✓" if ok else st.NEG + "✗") + st.R + " " + pad((st.NEG if not ok else "") + tx.get(f.get("type"), f.get("type") or "—") + st.R, 13)
+                ids = ", ".join(f.get("ids") or [])
+                body.append(pad(head + st.D + clip(ids, max(4, iw - 15 - len(money) - 2)) + st.R, iw - len(money)) + st.D + money + st.R)
+            if len(fs) > room:
+                body.append(st.D + tx["more"].format(n=len(fs) - room + 1) + st.R)
+            ev1 = (st.B + tx["ev"] + ":" + st.R + " " + st.POS + f"{L.get('tp') or 0} {tx['correct']}" + st.R + st.D + " · " + st.R +
+                   (st.NEG if L.get("fp") else st.D) + f"{L.get('fp') or 0} {tx['false']}" + st.R + st.D + " · " +
+                   tx["missed_of"].format(fn=L.get("fn") or 0, n=issues) + st.R)
+            ev2 = st.D + f"{L.get('steps', 0)} {tx['steps_n']}" + st.R + "  " + st.B + tx["reward"] + " " + st.R + st.val(L.get("reward"))
+            if vlen(ev1) + 3 + vlen(ev2) <= iw:
+                body.append(ev1 + st.D + " · " + st.R + ev2)
+            else:                                   # the reward is the point: it never gets clipped away
+                if len(body) >= rows - 3 and len(body) > 3:
+                    body.pop()
+                body += [ev1, ev2]
+        body = body[: rows - 2]
+        if not show_w:
+            return box(title, body, aw, st)
+        left = box(title, body + [""] * (rows - 2 - len(body)), aw, st)
+        mu = pts[-1]["mu"]
+        labels = tx["w_labels"].split("|")
+        cells = []
+        for d, v in enumerate(mu[:20]):
+            sg = 1 / (1 + math.exp(-max(-60.0, min(60.0, float(v)))))
+            k = round(sg * 5)
+            cells.append(pad(st.D + clip(labels[d] if d < len(labels) else str(d), 15) + st.R, 16) +
+                         (st.POS if sg > 0.5 else st.D) + "█" * k + st.R + st.D + "░" * (5 - k) + st.R + f" {sg:.2f}")
+        wrows = [pad(cells[i], 28) + "  " + (cells[i + 10] if i + 10 < len(cells) else "") for i in range(10)]
+        right = box(tx["weights"], wrows + [""] * (rows - 2 - len(wrows)), ww, st)
+        right = (right + [" " * ww] * rows)[:rows]
+        return [a + "  " + b for a, b in zip(left, right)]
 
     def draw_runs(self, w: int, h: int) -> List[str]:
         if self.replay is not None:
