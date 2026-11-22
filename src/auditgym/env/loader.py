@@ -66,12 +66,3 @@ def load_episode_dir(ep_dir: str, with_private: bool = False) -> Dict[str, Any]:
                           "provenance": _load(os.path.join(prv, "provenance.json")),
                           "clean": read_tables(os.path.join(prv, "clean")) if os.path.isdir(os.path.join(prv, "clean")) else {}}
     return out
-
-
-def validate_episode_dir(ep_dir: str) -> None:
-    ep = load_episode_dir(ep_dir)
-    m = ep["public"]["manifest"]
-    for k, n in m["counts"].items():
-        got = len(ep["public"]["tables"][k])
-        if got != n:
-            raise ValueError(f"count mismatch for {k}")

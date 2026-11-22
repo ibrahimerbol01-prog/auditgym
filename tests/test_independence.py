@@ -1,5 +1,4 @@
 import ast
-import os
 import unittest
 
 import auditgym.eval.verify_independent as vi

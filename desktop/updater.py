@@ -18,7 +18,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import time
 import urllib.request
 
@@ -60,9 +59,9 @@ def _gh(*args: str) -> str | None:
     if not gh:
         return None
     try:
-        out = subprocess.run([gh, *args], capture_output=True, text=True, timeout=20,
+        out = subprocess.run([gh, *args], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=20,
                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-    except (OSError, subprocess.SubprocessError):
+    except (OSError, subprocess.SubprocessError, ValueError):   # gh prints UTF-8; Windows would decode it as cp1252
         return None
     return out.stdout.strip() if out.returncode == 0 else None
 

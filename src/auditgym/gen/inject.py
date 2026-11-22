@@ -12,7 +12,6 @@ import copy
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from ..money import convert
 from ..seeding import Rng
 from ..timeutil import tz
 from ..version import ENV_VERSION

@@ -5,7 +5,6 @@ reference through the organizer interface (``reference``), never through the age
 """
 from __future__ import annotations
 
-import json
 import time
 from typing import Any, Dict, List, Optional
 
@@ -146,9 +145,3 @@ def run_episode(env, policy: Policy, seed: Any = None, config: Any = None, optio
                                "reward": reward, "terminated": terminated, "truncated": truncated})
     return {"episode_id": eid, "return": total, "steps": steps, "terminated": terminated, "truncated": truncated,
             "final_observation": last, "seconds": time.perf_counter() - t0}
-
-
-def write_trajectories(path: str, rows: List[dict]) -> None:
-    with open(path, "w", encoding="utf-8") as fh:
-        for r in rows:
-            fh.write(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n")

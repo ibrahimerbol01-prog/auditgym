@@ -20,7 +20,6 @@ import urllib.request
 from typing import Any, Dict, List, Optional
 
 PRESETS = ["mixed", "simple", "interacting"]
-PRESET_RU = {"mixed": "смешанные", "simple": "простые", "interacting": "с взаимодействиями"}
 
 # Measured (Nov 21, Linux, Python 3.11, one process): a standard training, 1 920 training episodes plus 16 dev
 # checks of 10 episodes, takes 21-23 s, i.e. ~0.011 s per episode. 0.015 leaves room for slower laptops and
