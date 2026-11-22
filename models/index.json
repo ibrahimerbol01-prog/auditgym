@@ -1,0 +1,76 @@
+{
+ "version": 1,
+ "about": "Preloaded models for AuditGym. Auditors are training runs (20 numbers each plus their curves); local LLMs are pulled through Ollama.",
+ "models": [
+  {
+   "name": "auditor-cem",
+   "kind": "auditor",
+   "file": "auditor-cem.json",
+   "title": "General auditor (recommended)",
+   "description": "Trained with CEM on mixed companies. Reads every table and runs all four checks; matches the hand-written Reconciler on the test set.",
+   "bytes": 13648,
+   "sha256": "00d4967bc40ce87343aead15a01d713c27179035b3f208f3e47821db84fc47f2",
+   "dev_best": 0.9606,
+   "test_reward": 0.9605,
+   "test_f1": 1.0,
+   "env_version": "1.0.0"
+  },
+  {
+   "name": "auditor-cem-interacting",
+   "kind": "auditor",
+   "file": "auditor-cem-interacting.json",
+   "title": "Auditor for interacting errors",
+   "description": "Trained only on companies whose errors interact (the brief's hardest cases).",
+   "bytes": 13693,
+   "sha256": "68f93ec55f4586cfa20ddf46d8520435cfc0d4bd3177302c09dbd715fb09e328",
+   "dev_best": 0.892,
+   "test_reward": 0.6894,
+   "test_f1": 0.939,
+   "env_version": "1.0.0"
+  },
+  {
+   "name": "auditor-reinforce",
+   "kind": "auditor",
+   "file": "auditor-reinforce.json",
+   "title": "REINFORCE auditor",
+   "description": "Trained with the policy-gradient method instead of CEM: noisier, weaker. Useful to compare methods.",
+   "bytes": 13632,
+   "sha256": "573e38195deb854284c3e9551408a2b05534c47faf71859dea45c0ebc4aa8639",
+   "dev_best": 0.745,
+   "test_reward": 0.6562,
+   "test_f1": 0.8467,
+   "env_version": "1.0.0"
+  },
+  {
+   "name": "auditor-noise-control",
+   "kind": "auditor",
+   "file": "auditor-noise-control.json",
+   "title": "Untrained control (noise instead of reward)",
+   "description": "The same training, but the search saw random noise instead of the reward. Shows what the auditor does without learning: the gap to the others is what training adds.",
+   "bytes": 13753,
+   "sha256": "a8ce673baece2028deaf837115e82f14b37f5aafc73315df31be81b4c9647b05",
+   "dev_best": -0.1095,
+   "test_reward": -0.1366,
+   "test_f1": 0.538,
+   "env_version": "1.0.0"
+  },
+  {
+   "name": "qwen2.5-0.5b",
+   "kind": "ollama",
+   "ollama": "qwen2.5:0.5b",
+   "title": "Qwen2.5 0.5B (local LLM)",
+   "description": "Smallest local language model, about 400 MB, via Ollama. In the app: Runs → LLM or LLM + tools. Measured on the test set: −0.50 alone, −0.33 with tools.",
+   "download_mb": 398,
+   "licence": "Apache-2.0"
+  },
+  {
+   "name": "qwen2.5-1.5b",
+   "kind": "ollama",
+   "ollama": "qwen2.5:1.5b",
+   "title": "Qwen2.5 1.5B (local LLM)",
+   "description": "Small local language model, about 1 GB, via Ollama. Measured on the test set: −0.60 alone, −0.09 with tools (precision 0.88).",
+   "download_mb": 986,
+   "licence": "Apache-2.0"
+  }
+ ]
+}

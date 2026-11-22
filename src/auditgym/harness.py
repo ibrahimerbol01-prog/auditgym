@@ -370,7 +370,8 @@ def list_runs(base: Optional[str] = None) -> List[Dict[str, Any]]:
                 out.append({k: r.get(k) for k in ("id", "kind", "agent", "model", "method", "split", "mode", "status", "started",
                                                    "finished", "summary", "at", "iterations", "group", "model_run", "seed", "llm_model", "arena")}
                            | {"test_reward": ((r.get("test") or {}).get("auditor") or {}).get("reward"),
-                              "preset": ((r.get("config") or {}).get("dataset") or {}).get("preset")}
+                              "preset": ((r.get("config") or {}).get("dataset") or {}).get("preset"),
+                              "preloaded": (r.get("preloaded") or {}).get("title") if isinstance(r.get("preloaded"), dict) else None}
                            | {"episodes": len(r.get("episodes", [])),
                               "rewards": [(e.get("score") or {}).get("reward") for e in r.get("episodes", [])]})
     return sorted(out, key=lambda r: r.get("started") or 0, reverse=True)

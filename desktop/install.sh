@@ -12,7 +12,8 @@
 # the app to Applications (macOS) or to the desktop menu (Linux).
 # Options (environment variables): AUDITGYM_VERSION=v1.0.0 (default: latest release), AUDITGYM_NO_LAUNCH=1,
 # AUDITGYM_BRANCH=<branch> (the newest successful "Desktop app" CI build of that branch instead of a release),
-# AUDITGYM_ZIP=/path/AuditGym-<os>-<arch>.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
+# AUDITGYM_ZIP=/path/AuditGym-<os>-<arch>.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>,
+# AUDITGYM_MODELS=all|none|"auditor-cem ..." (preloaded models; asked interactively when unset).
 set -eu
 
 REPO="ibrahimerbol01-prog/auditgym"            # CI branch builds (AUDITGYM_BRANCH; artifacts need gh)
@@ -20,6 +21,19 @@ PUBLIC="$REPO"                                  # releases: the default, plain H
 VERSION="${AUDITGYM_VERSION:-latest}"
 
 say() { printf '%s\n' "AuditGym installer: $*"; }
+CLIBIN=""
+
+# Preloaded models (models/ in the repository): ready-made auditors, plus small local LLMs through Ollama.
+# AUDITGYM_MODELS=all | none | "name name" answers without a question; otherwise an interactive install asks.
+offer_models() {
+  [ -n "$CLIBIN" ] && [ -x "$CLIBIN" ] || return 0
+  case "${AUDITGYM_MODELS:-}" in
+    none|no|0) return 0 ;;
+    "") if [ -z "${CI:-}" ] && (: </dev/tty) 2>/dev/null; then "$CLIBIN" models --ask </dev/tty || true
+        else say "ready-made models: run  auditgym models  later"; fi ;;
+    *) "$CLIBIN" models install $AUDITGYM_MODELS || say "some models were not installed (see above)" ;;
+  esac
+}
 fail() { printf '%s\n' "AuditGym installer: error: $*" >&2; exit 1; }
 
 case "$(uname -s)" in
@@ -90,9 +104,11 @@ if [ "$OS" = macos ]; then
     rm -rf "$CLI"
     mv "$TMP/x/auditgym-cli" "$CLI"
     ln -sf "$CLI/auditgym" "$BIN/auditgym"
+    CLIBIN="$CLI/auditgym"
     say "terminal command: auditgym   (try: auditgym run-agent --policy reconcile)"
     case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc" ;; esac
   fi
+  offer_models
   say "it is not notarised: if macOS blocks it, right-click AuditGym in Applications and choose Open once"
   [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || open "$APP"
 else
@@ -105,6 +121,7 @@ else
   ln -sf "$DEST/AuditGym/AuditGym" "$BIN/auditgym-app"
   if [ -x "$DEST/AuditGym/cli/auditgym" ]; then
     ln -sf "$DEST/AuditGym/cli/auditgym" "$BIN/auditgym"
+    CLIBIN="$DEST/AuditGym/cli/auditgym"
     say "terminal command: auditgym   (try: auditgym run-agent --policy reconcile)"
   fi
   APPS="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
@@ -121,6 +138,7 @@ Categories=Education;Development;
 EOF
   say "installed $DEST/AuditGym (command: auditgym-app)"
   case ":$PATH:" in *":$BIN:"*) ;; *) say "add $BIN to your PATH to use the auditgym and auditgym-app commands" ;; esac
+  offer_models
   [ -n "${AUDITGYM_NO_LAUNCH:-}" ] || (nohup "$DEST/AuditGym/AuditGym" >/dev/null 2>&1 &)
 fi
 if [ -f "$TMP/BUILD.txt" ]; then say "version: $(cat "$TMP/BUILD.txt")"; elif [ -z "${AUDITGYM_ZIP:-}" ]; then say "version: $VERSION release"; fi

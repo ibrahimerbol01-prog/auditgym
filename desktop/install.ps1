@@ -11,7 +11,8 @@
 # SHA256SUMS.txt, adds a Start menu shortcut, puts the `auditgym` terminal command on the user PATH, and starts the app.
 # Options (environment variables): AUDITGYM_VERSION=v1.0.0 (default: latest release), AUDITGYM_NO_LAUNCH=1,
 # AUDITGYM_BRANCH=<branch> (the newest successful "Desktop app" CI build of that branch instead of a release),
-# AUDITGYM_ZIP=C:\path\AuditGym-windows-x64.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
+# AUDITGYM_ZIP=C:\path\AuditGym-windows-x64.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>,
+# AUDITGYM_MODELS=all|none|"auditor-cem ..." (preloaded models; asked interactively when unset).
 & {
     # Scoped to this block, so running the one-liner does not change the caller's session settings.
     $ErrorActionPreference = 'Stop'
@@ -101,6 +102,17 @@
         }
         if (Test-Path $stamp) { Say "version: $((Get-Content $stamp -Raw).Trim())" } elseif (-not $env:AUDITGYM_ZIP) { Say "version: $Version release" }
         Say 'the app is not code-signed: if SmartScreen asks, choose More info, then Run anyway'
+        # Preloaded models (models/ in the repository): ready-made auditors, plus small local LLMs through Ollama.
+        $cliExe = Join-Path $cliDir 'auditgym.exe'
+        if (Test-Path $cliExe) {
+            $choice = "$env:AUDITGYM_MODELS"
+            try {
+                if ($choice -in @('none', 'no', '0')) { }
+                elseif ($choice) { & $cliExe models install @($choice -split '\s+' | Where-Object { $_ }) }
+                elseif ($env:CI -or [Console]::IsInputRedirected) { Say 'ready-made models: run  auditgym models  later' }
+                else { & $cliExe models --ask }
+            } catch { Say "models: $($_.Exception.Message)" }
+        }
         if (-not $env:AUDITGYM_NO_LAUNCH) { Start-Process -FilePath $exe -WorkingDirectory $dest }
         Say 'done'
         # Success: do not leave a native command's exit code (e.g. "gh auth status" = 1 when logged out) behind
