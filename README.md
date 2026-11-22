@@ -180,11 +180,12 @@ iteration, and a fixed **test** set of 20 fresh episodes (5 clean, 5 interacting
 | What | Result on the 20 test episodes |
 |---|---|
 | **Trained auditor** (a 20-parameter rule policy, CEM on CPU, about 20 s), seeds 1–3 | dev from −0.65 / −0.60 / +0.01 to **+0.961**; test **+0.961**, F1 1.00 — equal to the Reconciler, not better |
+| **Control: the same training with noise instead of the reward** (brief §01), seeds 1–3 | test −0.14 / −0.13 / +0.48 against +0.961 with the reward: the gain comes from the reward, not from the search or the policy space |
 | **Red team** (§5) | 0 of 9 attacks beat silence; the RL attacker converges to silence |
 | **Local LLM, pure** (Qwen2.5 1.5B / 0.5B on CPU; the model picks every action) | −0.60 / −0.50: no error found before the 60 s limit |
 | **Local LLM + tools** (code reads and proposes, the strict rules re-check, the model decides) | −0.09 / −0.33 (1.5B: 22 of 79 errors, precision 0.88). Without the re-check the model alone scores −0.82: the gain comes mostly from the tools |
 
-To re-run all of it before a submission: `python train/campaign.py` (about 4 min, 19 checks; `report.json` untouched).
+To re-run all of it before a submission: `python train/campaign.py` (about 5 min, 20 checks; `report.json` untouched).
 
 ## 8. Honest limitations
 
@@ -212,7 +213,10 @@ AuditGym — воспроизводимая среда для обучения �
 **Проверка одной командой, без сети:** `docker run --rm --network none auditgym` (или
 `$env:PYTHONPATH="src"; python -m auditgym.verify` в Windows) → 100/100, 85 из 85 проверок. Где проверяется каждый
 критерий — §2, материалы из §09 брифа — §3, базовые политики жюри — §4. Приложение: `python -m auditgym.cli ui`
-(английский по умолчанию, русский в «Настройках»). Подробности и честные ограничения — в [DESIGN.md](DESIGN.md).
+(английский по умолчанию, русский в «Настройках»). Без Docker: `python -m pip install -e .` → `auditgym verify`
+(Python 3.11–3.13, ничего не скачивается). Необязательное обучение (§7) проверено контрольным сравнением: с наградой
++0.96 на тестовых эпизодах для трёх seed, с шумом вместо награды −0.14 / −0.13 / +0.48. Подробности и честные
+ограничения — в [DESIGN.md](DESIGN.md).
 
 ## License
 

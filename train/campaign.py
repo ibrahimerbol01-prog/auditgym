@@ -110,6 +110,20 @@ def main(argv: list[str] | None = None) -> int:
         vs = f", Reconciler {base_reward:+.3f}" if base_reward is not None else ""
         check(f"training: {name}", r.get("status") == "done" and gain >= 0,
               f"dev {s.get('dev_start'):+.3f} -> best {s.get('dev_best'):+.3f}{vs}  ({time.time() - t:.0f} s)")
+    # the controlled comparison (brief §01): same search, same episodes, noise instead of the reward
+    ctrl_cfg = plan[0][1]
+    t = time.time()
+    learner.train(config=ctrl_cfg, run_id="train-control-noise", base=runs, control="noise")
+    rc = harness.read_run("train-control-noise", runs) or {}
+    real = harness.read_run("train-" + plan[0][0].replace(" ", "-"), runs) or {}
+    cb, rb = (rc.get("summary") or {}).get("dev_best"), (real.get("summary") or {}).get("dev_best")
+    ct = ((rc.get("test") or {}).get("auditor") or {}).get("reward")
+    rt = ((real.get("test") or {}).get("auditor") or {}).get("reward")
+    results["training control noise"] = {"dev_best": cb, "test": ct, "real_dev_best": rb, "real_test": rt}
+    margin = 0.1 if args.quick else 0.5
+    check("training control: noise reward", None not in (cb, rb, ct, rt) and rb - cb >= margin and rt - ct >= margin,
+          f"best dev {cb:+.3f} vs {rb:+.3f} with the reward; test {ct:+.3f} vs {rt:+.3f}  ({time.time() - t:.0f} s)"
+          if None not in (cb, rb, ct, rt) else "missing results")
     if "cem seed 1 again" in curves:
         check("training is reproducible (same seed)", curves["cem seed 1"] == curves["cem seed 1 again"], "identical dev curves")
 

@@ -29,8 +29,12 @@ def main(argv=None) -> int:
     ap.add_argument("--episodes", type=int, default=4, help="episodes per candidate")
     ap.add_argument("--preset", choices=learner.PRESETS, default="mixed")
     ap.add_argument("--eval-every", type=int, default=2)
-    ap.add_argument("--out", default=os.path.join(HERE, "curve.json"))
+    ap.add_argument("--control", choices=("noise",), default=None,
+                    help="controlled comparison: the search sees seeded noise instead of the reward")
+    ap.add_argument("--out", default=None, help="default: train/curve.json (train/curve-noise.json with --control)")
     a = ap.parse_args(argv)
+    if a.out is None:  # a control run never overwrites the real learning curve the app shows
+        a.out = os.path.join(HERE, "curve-noise.json" if a.control else "curve.json")
     config = {"method": a.method, "iterations": a.iterations, "population": a.population,
               "episodes_per_candidate": a.episodes, "seed": a.seed, "dataset": {"preset": a.preset},
               "eval_every": a.eval_every}
@@ -45,7 +49,7 @@ def main(argv=None) -> int:
               f"  sigma {p['sigma']:.2f}  {p['eps_per_sec'] or 0:.0f} ep/s{dev}", flush=True)
 
     t0 = time.perf_counter()
-    run = learner.train(config, base=base, on_event=show)
+    run = learner.train(config, base=base, on_event=show, control=a.control)
     elapsed = time.perf_counter() - t0
     if run["status"] != "done":
         print(f"training {run['status']}: {run.get('error', '')}", file=sys.stderr)
@@ -56,7 +60,7 @@ def main(argv=None) -> int:
               for p in run["points"]]
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     harness._write_json(a.out, {"points": points, "config": run["config"], "run": run["id"],
-                                "env_version": run["env_version"],
+                                "env_version": run["env_version"], **({"control": "noise_reward"} if a.control else {}),
                                 "baselines": {k: v["reward"] for k, v in base_dev.items()},
                                 "best": {"i": run["best"]["i"], "dev": run["best"]["dev"], "describe": run["best"]["describe"]}})
     s = run["summary"]

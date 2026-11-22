@@ -515,9 +515,15 @@ def _mean(xs: Sequence[float]) -> float:
 def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None, base: Optional[str] = None,
           on_event: Optional[Callable[[Dict[str, Any]], None]] = None,
           stop: Optional[threading.Event] = None, configs: Optional[str] = None,
-          meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+          meta: Optional[Dict[str, Any]] = None, control: Optional[str] = None) -> Dict[str, Any]:
     """Run a training job, write ``<runs>/<run_id>/run.json`` after every iteration and return the run. At the
-    end, the best-on-dev parameters are measured once on the fresh test split (``run["test"]``)."""
+    end, the best-on-dev parameters are measured once on the fresh test split (``run["test"]``).
+
+    ``control="noise"`` is the controlled comparison of brief §01: the same episodes are played, but the search sees
+    seeded noise in place of the evaluator's reward. Dev and test are measured exactly as usual, so any gain of a real
+    training over this control comes from the reward signal, not from the search procedure or the policy space."""
+    if control not in (None, "noise"):
+        raise ValueError("control must be None or 'noise'")
     cfg = normalize_config(config)
     method, n_iter, pop = cfg["method"], cfg["iterations"], cfg["population"]
     n_eps, seed, preset = cfg["episodes_per_candidate"], cfg["seed"], cfg["dataset"]["preset"]
@@ -541,7 +547,7 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
                            "iterations": n_iter, "at": 0, "points": [],
                            "best": {"theta": None, "describe": None, "dev": None, "i": None},
                            "summary": {"dev_start": None, "dev_best": None, "dev_last": None, "episodes": 0, "seconds": 0.0},
-                           "seed": seed, **(meta or {})}
+                           "seed": seed, **({"control": "noise_reward"} if control else {}), **(meta or {})}
     harness._write_json(path, run)
 
     rng = Rng("auditgym-learner-search", seed, method)
@@ -570,6 +576,8 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
                 rs = [run_episode(env, AuditorPolicy(th), seed=s, config=c)["return"] for s, c in specs]
                 scores.append(_mean(rs))
             env.close()
+            if control == "noise" and not aborted:   # the control: the search never sees the reward
+                scores = [Rng("auditgym-learner-control", seed, i, k).random() * 2 - 1 for k in range(pop)]
             if aborted:
                 run["status"] = "stopped"
                 break

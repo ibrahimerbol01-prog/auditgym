@@ -167,3 +167,23 @@ class DevBaselines(unittest.TestCase):
         dev = learner.evaluate_dev(learner.ReconcilePolicy)
         self.assertEqual(res["baselines"]["reconcile"], dev["reward"], "the same number the dev curve is measured with")
         self.assertEqual(res["baselines"]["random"], -1.0)
+
+
+class NoiseRewardControl(unittest.TestCase):
+    """Brief §01: no improvement claim without a controlled comparison. The same search on the same episodes, with
+    seeded noise in place of the reward, must not learn; the real reward must."""
+
+    def test_learning_comes_from_the_reward(self):
+        cfg = {"iterations": 8, "population": 8, "episodes_per_candidate": 2, "eval_every": 2, "seed": 1}
+        base = tempfile.mkdtemp()
+        try:
+            real = learner.train(cfg, run_id="real", base=base)
+            ctrl = learner.train(cfg, run_id="ctrl", base=base, control="noise")
+        finally:
+            shutil.rmtree(base, ignore_errors=True)
+        self.assertEqual(ctrl["control"], "noise_reward")
+        self.assertNotIn("control", real)
+        self.assertGreaterEqual(real["summary"]["dev_best"] - ctrl["summary"]["dev_best"], 0.3)
+        self.assertGreaterEqual(real["test"]["auditor"]["reward"] - ctrl["test"]["auditor"]["reward"], 0.3)
+        with self.assertRaises(ValueError):
+            learner.train(cfg, base=tempfile.mkdtemp(), control="shuffle")
