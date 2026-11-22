@@ -54,12 +54,14 @@ no paid API, no network), and an improvement may only be shown as a **controlled
     candidate behaved alike), the best candidate of an iteration is carried into the next one (elitism), the elite
     is rank-weighted, and after 4 iterations without a better elite mean (+0.02) the search widens again
     (σ ≥ 1.5). Over seeds 1–12, Standard (30 × 16 × 4) went from 3 runs stuck at −0.13 on test (duplicates only)
-    to none (mean +0.92), and Deep (40 × 24 × 4) to +0.961 on every seed. REINFORCE is unchanged.
+    to none (mean +0.92), and Deep (40 × 24 × 4) to +0.961 on every seed (measured with that change alone). REINFORCE is
+    unchanged.
   - After that plateau, the next population also gets the champion with one check that cannot work turned fully
     on (every setting of its group, its mode setting both ways): a check needs its whole group at once (the payment
     check without the payments table finds nothing), which sampling around a decided mean almost never does. Standard
     over seeds 1–12: mean +0.95, 11 of 12 at +0.961; 25 seeds at 30 × 24 × 4: mean +0.959, 23 of 25 at +0.961,
-    no check left unlearned (`docs/reports/training_25_seeds.md`).
+    no check left unlearned (`docs/reports/training_25_seeds.md`). Deep (40 × 24 × 4), seeds 1–12: mean +0.959, 11 of
+    12 at +0.961; seed 5 ends at +0.939 (it misses 2 of the 20 smallest FX discrepancies).
 - `train/learn_rules.py --seed 1 [--iterations N] [--method cem]`: CLI wrapper; prints progress, writes
   `train/curve.json` = `{"points": [{"iteration": i, "train_reward": train_mean, "dev_reward": dev.reward, "steps": ...}], "config": ..., "baselines": ...}`
   (only points with a dev evaluation carry `dev_reward`).
