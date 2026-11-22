@@ -163,7 +163,7 @@ T: Dict[str, Dict[str, str]] = {
 TABS = ("home", "train", "runs", "settings")
 MODELS = ("cem", "reinforce")
 DATASETS = ("mixed", "simple", "interacting")
-SIZES = {"fast": {"iterations": 12, "population": 8, "episodes_per_candidate": 2},
+SIZES = {"fast": {"iterations": 16, "population": 16, "episodes_per_candidate": 2},
          "std": {"iterations": 30, "population": 16, "episodes_per_candidate": 4},
          "deep": {"iterations": 40, "population": 24, "episodes_per_candidate": 4}}
 POLICIES = ("reconcile", "random", "flag_all")
