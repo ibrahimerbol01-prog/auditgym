@@ -217,3 +217,23 @@ class InstalledAppPaths(unittest.TestCase):
             harness._DEV_BASE.clear()
             shutil.rmtree(base, ignore_errors=True)
             shutil.rmtree(cfg, ignore_errors=True)
+
+
+class WindowsFileRace(unittest.TestCase):
+    def test_a_run_being_replaced_is_read_after_a_retry_not_reported_missing(self):
+        base = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(base, "r1"))
+            harness._write_json(os.path.join(base, "r1", "run.json"), {"id": "r1"})
+            real, calls = open, []
+
+            def flaky(path, *a, **k):
+                if str(path).endswith("run.json") and len(calls) < 3:
+                    calls.append(1)
+                    raise PermissionError(13, "being replaced")
+                return real(path, *a, **k)
+            with mock.patch("builtins.open", flaky):
+                self.assertEqual(harness.read_run("r1", base), {"id": "r1"})
+            self.assertEqual(len(calls), 3)
+        finally:
+            shutil.rmtree(base, ignore_errors=True)
