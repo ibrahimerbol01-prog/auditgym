@@ -68,7 +68,9 @@ function validate(c) {
   for (const [k, [lo, hi, int]] of Object.entries(LIMITS)) {
     const v = c[k], ok = Number.isFinite(v) && v >= lo && v <= hi && (!int || Number.isInteger(v));
     $(FIELDS[k]).setAttribute("aria-invalid", String(!ok));
-    if (!ok) bad.push(`${FIELD_NAMES[k]}: ${int ? "целое " : ""}от ${String(lo).replace(".", ",")} до ${String(hi).replace(".", ",")}`);
+    const range = (int ? "целое число от {0} до {1}" : "число от {0} до {1}").replace("{0}", String(lo).replace(".", ",")).replace("{1}", String(hi).replace(".", ","));
+    const T = window.agT || String;   // pieces translated one by one: the joined line matches no single template
+    if (!ok) bad.push(`${T(FIELD_NAMES[k])}: ${T(range)}`);
   }
   return bad;
 }
@@ -118,7 +120,7 @@ function setStep(n) {
 }
 function leaveStep2() {
   const bad = validate(readCfg());
-  $("f-err").textContent = bad.length ? "Проверьте: " + bad.join("; ") + "." : "";
+  $("f-err").textContent = bad.length ? (window.agT || String)("Проверьте:") + " " + bad.join("; ") + "." : "";
   $("f-err").classList.toggle("hidden", !bad.length);
   return !bad.length;
 }
