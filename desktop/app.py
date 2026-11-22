@@ -21,6 +21,7 @@ import os
 import runpy
 import sys
 import threading
+import urllib.error
 import urllib.request
 
 APP_NAME = "AuditGym"
@@ -151,7 +152,15 @@ def smoke() -> int:
             f"run {run.get('status')}: error={run.get('error')!r} episodes={str(why)[:400]}"
         # Training: a tiny job through the app's API, the same path as the Training page (dev checks and the
         # final test measurement read the bundled configs, not a repository).
-        started = json.loads(_request(url + "api/train", {"iterations": 2, "population": 4, "episodes_per_candidate": 1})[1])
+        started = {}
+        for _ in range(100):  # the evaluation's thread may still be closing after its run reads "done": 409 busy
+            try:
+                started = json.loads(_request(url + "api/train", {"iterations": 2, "population": 4, "episodes_per_candidate": 1})[1])
+                break
+            except urllib.error.HTTPError as exc:
+                if exc.code != 409:
+                    raise
+                time.sleep(0.1)
         assert started.get("ok"), f"start training: {started}"
         for _ in range(1200):
             run = json.loads(_request(url + "api/runs/" + started["run"])[1]).get("run") or {}
