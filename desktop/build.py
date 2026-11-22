@@ -40,6 +40,20 @@ def _git(*args: str) -> str:
         return ""
 
 
+def package_modules() -> list[str]:
+    """Every module of src/auditgym, by name. `--collect-submodules auditgym` cannot be trusted here: PyInstaller runs
+    it before `--paths src` applies, so unless auditgym happens to be pip-installed in the build environment it finds
+    nothing, silently, and modules the app only starts as child processes (auditgym.verify for judge mode) are left
+    out of the build."""
+    src = os.path.join(ROOT, "src")
+    out = []
+    for dirpath, dirs, files in os.walk(os.path.join(src, "auditgym")):
+        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and os.path.exists(os.path.join(dirpath, d, "__init__.py")))
+        rel = os.path.relpath(dirpath, src).replace(os.sep, ".")
+        out += [rel if f == "__init__.py" else f"{rel}.{f[:-3]}" for f in sorted(files) if f.endswith(".py")]
+    return out
+
+
 def main() -> int:
     import PyInstaller.__main__
 
@@ -66,6 +80,7 @@ def main() -> int:
                 "--onedir",             # a folder starts fast and avoids re-extracting for the evaluator process
                 "--paths", os.path.join(ROOT, "src"), "--paths", os.path.join(ROOT, "desktop"),
                 "--collect-submodules", "auditgym",
+                *[x for m in package_modules() for x in ("--hidden-import", m)],
                 "--workpath", os.path.join(ROOT, "build", work), "--specpath", os.path.join(ROOT, "build", work)] + data
 
     # 1. the desktop app: no console window on Windows, an .app bundle on macOS
