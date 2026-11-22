@@ -37,6 +37,12 @@ def parse_stamp(stamp: str) -> tuple[str, str]:
     return (m.group(1), m.group(2)) if m else ("", "")
 
 
+def built_at(stamp: str) -> str:
+    """'... · built 2026-11-21 10:00 UTC' -> '2026-11-21T10:00Z' (comparable with GitHub's published_at); '' if absent."""
+    m = re.search(r"built (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) UTC", stamp or "")
+    return f"{m.group(1)}T{m.group(2)}Z" if m else ""
+
+
 def version_key(tag: str) -> tuple | None:
     """'v1.2.10' -> (1, 2, 10); None if the tag is not a plain release version."""
     m = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)", tag or "")
@@ -64,7 +70,8 @@ def _gh(*args: str) -> str | None:
 def latest_release() -> dict | None:
     d = _get_json(f"https://api.github.com/repos/{PUBLIC}/releases/latest")
     tag = d.get("tag_name") or ""
-    return {"version": tag, "url": d.get("html_url"), "notes": (d.get("body") or "")[:2000]} if version_key(tag) else None
+    return {"version": tag, "url": d.get("html_url"), "notes": (d.get("body") or "")[:2000],
+            "published": d.get("published_at") or ""} if version_key(tag) else None
 
 
 def latest_branch_build(branch: str) -> dict | None:
@@ -104,7 +111,14 @@ def check(stamp: str, force: bool = False) -> dict:
         else:
             build = latest_branch_build(ref)
             if build is None:
-                res["error"] = "branch builds update through the GitHub CLI: install gh and run gh auth login"
+                # No GitHub CLI (or no newer CI build): a test build moves to the public releases as soon as one is
+                # newer than itself, so nobody is stuck on a pre-release build; never offers an older release.
+                rel, when = latest_release(), built_at(stamp)
+                if rel and when and rel["published"][:16] > when[:16]:
+                    res.update(channel="release", latest=rel, available=True)
+                else:
+                    res["error"] = ("test build: it updates to the next release once one is published "
+                                    "(or to newer test builds through the GitHub CLI: gh auth login)")
             else:
                 res["latest"] = build
                 res["available"] = not build["sha"].startswith(sha)

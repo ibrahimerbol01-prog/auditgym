@@ -25,7 +25,8 @@ SEP = os.pathsep  # PyInstaller --add-data uses ';' on Windows and ':' elsewhere
 
 def build_stamp() -> str:
     """One line that says exactly what was built: tag or branch, commit, UTC time (CI sets the GITHUB_* values)."""
-    ref = os.environ.get("GITHUB_REF_NAME") or _git("rev-parse", "--abbrev-ref", "HEAD") or "local"
+    # a pull-request build is named after its branch (GITHUB_HEAD_REF), not GitHub's temporary "<n>/merge" ref
+    ref = os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME") or _git("rev-parse", "--abbrev-ref", "HEAD") or "local"
     sha = (os.environ.get("GITHUB_SHA") or _git("rev-parse", "HEAD") or "unknown")[:7]
     when = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     return f"{ref} @ {sha} · built {when}"
