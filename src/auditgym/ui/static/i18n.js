@@ -369,6 +369,8 @@
 "Проверка завершилась с кодом {0}.": "The check ended with exit code {0}.",
 "Эта страница открыта без сервера приложения: запустите auditgym ui.": "This page is open without the app's server: run auditgym ui.",
 "Сервер не отвечает.": "The server does not answer.",
+"Готовые модели": "Ready-made models",
+"{0} · {1} на тесте": "{0} · {1} on test",
 "Обученный аудитор": "Trained auditor",
 "Обученный аудитор · {0}": "Trained auditor · {0}",
 "Обучить аудитора": "Train the auditor",
@@ -928,6 +930,8 @@
 "тип эпизода — из публичной конфигурации; ответы не показываются. Строка открывает журнал шагов.": "episode type — from the public config; answers are not shown. A row opens the step log.",
 "типа ошибок": "error types",
 "то же в терминале": "same in the terminal",
+"то же в терминале:": "same in the terminal:",
+"Это делается на странице «Обучение»": "This is done on the Training page",
 "то же в терминале:\\n": "same in the terminal:\\n",
 "только CPU · без сети": "CPU only · offline",
 "только id документов": "document IDs only",
@@ -1003,7 +1007,7 @@
   };
   window.agT = tr;                                  // for page scripts that build text outside the DOM
 
-  const ATTRS = ["aria-label", "title", "placeholder", "alt"];
+  const ATTRS = ["aria-label", "title", "placeholder", "alt", "label"];  // label: <optgroup>/<option> headings
   const SKIP = new Set(["SCRIPT", "STYLE", "CODE", "PRE"]);
   const text = (n) => { if (n.parentNode && !SKIP.has(n.parentNode.nodeName)) { const v = n.nodeValue, t = tr(v); if (t !== v) n.nodeValue = t; } };
   const attrs = (el) => { for (const a of ATTRS) { const v = el.getAttribute && el.getAttribute(a); if (v) { const t = tr(v); if (t !== v) el.setAttribute(a, t); } } };

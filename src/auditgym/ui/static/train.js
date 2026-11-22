@@ -212,7 +212,7 @@ async function loadRecent() {
     const [st, cls] = STATUS[r.status] || [r.status, "dim"], s = r.summary || {};
     const at = Math.min(r.at ?? 0, r.iterations ?? Infinity);  // finished iterations
     return el("li", {}, el("button", { class: "run-i" + (r.id === runId ? " on" : ""), "aria-label": `Открыть обучение ${r.id}`, onclick: () => openRun(r.id) },
-      el("span", { class: "ri-top" }, el("b", {}, `Аудитор · ${METHODS[r.method] || r.method || r.model}`), el("span", { class: "badge " + cls }, st)),
+      el("span", { class: "ri-top" }, el("b", {}, r.preloaded ? r.preloaded : `Аудитор · ${METHODS[r.method] || r.method || r.model}`), el("span", { class: "badge " + cls }, st)),
       el("span", { class: "ri-sub" }, `${at}/${r.iterations ?? "?"} итер. · ${when(r.started)}`),
       el("span", { class: "ri-v mono" }, f2(s.dev_best))));
   }));

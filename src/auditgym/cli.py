@@ -3,6 +3,7 @@
   verify                      run the full verification (same as python -m auditgym.verify)
   demo                        play one episode with the reconciliation baseline, printed as text
   serve --stdio|--http        JSON front doors (HTTP binds to 127.0.0.1 only)
+  models [install NAME|all]   ready-made auditors (and local LLMs through Ollama) to evaluate without training
   ui [--port 8000]            thin local web UI (offline), including the run page (/runs.html)
   run-agent --policy NAME | --cmd "PROGRAM" [--split dev] [--limit N] [--pace S] [--plain]
                               run an agent on a split in closed mode; live trace in the terminal, saved for the app
@@ -186,6 +187,9 @@ def main(argv=None) -> int:
         # subcommand on current Python 3.11 releases, which broke the Docker image's default command.
         from .verify import main as vmain
         return vmain(argv[1:])
+    if argv[:1] == ["models"]:  # preloaded models: list, install, or ask (used by the installers)
+        from .models import main as mmain
+        return mmain(argv[1:])
     if not argv and sys.stdin.isatty() and sys.stdout.isatty():
         argv = ["tui"]  # `auditgym` on its own, in a terminal: the interactive terminal UI
     ap = argparse.ArgumentParser(prog="auditgym")
@@ -193,6 +197,7 @@ def main(argv=None) -> int:
     sub.add_parser("tui", help="interactive terminal UI (also: auditgym with no arguments)")
     sub.add_parser("verify").add_argument("rest", nargs=argparse.REMAINDER)
     sub.add_parser("demo")
+    sub.add_parser("models", help="list or download preloaded models: models [install NAME|all] [--ask]")
     s = sub.add_parser("serve")
     g = s.add_mutually_exclusive_group(required=True)
     g.add_argument("--stdio", action="store_true")

@@ -1,0 +1,755 @@
+{
+ "at": 30,
+ "best": {
+  "describe": [
+   {
+    "key": "read_fx",
+    "label": "Читать курсы валют",
+    "on": true,
+    "value": "да"
+   },
+   {
+    "key": "read_invoices",
+    "label": "Читать счета",
+    "on": true,
+    "value": "да"
+   },
+   {
+    "key": "read_payments",
+    "label": "Читать платежи",
+    "on": true,
+    "value": "да"
+   },
+   {
+    "key": "read_ledger",
+    "label": "Читать главную книгу",
+    "on": true,
+    "value": "да"
+   },
+   {
+    "key": "pages_fx",
+    "label": "Страниц курсов",
+    "on": true,
+    "value": "до 14"
+   },
+   {
+    "key": "pages_invoices",
+    "label": "Страниц счетов",
+    "on": true,
+    "value": "до 24"
+   },
+   {
+    "key": "pages_payments",
+    "label": "Страниц платежей",
+    "on": true,
+    "value": "все"
+   },
+   {
+    "key": "pages_ledger",
+    "label": "Страниц главной книги",
+    "on": true,
+    "value": "все"
+   },
+   {
+    "key": "check_duplicate",
+    "label": "Проверка дублей счетов",
+    "on": true,
+    "value": "вкл · полное совпадение строк"
+   },
+   {
+    "key": "check_payment",
+    "label": "Проверка разноски платежей",
+    "on": true,
+    "value": "вкл · только по ссылке на один счёт"
+   },
+   {
+    "key": "check_fx",
+    "label": "Проверка курсов",
+    "on": true,
+    "value": "вкл · допуск 4341 · местное время"
+   },
+   {
+    "key": "check_period",
+    "label": "Проверка периода",
+    "on": true,
+    "value": "вкл · местное время"
+   },
+   {
+    "key": "dup_match",
+    "label": "Критерий дубля",
+    "on": true,
+    "value": "полное совпадение строк"
+   },
+   {
+    "key": "fx_tolerance",
+    "label": "Допуск по курсу",
+    "on": true,
+    "value": "4341 мин. ед."
+   },
+   {
+    "key": "fx_local_time",
+    "label": "Дата курса",
+    "on": true,
+    "value": "местное время"
+   },
+   {
+    "key": "period_local_time",
+    "label": "Дата для периода",
+    "on": true,
+    "value": "местное время"
+   },
+   {
+    "key": "payment_strict",
+    "label": "Строгость разноски",
+    "on": true,
+    "value": "строго"
+   },
+   {
+    "key": "evidence_rich",
+    "label": "Доказательства",
+    "on": true,
+    "value": "строка книги и курс"
+   },
+   {
+    "key": "min_amount",
+    "label": "Порог суммы",
+    "on": true,
+    "value": "от 2970 мин. ед."
+   },
+   {
+    "key": "max_findings",
+    "label": "Предел находок",
+    "on": true,
+    "value": "24"
+   }
+  ],
+  "dev": {
+   "episodes": 10,
+   "f1": 1.0,
+   "fp": 0.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "reward": 0.9606,
+   "steps": 20.7
+  },
+  "i": 24,
+  "theta": [
+   1.3276,
+   3.9619,
+   1.0017,
+   2.2431,
+   -0.2308,
+   1.3486,
+   3.5639,
+   4.0059,
+   5.5522,
+   0.9832,
+   2.3285,
+   1.9176,
+   3.42,
+   0.4317,
+   1.5316,
+   2.4964,
+   1.6309,
+   5.4547,
+   0.3179,
+   1.3144
+  ]
+ },
+ "config": {
+  "dataset": {
+   "preset": "mixed"
+  },
+  "elite_frac": 0.25,
+  "episodes_per_candidate": 4,
+  "eval_every": 2,
+  "iterations": 30,
+  "method": "cem",
+  "pace": 0.0,
+  "population": 16,
+  "seed": 1
+ },
+ "env_version": "1.0.0",
+ "finished": 1795332887.5891304,
+ "id": "preloaded-auditor-cem",
+ "iterations": 30,
+ "kind": "training",
+ "method": "cem",
+ "model": "auditor-cem",
+ "points": [
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.2326,
+    "fp": 3.5,
+    "precision": 0.2222,
+    "recall": 0.2439,
+    "reward": -0.6451,
+    "steps": 18.4
+   },
+   "episodes": 64,
+   "eps_per_sec": 83.1,
+   "i": 0,
+   "seconds": 1.479,
+   "sigma": 2.1866,
+   "train_best": 0.1839,
+   "train_elite": -0.1804,
+   "train_mean": -0.4459
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 86.3,
+   "i": 1,
+   "seconds": 0.742,
+   "sigma": 2.3101,
+   "train_best": -0.2835,
+   "train_elite": -0.3849,
+   "train_mean": -0.5534
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.4634,
+    "fp": 2.2,
+    "precision": 0.4634,
+    "recall": 0.4634,
+    "reward": -0.257,
+    "steps": 18.2
+   },
+   "episodes": 64,
+   "eps_per_sec": 154.1,
+   "i": 2,
+   "seconds": 0.5,
+   "sigma": 2.4679,
+   "train_best": 0.0351,
+   "train_elite": -0.1467,
+   "train_mean": -0.4342
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 126.5,
+   "i": 3,
+   "seconds": 0.506,
+   "sigma": 2.5232,
+   "train_best": 0.24,
+   "train_elite": 0.0301,
+   "train_mean": -0.5966
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.7778,
+    "fp": 0.3,
+    "precision": 0.9032,
+    "recall": 0.6829,
+    "reward": 0.5823,
+    "steps": 18.2
+   },
+   "episodes": 64,
+   "eps_per_sec": 101.6,
+   "i": 4,
+   "seconds": 0.701,
+   "sigma": 2.6821,
+   "train_best": 0.1056,
+   "train_elite": 0.0713,
+   "train_mean": -0.3046
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 129.4,
+   "i": 5,
+   "seconds": 0.495,
+   "sigma": 2.6595,
+   "train_best": 0.2562,
+   "train_elite": 0.1287,
+   "train_mean": -0.3635
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.7778,
+    "fp": 0.3,
+    "precision": 0.9032,
+    "recall": 0.6829,
+    "reward": 0.5823,
+    "steps": 18.2
+   },
+   "episodes": 64,
+   "eps_per_sec": 88.0,
+   "i": 6,
+   "seconds": 0.804,
+   "sigma": 2.6764,
+   "train_best": 0.2948,
+   "train_elite": -0.0702,
+   "train_mean": -0.4673
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 131.3,
+   "i": 7,
+   "seconds": 0.487,
+   "sigma": 2.695,
+   "train_best": 0.1159,
+   "train_elite": -0.255,
+   "train_mean": -0.4824
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.3922,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.2439,
+    "reward": 0.0005,
+    "steps": 7.8
+   },
+   "episodes": 64,
+   "eps_per_sec": 129.9,
+   "i": 8,
+   "seconds": 0.54,
+   "sigma": 2.6717,
+   "train_best": 0.6627,
+   "train_elite": 0.6495,
+   "train_mean": -0.0503
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 120.8,
+   "i": 9,
+   "seconds": 0.53,
+   "sigma": 2.6623,
+   "train_best": 0.4097,
+   "train_elite": 0.4053,
+   "train_mean": 0.0615
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.3922,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.2439,
+    "reward": 0.0093,
+    "steps": 2.9
+   },
+   "episodes": 64,
+   "eps_per_sec": 99.9,
+   "i": 10,
+   "seconds": 0.688,
+   "sigma": 2.6172,
+   "train_best": 0.5251,
+   "train_elite": 0.2697,
+   "train_mean": -0.0832
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 99.2,
+   "i": 11,
+   "seconds": 0.645,
+   "sigma": 2.645,
+   "train_best": 0.7035,
+   "train_elite": 0.5394,
+   "train_mean": 0.2906
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.5357,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.3659,
+    "reward": 0.2271,
+    "steps": 14.1
+   },
+   "episodes": 64,
+   "eps_per_sec": 86.8,
+   "i": 12,
+   "seconds": 0.805,
+   "sigma": 2.5979,
+   "train_best": 0.3742,
+   "train_elite": 0.1844,
+   "train_mean": -0.2031
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 122.4,
+   "i": 13,
+   "seconds": 0.523,
+   "sigma": 2.5143,
+   "train_best": 0.4683,
+   "train_elite": 0.2526,
+   "train_mean": -0.2573
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.8611,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.7561,
+    "reward": 0.7071,
+    "steps": 19.5
+   },
+   "episodes": 64,
+   "eps_per_sec": 114.8,
+   "i": 14,
+   "seconds": 0.632,
+   "sigma": 2.4879,
+   "train_best": 0.8286,
+   "train_elite": 0.6466,
+   "train_mean": 0.1116
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 94.3,
+   "i": 15,
+   "seconds": 0.679,
+   "sigma": 2.4336,
+   "train_best": 0.4095,
+   "train_elite": 0.0123,
+   "train_mean": -0.3096
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.8611,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.7561,
+    "reward": 0.7073,
+    "steps": 19.4
+   },
+   "episodes": 64,
+   "eps_per_sec": 94.1,
+   "i": 16,
+   "seconds": 0.804,
+   "sigma": 2.4268,
+   "train_best": 0.6336,
+   "train_elite": 0.5705,
+   "train_mean": 0.1953
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 82.6,
+   "i": 17,
+   "seconds": 0.775,
+   "sigma": 2.4376,
+   "train_best": 0.625,
+   "train_elite": 0.4483,
+   "train_mean": -0.2988
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.9877,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.9756,
+    "reward": 0.932,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 80.3,
+   "i": 18,
+   "seconds": 0.893,
+   "sigma": 2.3685,
+   "train_best": 0.866,
+   "train_elite": 0.6799,
+   "train_mean": 0.2473
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 67.0,
+   "i": 19,
+   "seconds": 0.956,
+   "sigma": 2.387,
+   "train_best": 0.9615,
+   "train_elite": 0.795,
+   "train_mean": 0.4273
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.9877,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.9756,
+    "reward": 0.932,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 90.2,
+   "i": 20,
+   "seconds": 0.788,
+   "sigma": 2.2864,
+   "train_best": 0.8531,
+   "train_elite": 0.6209,
+   "train_mean": 0.2307
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 60.4,
+   "i": 21,
+   "seconds": 1.06,
+   "sigma": 2.2558,
+   "train_best": 0.7806,
+   "train_elite": 0.6345,
+   "train_mean": 0.0742
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.9877,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.9756,
+    "reward": 0.932,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 106.0,
+   "i": 22,
+   "seconds": 0.686,
+   "sigma": 2.199,
+   "train_best": 0.9605,
+   "train_elite": 0.7722,
+   "train_mean": 0.2893
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 93.8,
+   "i": 23,
+   "seconds": 0.682,
+   "sigma": 2.1536,
+   "train_best": 0.9565,
+   "train_elite": 0.8624,
+   "train_mean": 0.4111
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 1.0,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "reward": 0.9606,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 81.8,
+   "i": 24,
+   "seconds": 0.862,
+   "sigma": 2.1477,
+   "train_best": 0.9565,
+   "train_elite": 0.7311,
+   "train_mean": 0.2188
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 77.4,
+   "i": 25,
+   "seconds": 0.827,
+   "sigma": 2.0477,
+   "train_best": 0.9316,
+   "train_elite": 0.8986,
+   "train_mean": 0.2586
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.9877,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.9756,
+    "reward": 0.932,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 67.3,
+   "i": 26,
+   "seconds": 1.091,
+   "sigma": 1.9676,
+   "train_best": 0.954,
+   "train_elite": 0.799,
+   "train_mean": 0.3828
+  },
+  {
+   "dev": null,
+   "episodes": 64,
+   "eps_per_sec": 61.4,
+   "i": 27,
+   "seconds": 1.043,
+   "sigma": 1.8891,
+   "train_best": 0.9079,
+   "train_elite": 0.9079,
+   "train_mean": 0.6444
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.9877,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.9756,
+    "reward": 0.932,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 67.9,
+   "i": 28,
+   "seconds": 1.023,
+   "sigma": 1.7313,
+   "train_best": 0.961,
+   "train_elite": 0.9335,
+   "train_mean": 0.6877
+  },
+  {
+   "dev": {
+    "episodes": 10,
+    "f1": 0.9877,
+    "fp": 0.0,
+    "precision": 1.0,
+    "recall": 0.9756,
+    "reward": 0.932,
+    "steps": 20.7
+   },
+   "episodes": 64,
+   "eps_per_sec": 86.6,
+   "i": 29,
+   "seconds": 0.818,
+   "sigma": 1.6335,
+   "train_best": 0.9585,
+   "train_elite": 0.9585,
+   "train_mean": 0.7821
+  }
+ ],
+ "preloaded": {
+  "name": "auditor-cem",
+  "title": "General auditor (recommended)"
+ },
+ "seed": 1,
+ "started": 1795332861.5143847,
+ "status": "done",
+ "summary": {
+  "dev_best": 0.9606,
+  "dev_last": 0.932,
+  "dev_start": -0.6451,
+  "episodes": 1920,
+  "seconds": 23.06
+ },
+ "test": {
+  "analysis": {
+   "by_kind": {
+    "clean": {
+     "episodes": 5,
+     "reward": 0.962
+    },
+    "errors": {
+     "episodes": 10,
+     "reward": 0.9618
+    },
+    "interacting": {
+     "episodes": 5,
+     "reward": 0.9564
+    }
+   },
+   "by_type": {
+    "date_or_fx": {
+     "found": 20,
+     "issues": 20
+    },
+    "duplicate_invoice": {
+     "found": 14,
+     "issues": 14
+    },
+    "payment_allocation": {
+     "found": 21,
+     "issues": 21
+    },
+    "period_classification": {
+     "found": 24,
+     "issues": 24
+    }
+   },
+   "episodes": 20,
+   "false_by_type": {}
+  },
+  "auditor": {
+   "episodes": 20,
+   "f1": 1.0,
+   "fp": 0.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "reward": 0.9605,
+   "steps": 20.75
+  },
+  "episodes": 20,
+  "random": {
+   "episodes": 20,
+   "f1": 0.0,
+   "fp": 2.85,
+   "precision": 0.0,
+   "recall": 0.0,
+   "reward": -1.0,
+   "steps": 9.25
+  },
+  "reconcile": {
+   "episodes": 20,
+   "f1": 1.0,
+   "fp": 0.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "reward": 0.9605,
+   "steps": 20.75
+  },
+  "reconcile_analysis": {
+   "by_kind": {
+    "clean": {
+     "episodes": 5,
+     "reward": 0.962
+    },
+    "errors": {
+     "episodes": 10,
+     "reward": 0.9618
+    },
+    "interacting": {
+     "episodes": 5,
+     "reward": 0.9564
+    }
+   },
+   "by_type": {
+    "date_or_fx": {
+     "found": 20,
+     "issues": 20
+    },
+    "duplicate_invoice": {
+     "found": 14,
+     "issues": 14
+    },
+    "payment_allocation": {
+     "found": 21,
+     "issues": 21
+    },
+    "period_classification": {
+     "found": 24,
+     "issues": 24
+    }
+   },
+   "episodes": 20,
+   "false_by_type": {}
+  }
+ }
+}
