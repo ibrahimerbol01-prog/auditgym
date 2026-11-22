@@ -1161,6 +1161,19 @@ main.settings h1{margin:0 0 4px;font-size:28px;font-weight:600;letter-spacing:-.
 .kbd-help dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;font-size:13.5px;align-items:center}
 .kbd-help dt{display:flex;gap:4px}.kbd-help dd{margin:0;color:var(--txt2)}
 .kbd-help kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--s2);color:var(--txt)}
+.tour{border:1px solid var(--line2);border-radius:var(--r);background:var(--s1);color:var(--txt);padding:22px 24px 18px;width:min(520px,calc(100vw - 32px));box-shadow:var(--shadow)}
+.tour::backdrop{background:rgba(0,0,0,.4)}
+.tour-n{margin:0;font:12px var(--mono);color:var(--txt2)}
+.tour h2{margin:8px 0 10px;font-size:22px;font-weight:600;letter-spacing:-.01em}
+.tour-p{margin:0;color:var(--txt2);font-size:15px;line-height:1.55}
+.tour-go{display:inline-block;margin-top:12px;font-size:14px;color:var(--txt);text-decoration:underline;text-underline-offset:3px}
+.tour-dots{display:flex;gap:6px;margin:18px 0 14px}
+.tour-dots i{width:18px;height:4px;border-radius:2px;background:var(--line2)}
+.tour-dots i.on{background:var(--txt)}
+.tour-bar{display:flex;gap:8px;justify-content:flex-end}
+.tour-bar .btn.ghost{margin-right:auto}
+.tour-open{display:block;width:100%;margin:0 0 8px;padding:6px 8px;border:1px dashed var(--line2);border-radius:8px;background:none;color:var(--txt2);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.tour-open:hover{color:var(--txt);border-color:var(--txt2)}
 
 /* ---------- red team arena ---------- */
 main.arena{display:flex;flex-direction:column;gap:16px;padding-top:32px;padding-bottom:64px}

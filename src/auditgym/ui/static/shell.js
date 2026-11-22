@@ -242,3 +242,72 @@
     if (e.key === "n" && !/\/runs\.html$/.test(location.pathname)) { e.preventDefault(); location.href = "/train.html"; }
   });
 })();
+
+// ---- "How it works": a short tour in plain words. Opens once on the first visit to Home (never under automation,
+// so tests and screenshots are not covered by it), and from the sidebar's «Как это работает» button on every page.
+(() => {
+  const STEPS = [
+    ["Что это", "AuditGym — тренажёр для ИИ-аудиторов. Каждый эпизод — книги вымышленной компании: счета, платежи, курсы валют и главная книга. В них спрятаны ошибки четырёх типов: дубли счетов, неверная разноска платежей, неверный курс или дата и проводка не в том периоде.", null],
+    ["Что делает агент", "Агент читает записи пятью инструментами только для чтения — до 100 шагов — и отправляет выводы: тип ошибки, ID записей, сумму и доказательства. Попробуйте сами на странице «Расследование».", ["/play.html", "Открыть «Расследование»"]],
+    ["Как считается награда", "Оценщик сверяет выводы со скрытым эталоном. Награда = 2·F1 − 1 − 0.002·шаги, от −1 до +1: все ошибки с доказательствами и ничего лишнего — около +1; пометить всё подряд — −1. Награда только за доказанное, а не за угаданное.", null],
+    ["Запуски", "Оцените любого агента на 10 отложенных эпизодах или на свежем тестовом наборе из 20: встроенные политики, готовые и обученные модели, локальные LLM или вашу программу. Каждый шаг можно переиграть.", ["/runs.html", "Открыть «Запуски»"]],
+    ["Обучение и Red team", "«Обучение»: небольшой аудитор учится на награде примерно за 30 секунд; итог проверяется на тестовом наборе и против контроля, где вместо награды шум. «Red team»: девять атак пытаются обмануть награду — ни одна не лучше молчания.", ["/train.html", "Открыть «Обучение»"]],
+    ["Режим жюри", "Та же проверка, что запускает жюри: python -m auditgym.verify — 85 проверок по пяти областям брифа, без сети, около 20 секунд. Результат — 100 из 100.", ["/report.html", "Открыть проверку"]],
+  ];
+  const KEY = "ag-tour-seen";
+  let box = null;
+  const open = () => {
+    if (box) return;
+    let i = 0;
+    box = document.createElement("dialog");
+    box.className = "tour";
+    box.setAttribute("aria-labelledby", "tour-h");
+    const n = document.createElement("p"); n.className = "tour-n";
+    const h = document.createElement("h2"); h.id = "tour-h";
+    const p = document.createElement("p"); p.className = "tour-p";
+    const go = document.createElement("a"); go.className = "tour-go";
+    const dots = document.createElement("div"); dots.className = "tour-dots"; dots.setAttribute("aria-hidden", "true");
+    const bar = document.createElement("div"); bar.className = "tour-bar";
+    const skip = document.createElement("button"); skip.type = "button"; skip.className = "btn ghost small"; skip.textContent = "Пропустить";
+    const back = document.createElement("button"); back.type = "button"; back.className = "btn outline small"; back.textContent = "Назад";
+    const next = document.createElement("button"); next.type = "button"; next.className = "btn primary small";
+    bar.append(skip, back, next);
+    const t = window.agT || ((x) => x);  // built after the page's translation pass: translate here
+    const show = () => {
+      const [title, text, link] = STEPS[i];
+      n.textContent = t(`Как это работает · ${i + 1} из ${STEPS.length}`);
+      h.textContent = t(title); p.textContent = t(text);
+      go.classList.toggle("hidden", !link);
+      if (link) { go.href = link[0]; go.textContent = t(link[1]) + " →"; }
+      dots.replaceChildren(...STEPS.map((_, k) => { const d = document.createElement("i"); if (k === i) d.className = "on"; return d; }));
+      back.disabled = i === 0;
+      next.textContent = t(i === STEPS.length - 1 ? "Готово" : "Далее");
+      skip.textContent = t("Пропустить"); back.textContent = t("Назад");
+    };
+    const done = () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } box.close(); };
+    skip.addEventListener("click", done);
+    back.addEventListener("click", () => { if (i > 0) { i--; show(); } });
+    next.addEventListener("click", () => { if (i < STEPS.length - 1) { i++; show(); } else done(); });
+    go.addEventListener("click", () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } });
+    box.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") next.click(); if (e.key === "ArrowLeft") back.click(); });
+    box.addEventListener("close", () => { try { localStorage.setItem(KEY, "1"); } catch { /* private mode */ } box.remove(); box = null; });
+    box.addEventListener("click", (e) => { if (e.target === box) done(); });
+    box.append(n, h, p, go, dots, bar);
+    document.body.append(box);
+    show();
+    box.showModal();
+    next.focus();
+  };
+  window.agTour = open;
+  const foot = document.querySelector(".side-foot");
+  if (foot) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tour-open"; b.textContent = "Как это работает";
+    b.addEventListener("click", open);
+    foot.prepend(b);
+  }
+  let seen = false;
+  try { seen = localStorage.getItem(KEY) === "1"; } catch { seen = true; }
+  const home = location.pathname === "/" || /\/index\.html$/.test(location.pathname);
+  if (home && !seen && !navigator.webdriver) setTimeout(open, 400);
+})();
