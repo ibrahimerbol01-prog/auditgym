@@ -269,7 +269,7 @@ def run_arena(arena_id: str, base: Optional[str] = None, stop: Optional[threadin
     folder = os.path.join(root, arena_id)
     os.makedirs(folder, exist_ok=True)
     path = os.path.join(folder, "run.json")
-    arena: Dict[str, Any] = {"id": arena_id, "kind": "arena", "status": "running", "split": SPLIT, "env_version": ENV_VERSION,
+    arena: Dict[str, Any] = {"id": arena_id, "kind": "arena", "status": "running", "pid": os.getpid(), "split": SPLIT, "env_version": ENV_VERSION,
                              "started": time.time(), "finished": None, "margin": MARGIN,
                              "lanes": [{"key": k, "status": "queued"} for k in LANES], "summary": {}}
     harness._write_json(path, arena)

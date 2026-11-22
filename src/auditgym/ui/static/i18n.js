@@ -1050,6 +1050,9 @@
 "строк: {0}": "rows: {0}",
 "чистая компания, ошибок нет": "clean company, no errors",
 "Компания чистая, и модель верно не отправила ни одной находки": "The company is clean, and the model correctly submitted no findings",
+"прерван": "interrupted",
+"прервано": "interrupted",
+"прервано на итерации {0} из {1}: приложение закрылось во время обучения": "interrupted at iteration {0} of {1}: the app closed during training",
 "≈ {0} на этом компьютере": "≈ {0} on this computer"
 };
   const CYR = /[А-Яа-яЁё]/;

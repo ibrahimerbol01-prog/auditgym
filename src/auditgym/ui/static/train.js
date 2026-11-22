@@ -9,7 +9,7 @@ const svg = (tag, attrs = {}, parent) => { const e = document.createElementNS(SV
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const PRESETS = { mixed: "смешанные", simple: "простые", interacting: "с взаимодействиями" };
 const METHODS = { cem: "CEM", reinforce: "REINFORCE" };
-const STATUS = { running: ["идёт", "lime"], done: ["завершено", "dim"], stopped: ["остановлено", "gold"], error: ["ошибка", "pink"] };
+const STATUS = { running: ["идёт", "lime"], done: ["завершено", "dim"], stopped: ["остановлено", "gold"], error: ["ошибка", "pink"], interrupted: ["прервано", "gold"] };
 const LIMITS = { iterations: [2, 200, 1], population: [4, 64, 1], episodes_per_candidate: [1, 10, 1], seed: [0, 1000000, 1], elite_frac: [0.05, 0.5, 0], eval_every: [1, 20, 1], pace: [0, 0.5, 0] };
 const FIELDS = { iterations: "f-iter", population: "f-pop", episodes_per_candidate: "f-epc", seed: "f-seed", elite_frac: "f-elite", eval_every: "f-every", pace: "f-pace" };
 const FIELD_NAMES = { iterations: "Итераций", population: "Популяция", episodes_per_candidate: "Эпизодов на кандидата", seed: "Сид", elite_frac: "Доля элиты", eval_every: "Проверка на dev", pace: "Темп показа" };
@@ -446,7 +446,7 @@ function renderDash() {
   const every = c.eval_every || 2, nextDev = Math.min(n - 1, (Math.floor(at / every) + 1) * every);
   $("k-prog").textContent = r.status === "running" ? `итерация ${at + 2 > n ? n : at + 2} из ${n} · следующая проверка на dev — итерация ${nextDev + 1}`
     : r.status === "done" ? `завершено · ${plural(n, "итерация", "итерации", "итераций")} · ${plural(devs.length, "проверка", "проверки", "проверок")} на dev`
-    : r.status === "stopped" ? `остановлено на итерации ${at + 1} из ${n}` : `ошибка на итерации ${at + 1} из ${n}`;
+    : r.status === "stopped" ? `остановлено на итерации ${at + 1} из ${n}` : r.status === "interrupted" ? `прервано на итерации ${at + 1} из ${n}: приложение закрылось во время обучения` : `ошибка на итерации ${at + 1} из ${n}`;
   for (const ch of Object.values(charts)) ch.update(pts, n);
   renderLive();
   renderPolicy();
