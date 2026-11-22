@@ -508,6 +508,32 @@ MU_BOUND = 3.0                   # |mean of theta| <= 3: sigma(3) = 0.95, so a s
                                  # drifted to +-10 and every candidate behaved the same (no signal left to follow)
 PLATEAU, PLATEAU_GAIN = 4, 0.02  # 4 iterations without a better elite mean (+0.02) -> widen the search again ...
 RESTART_SIGMA = 1.5              # ... to at least this sigma; the mean stays, and the carried champion keeps the best
+# ... and the next population also gets the champion with one check that cannot work turned fully on, its mode setting
+# both ways: turning a check on needs its whole group to flip together (payments: read the table, enough pages, the
+# check, strict allocation), which sampling around a decided mean almost never does. The variants are scored like any
+# candidate (training reward only); whatever is better wins through the usual selection.
+GROUPS: List[Tuple[str, Tuple[str, ...], str]] = [  # (check, settings switched on, mode tried both ways)
+    ("check_payment", ("read_payments", "pages_payments", "read_invoices", "read_ledger", "pages_ledger", "check_payment"), "payment_strict"),
+    ("check_fx", ("read_fx", "pages_fx", "read_invoices", "read_ledger", "pages_ledger", "check_fx"), "fx_local_time"),
+    ("check_period", ("read_ledger", "pages_ledger", "check_period"), "period_local_time"),
+    ("check_duplicate", ("read_invoices", "pages_invoices", "check_duplicate"), "evidence_rich"),
+]
+
+
+def switch_on_variants(champ: Sequence[float]) -> List[List[float]]:
+    """The champion with one check that cannot work turned fully on (its mode setting both ways), for every such check.
+    A check works only with all its settings on: the payment check without the payments table finds nothing."""
+    out: List[List[float]] = []
+    for check, names, mode in GROUPS:
+        if all(champ[_IDX[n]] > 0 for n in names):
+            continue
+        for m in (MU_BOUND, -MU_BOUND):
+            v = list(champ)
+            for n in names:
+                v[_IDX[n]] = MU_BOUND
+            v[_IDX[mode]] = m
+            out.append(v)
+    return out
 
 
 def normalize_config(config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -600,6 +626,7 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
     total_eps, total_sec = 0, 0.0
     champ: Optional[List[float]] = None          # elitism: the best candidate of the previous iteration
     stall_best, stall_n = -9.0, 0                # plateau: iterations without a better elite mean (training reward)
+    inject: List[List[float]] = []               # candidates the next iteration tries (set on a plateau)
     try:
         for i in range(n_iter):
             if stop is not None and stop.is_set():
@@ -613,6 +640,9 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
             cands = [[mu[d] + sig[d] * e[d] for d in range(N_PARAMS)] for e in eps_noise]
             if champ is not None and method == "cem":   # elitism: the last sample is replaced by the champion
                 cands[-1] = list(champ)
+                for k, v in enumerate(inject[: max(0, pop // 4)]):   # after a plateau: champion + one check switched on
+                    cands[-2 - k] = v
+            inject = []
             scores: List[float] = []
             aborted = False
             for th in cands:
@@ -653,6 +683,7 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
                     stall_n += 1
                     if stall_n >= PLATEAU and i < n_iter - 3:      # widen the search again; mu stays where it is
                         sig = [max(x, RESTART_SIGMA) for x in sig]
+                        inject = switch_on_variants(champ)
                         stall_n, stall_best = 0, em
             else:  # REINFORCE with a Gaussian policy over theta and the population mean as baseline
                 b = _mean(scores)
