@@ -8,6 +8,10 @@ uses it, and `src/` stays standard-library only. The two build tools below are n
 
 ## Install in one line
 
+At the end, the installer offers the ready-made models (see `models/` and README §5) and lists them; answer `a` for
+all, `s` for the small auditors, numbers such as `1,3`, or Enter to skip. Without a question:
+`AUDITGYM_MODELS=all` / `none` / `"auditor-cem auditor-reinforce"`. Later: `auditgym models`.
+
 ```powershell
 irm is.gd/auditgym | iex                 # Windows (PowerShell)
 ```

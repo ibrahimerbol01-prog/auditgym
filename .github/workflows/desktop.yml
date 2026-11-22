@@ -52,7 +52,10 @@ jobs:
         run: |
           $env:AUDITGYM_ZIP = (Resolve-Path dist/AuditGym-windows-x64.zip).Path
           $env:AUDITGYM_NO_LAUNCH = '1'
+          $env:AUDITGYM_MODELS = 'auditor-reinforce'                  # the installer's model step, from this checkout
+          $env:AUDITGYM_MODELS_URL = (Join-Path $PWD 'models') + '/'
           Get-Content desktop/install.ps1 -Raw | Invoke-Expression    # the same way the one-liner runs it
+          if (-not (Test-Path (Join-Path $HOME '.auditgym/runs/preloaded-auditor-reinforce/run.json'))) { throw 'model not installed' }
           $exe = Join-Path $env:LOCALAPPDATA 'Programs/AuditGym/AuditGym.exe'
           if (-not (Test-Path (Join-Path $env:APPDATA 'Microsoft/Windows/Start Menu/Programs/AuditGym.lnk'))) { throw 'no Start menu shortcut' }
           $p = Start-Process -FilePath $exe -ArgumentList '--smoke','--smoke-out','installed.txt' -Wait -PassThru
@@ -64,12 +67,16 @@ jobs:
       - name: Test the one-line installer with this build (macOS)
         if: runner.os == 'macOS'
         run: |
-          AUDITGYM_ZIP="$(ls dist/AuditGym-macos-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
+          AUDITGYM_ZIP="$(ls dist/AuditGym-macos-*.zip)" AUDITGYM_NO_LAUNCH=1 AUDITGYM_MODELS=auditor-reinforce \
+            AUDITGYM_MODELS_URL="$PWD/models/" sh desktop/install.sh
+          test -f ~/.auditgym/runs/preloaded-auditor-reinforce/run.json
           ~/Applications/AuditGym.app/Contents/MacOS/AuditGym --smoke
       - name: Test the one-line installer with this build (Linux)
         if: runner.os == 'Linux'
         run: |
-          AUDITGYM_ZIP="$(ls dist/AuditGym-linux-*.zip)" AUDITGYM_NO_LAUNCH=1 sh desktop/install.sh
+          AUDITGYM_ZIP="$(ls dist/AuditGym-linux-*.zip)" AUDITGYM_NO_LAUNCH=1 AUDITGYM_MODELS=auditor-reinforce \
+            AUDITGYM_MODELS_URL="$PWD/models/" sh desktop/install.sh
+          test -f ~/.auditgym/runs/preloaded-auditor-reinforce/run.json
           ~/.local/bin/auditgym-app --smoke
       - name: The auditgym terminal command (built and installed)
         shell: bash
@@ -82,6 +89,10 @@ jobs:
           "$built" --version
           "$built" run-agent --policy reconcile --limit 1 --plain
           "$installed" run-agent --policy flag_all --limit 1 --plain
+          src="$PWD/models/"; if [ "$RUNNER_OS" = Windows ]; then src="$(pwd -W)/models/"; fi
+          AUDITGYM_MODELS_URL="$src" "$installed" models
+          AUDITGYM_MODELS_URL="$src" "$installed" models install auditor-cem
+          test -f "$HOME/.auditgym/runs/preloaded-auditor-cem/run.json"
           if [ "$RUNNER_OS" = Windows ]; then
             powershell -NoProfile -Command "if (-not (([Environment]::GetEnvironmentVariable('Path','User') -split ';') -like '*AuditGym\cli')) { throw 'cli folder not on the user PATH' }"
           fi

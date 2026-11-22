@@ -165,6 +165,20 @@ In the app:
   attacker learns that claiming nothing is the best it can do (−0.50, the floor). About 13 s; every attack replayable.
 - **Training** — the optional trainer of §7 with live telemetry, a seed comparison and a Markdown report export.
 
+**Ready-made models** (optional, so there is something to evaluate before anyone trains): `models/` holds four
+auditors trained by §7 — each one complete training run (14 KB: 20 numbers plus its curves and test result) — and the
+catalogue also lists two small local LLMs that are pulled through Ollama, never stored here. `auditgym models` lists
+them; `auditgym models install auditor-cem` (or `all`) puts one in the app under Runs → *Ready-made models*. Every
+file is checked against its SHA-256 in `models/index.json`; `train/make_models.py` rebuilds them from the same seeds.
+
+| Model | On the 20 test episodes |
+|---|---|
+| General auditor (CEM, mixed companies), recommended | +0.96, F1 1.00 |
+| Auditor for interacting errors | +0.69 |
+| REINFORCE auditor | +0.66 |
+| Untrained control (noise instead of reward) | −0.14 |
+| Qwen2.5 0.5B / 1.5B through Ollama (LLM + tools) | −0.33 / −0.09 |
+
 A desktop build (Windows / macOS / Linux, with in-app updates) is produced by CI from `desktop/`; judges do not need it.
 
 ## 6. Plug in an agent

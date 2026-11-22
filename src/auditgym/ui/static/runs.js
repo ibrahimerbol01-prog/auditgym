@@ -272,7 +272,8 @@ function syncDlg() {
   $("f-builtin").classList.toggle("hidden", k !== "builtin"); $("f-cmd").classList.toggle("hidden", k !== "cmd");
   $("dlg-go").classList.toggle("hidden", k !== "builtin"); $("dlg-copy").classList.toggle("hidden", k !== "cmd");
   $("f-why").textContent = k === "cmd" ? "Свою программу запускайте из терминала: страница в браузере не запускает чужой код. Результат появится в этом списке." : "Режим всегда закрытый, бюджет — 100 шагов на эпизод. Так же считает жюри.";
-  $("f-cmdline").textContent = (k === "cmd" ? "" : "то же в терминале:\n") + cmdline();
+  const t = window.agT || ((x) => x);  // <pre> is never auto-translated (commands must stay exact): only the prose is
+  $("f-cmdline").textContent = (k === "cmd" ? "" : t("то же в терминале:") + "\n") + (cmdline().startsWith("# ") ? t(cmdline()) : cmdline());
 }
 for (const id of ["k-builtin", "k-cmd", "f-policy", "f-split", "f-limit", "f-pace", "f-model", "f-temp", "f-tok", "f-split2"]) $(id).addEventListener("input", syncDlg);
 const openDlg = (k) => { $(k === "cmd" ? "k-cmd" : "k-builtin").checked = true; $("f-err").classList.add("hidden"); syncDlg(); dlg.showModal(); loadModels().then(syncDlg); };
@@ -296,6 +297,13 @@ async function loadModels() {  // finished trainings can be evaluated like any a
       sel.append(g2);
     }
   } catch { /* no LLM route on this server */ }
+  const pre = all.filter((r) => r.preloaded).sort((a, b) => (b.test_reward ?? -9) - (a.test_reward ?? -9));  // best first  // downloaded with `auditgym models` or by the installer
+  if (pre.length) {
+    const g0 = el("optgroup", { label: "Готовые модели", "data-model": "1" });
+    for (const r of pre) g0.append(el("option", { value: "model:" + r.id, "data-model": "1" }, `${r.preloaded} · ${f2(r.test_reward ?? r.summary.dev_best)} на тесте`));
+    sel.append(g0);
+  }
+  all = all.filter((r) => !r.preloaded);
   if (!all.length) return;
   const grp = el("optgroup", { label: "Обученные аудиторы", "data-model": "1" });
   for (const r of all.slice(0, 12)) grp.append(el("option", { value: "model:" + r.id, "data-model": "1" }, `Аудитор · ${r.method === "reinforce" ? "REINFORCE" : "CEM"} · сид ${r.seed ?? "—"} · ${f2(r.summary.dev_best)} на dev · ${when(r.started)}`));
