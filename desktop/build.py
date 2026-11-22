@@ -55,7 +55,8 @@ def main() -> int:
         fh.write(build_stamp() + "\n")
     data += ["--add-data", f"{stamp_file}{SEP}data"]
     data += add("desktop/icon.png", "data")  # Linux menu entry and window icon
-    data += add("LICENSE", "data") + add("desktop/THIRD_PARTY_NOTICES.md", "data")  # licences travel with the app
+    data += add("LICENSE", "data") + add("desktop/THIRD_PARTY_NOTICES.md", "data")
+    data += add("DESIGN.md", "data")  # judge mode: verify's E5 reads the documented limitations  # licences travel with the app
     for name in ("report.json", "trajectories.jsonl"):
         if os.path.exists(os.path.join(ROOT, name)):
             data += add(name, "data")

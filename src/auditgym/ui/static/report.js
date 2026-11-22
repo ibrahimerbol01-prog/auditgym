@@ -13,8 +13,10 @@ const divBar = (v) => el("div", { class: "dv", "aria-hidden": "true" }, el("i", 
 
 async function main() {
   let rep;
-  try { rep = await (await fetch("/data/report.json")).json(); } catch { $("areas").append(el("div", { class: "card" }, el("div", { class: "an" }, "report.json не найден"), el("div", { class: "au" }, "запустите python -m auditgym.verify"))); return; }
+  const fresh = new URLSearchParams(location.search).has("fresh");  // judge mode: the report this app just produced
+  try { rep = fresh ? (await (await fetch("/api/verify")).json()).report : await (await fetch("/data/report.json")).json(); if (!rep) throw new Error("no report"); } catch { $("areas").append(el("div", { class: "card" }, el("div", { class: "an" }, "report.json не найден"), el("div", { class: "au" }, "запустите python -m auditgym.verify"))); return; }
   $("ver").textContent = `ENV ${rep.versions.env} · Python ${rep.versions.python} · без сети`;
+  if (fresh) $("vrun-d").textContent = `Свежий запуск в этом приложении: ${rep.seconds} с, Python ${rep.versions.python}. Ниже всё прочитано из его report.json.`;
   $("rv-sec").textContent = `${rep.seconds} с · Python ${rep.versions.python}`; $("rv-by").textContent = rep.independent_verifier ? "независимый верификатор — сходится" : "независимый верификатор — не запускался";
   $("est").textContent = rep.estimated_score.total;
   const all = Object.values(rep.areas).flat(); const okN = all.filter((c) => c.passed).length;
@@ -141,3 +143,30 @@ $("b-prev").addEventListener("click", () => { pos = Math.max(0, pos - 1); render
 $("b-next").addEventListener("click", () => { pos = Math.min(view.length - 1, pos + 1); render(); });
 $("b-play").addEventListener("click", () => { if (timer) { stopPlay(); return; } if (pos >= view.length - 1) pos = 0; $("b-play").textContent = "❚❚"; $("b-play").setAttribute("aria-label", "Пауза"); timer = setInterval(() => { if (pos >= view.length - 1) { stopPlay(); return; } pos += 1; render(); }, 700); });
 main();
+
+// ---- judge mode: run verify from the app, show its output live, then redraw from the fresh report
+(() => {
+  const go = $("vrun-go"), log = $("vrun-log"), t = window.agT || ((x) => x);  // <pre> is not auto-translated
+  if (!go) return;
+  let timer = 0;
+  const show = (st) => {
+    log.classList.remove("hidden");
+    log.textContent = (st.lines || []).filter((l) => l.trim()).slice(-14).join("\n") || t("запуск…");
+    if (st.running) { go.disabled = true; go.textContent = `Идёт проверка · ${Math.round(st.seconds || 0)} с`; timer = setTimeout(poll, 700); return; }
+    go.disabled = false; go.textContent = "Запустить ещё раз";
+    if (st.report) location.href = "/report.html?fresh=1";
+    else if (st.exit != null) log.textContent += "\n\n" + t(`Проверка завершилась с кодом ${st.exit}.`);
+  };
+  async function poll() {
+    clearTimeout(timer);
+    try { show(await (await fetch("/api/verify")).json()); } catch { go.disabled = false; log.textContent = t("Сервер не отвечает."); }
+  }
+  go.addEventListener("click", async () => {
+    go.disabled = true;
+    let r;
+    try { r = await fetch("/api/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" }); } catch { go.disabled = false; return; }
+    if (r.status === 404) { go.disabled = false; log.classList.remove("hidden"); log.textContent = t("Эта страница открыта без сервера приложения: запустите auditgym ui."); return; }
+    poll();
+  });
+  fetch("/api/verify").then((r) => (r.ok ? r.json() : null)).then((st) => { if (st && st.running) show(st); }).catch(() => {});
+})();

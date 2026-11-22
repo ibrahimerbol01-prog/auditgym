@@ -479,6 +479,54 @@ class Jobs:
         self.thread: Optional[threading.Thread] = None
         self.stop_ev = threading.Event()
         self.current: Optional[str] = None
+        self.verify_args = ["--fuzz", "50"]          # the official command's default; tests pass a smaller fuzz
+        self.vlock = threading.Lock()
+        self.vproc: Optional[subprocess.Popen] = None
+        self.vstate: Dict[str, Any] = {"running": False, "lines": [], "exit": None, "dir": None, "started": None}
+
+    # ---- judge mode: the official verification, run from the app in its own process
+    def verify_start(self) -> Dict[str, Any]:
+        import tempfile
+        with self.vlock:
+            if self.vstate["running"]:
+                return {"ok": False, "error": {"code": "busy", "message": "the check is already running"}}
+            d = tempfile.mkdtemp(prefix="auditgym-verify-")
+            cmd = [sys.executable, "-m", "auditgym.verify", "--out", os.path.join(d, "report.json"),
+                   "--trajectories", os.path.join(d, "trajectories.jsonl"), *self.verify_args]
+            env = dict(os.environ)
+            if not getattr(sys, "frozen", False):  # a checkout or pip install: the child imports this same package
+                src = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                env["PYTHONPATH"] = src + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+            env["PYTHONIOENCODING"] = "utf-8"
+            try:
+                self.vproc = subprocess.Popen(cmd, cwd=d, env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                              stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
+                                              creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            except OSError as exc:
+                return {"ok": False, "error": {"code": "start_failed", "message": str(exc)[:200]}}
+            self.vstate = {"running": True, "lines": [], "exit": None, "dir": d, "started": time.time()}
+            proc, state = self.vproc, self.vstate
+
+        def pump() -> None:
+            for line in proc.stdout:  # type: ignore[union-attr]
+                if len(state["lines"]) < 400:
+                    state["lines"].append(line.rstrip("\n")[:300])
+            state["exit"] = proc.wait()
+            state["running"] = False
+        threading.Thread(target=pump, daemon=True).start()
+        return {"ok": True}
+
+    def verify_status(self) -> Dict[str, Any]:
+        st = self.vstate
+        out: Dict[str, Any] = {"ok": True, "running": st["running"], "lines": list(st["lines"]), "exit": st["exit"],
+                               "seconds": round(time.time() - st["started"], 1) if st["started"] else None, "report": None}
+        if not st["running"] and st["dir"] and st["exit"] == 0:
+            try:
+                with open(os.path.join(st["dir"], "report.json"), encoding="utf-8") as fh:
+                    out["report"] = json.load(fh)
+            except (OSError, ValueError):
+                pass
+        return out
 
     def busy(self) -> bool:
         return self.thread is not None and self.thread.is_alive()
@@ -660,6 +708,8 @@ class Jobs:
 
     # HTTP routes: return (status, json)
     def get(self, path: str, query: Dict[str, str]):
+        if path == "/api/verify":  # judge mode: progress and, when finished, the fresh report.json
+            return 200, self.verify_status()
         if path == "/api/update":  # updates exist in the packaged desktop app only (desktop/updater.py answers there)
             return 200, {"ok": True, "update": None}
         if path == "/api/scout":
@@ -703,6 +753,9 @@ class Jobs:
         m = re.match(r"^/api/runs/([^/]+)/stop$", path)
         if m:
             res = self.stop(m.group(1))
+            return (200 if res["ok"] else 409), res
+        if path == "/api/verify":
+            res = self.verify_start()
             return (200 if res["ok"] else 409), res
         if path == "/api/arena":
             res = self.start_arena(bool(b.get("quick")))
