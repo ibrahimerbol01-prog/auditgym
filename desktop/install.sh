@@ -3,8 +3,8 @@
 #
 #   curl -fsSL is.gd/auditgym_sh | sh
 #
-# (the short link points at https://github.com/ibrahimerbol01-prog/auditgym-releases/releases/latest/download/install.sh;
-#  the source repo is private, builds are published to that public releases-only repo by the Release workflow)
+# Without the short link:  curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
+# (the short link points there; the Release workflow publishes every tagged build to this public repository)
 #   Team, newest CI build of a branch (GitHub CLI logged in):
 #     gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.sh?ref=main" -H "Accept: application/vnd.github.raw" | AUDITGYM_BRANCH=main sh
 #
@@ -15,8 +15,8 @@
 # AUDITGYM_ZIP=/path/AuditGym-<os>-<arch>.zip (install a local build, for testing), AUDITGYM_BASE_URL=<mirror>.
 set -eu
 
-REPO="ibrahimerbol01-prog/auditgym"            # private source: CI branch builds (AUDITGYM_BRANCH, needs gh)
-PUBLIC="ibrahimerbol01-prog/auditgym-releases"  # public releases: the default, plain HTTPS, no login
+REPO="ibrahimerbol01-prog/auditgym"            # CI branch builds (AUDITGYM_BRANCH; artifacts need gh)
+PUBLIC="$REPO"                                  # releases: the default, plain HTTPS, no login
 VERSION="${AUDITGYM_VERSION:-latest}"
 
 say() { printf '%s\n' "AuditGym installer: $*"; }

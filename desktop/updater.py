@@ -1,7 +1,7 @@
 """Updates for the packaged app: find out whether a newer build exists and install it with the same one-line installer.
 
 Two channels, chosen from the build stamp (BUILD.txt, "<ref> @ <sha> · built ..."):
-  * release builds (ref like v0.2.0): the newest release of the public releases repo, plain HTTPS, no login;
+  * release builds (ref like v0.2.0): the newest release of the public repository, plain HTTPS, no login;
   * team branch builds (any other ref): the newest successful "Desktop app" CI build of that branch, through the
     GitHub CLI (`gh`, logged in), compared by commit.
 
@@ -22,8 +22,8 @@ import sys
 import time
 import urllib.request
 
-PUBLIC = "ibrahimerbol01-prog/auditgym-releases"   # public: release builds and their installers
-PRIVATE = "ibrahimerbol01-prog/auditgym"           # private source: CI builds of branches (needs gh)
+PRIVATE = "ibrahimerbol01-prog/auditgym"           # the repository: CI builds of branches (artifacts need gh)
+PUBLIC = PRIVATE                                   # its releases: release builds and their installers, no login
 HOME = os.path.join(os.path.expanduser("~"), ".auditgym")
 CACHE = os.path.join(HOME, "update.json")
 LOG = os.path.join(HOME, "update.log")
