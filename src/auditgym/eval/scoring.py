@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Tuple
 TYPES = ("duplicate_invoice", "payment_allocation", "date_or_fx", "period_classification")
 FINDING_KEYS = {"type", "affected_ids", "claimed_amount_minor", "currency", "evidence_ids", "explanation"}
 MAX_FINDINGS, MAX_EVIDENCE, MAX_EXPLANATION, MAX_AMOUNT = 30, 10, 1000, 10 ** 18
-MAX_IDS, MAX_ID_LEN = 10, 64
+MAX_IDS, MAX_ID_LEN = 1000, 1000  # sanity bounds only; the published limits are 30 / 10 / 1000
 
 
 class StructureError(ValueError):
@@ -32,8 +32,10 @@ class StructureError(ValueError):
 
 
 def _str(x: Any, what: str, max_len: int = MAX_ID_LEN) -> str:
-    if not isinstance(x, str) or not x.strip() or len(x) > max_len:
-        raise StructureError(f"{what} must be a non-empty string up to {max_len} chars")
+    # Only the value type is structural (organizers' convention 8): an empty or odd id is a
+    # structurally valid finding that simply does not match (a FP), not an invalid submission.
+    if not isinstance(x, str) or len(x) > max_len:
+        raise StructureError(f"{what} must be a string")
     return x
 
 
@@ -56,12 +58,12 @@ def validate_structure(sub: Any, episode_id: str) -> Dict[str, Any]:
         if f["type"] not in TYPES:
             raise StructureError(f"finding {i}: unknown type")
         amt = f["claimed_amount_minor"]
-        if isinstance(amt, bool) or not isinstance(amt, int) or amt < 0 or amt > MAX_AMOUNT:
-            raise StructureError(f"finding {i}: claimed_amount_minor must be an integer in [0, 1e18]")
-        _str(f["currency"], f"finding {i}: currency", 8)
+        if isinstance(amt, bool) or not isinstance(amt, int) or abs(amt) > MAX_AMOUNT:
+            raise StructureError(f"finding {i}: claimed_amount_minor must be a JSON integer")
+        _str(f["currency"], f"finding {i}: currency")
         for key, lim in (("affected_ids", MAX_IDS), ("evidence_ids", MAX_EVIDENCE)):
             ids = f[key]
-            if not isinstance(ids, list) or len(ids) > lim or (key == "affected_ids" and not ids):
+            if not isinstance(ids, list) or len(ids) > lim:
                 raise StructureError(f"finding {i}: {key} must be a list of up to {lim} ids")
             for x in ids:
                 _str(x, f"finding {i}: {key} item")

@@ -227,6 +227,11 @@ class TestMatcher(Base):
             self.assertEqual(r["return"], -1.0)
             self.assertIsNone(r["tp"])
 
+    def test_valid_structure_with_odd_values_is_a_fp_not_a_crash(self):
+        # convention 8: only a wrong value type, a missing field or a published limit is structural
+        for f in (self.F(affected_ids=[]), self.F(claimed_amount_minor=-5), self.F(affected_ids=[""]), self.F(currency="")):
+            self.check(self.s(self.fx_a, [f]), 0, 1, 1, -1)
+
     def test_m01_to_m12(self):
         d1, d2, d3 = self.D1, self.D2, self.D3
         two = fixture(self.ep, os.path.join(self.tmp, "M"), [{**self.A, "affected_ids": [self.R1, self.R2]}])

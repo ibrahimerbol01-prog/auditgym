@@ -5,15 +5,13 @@ not only a page to play one episode? Pick one of A, B, C below.
 
 ## What I looked at
 
-- **Ran locally** with sample AuditGym-style runs (3 runs, 400 steps, dev and train metrics): TensorBoard 2.21,
+- **Ran locally** with synthetic sample runs (made-up metrics only to see each tool's layout; not training results) (3 runs, 400 steps, dev and train metrics): TensorBoard 2.21,
   MLflow 3.18, Aim 3.29, Optuna Dashboard 0.21, Trackio 0.45. These are real UIs, not marketing images.
 - **Product sites** (26): Weights & Biases (Models, Weave), Comet, ClearML, Neptune, MLflow, Trackio, Transformer Lab,
   Unsloth, LM Studio, Kiln, LLaMA-Factory, Ollama, OpenAI fine-tuning, HF AutoTrain, Together fine-tuning, Tinker,
   Prime Intellect (Hosted Training, Environments Hub), OpenPipe ART, Lightning AI, Braintrust, LangSmith, Langfuse,
   Arize Phoenix. Some sites failed: Comet 404, Neptune 502, Unsloth bot check, LM Studio did not load.
-  Screenshots stay out of the repo; the contact sheet is `img/market-sheet.jpg`.
-
-![market](img/market-sheet.jpg)
+  Third-party screenshots stay out of the repo (the earlier contact sheet was removed before submission).
 
 ## Three layout families in this market
 

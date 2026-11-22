@@ -309,14 +309,17 @@ def reward_checks() -> List[Dict[str, Any]]:
             return False
         except StructureError:
             pass
-        for amt in (True, 1.5, "100", -5, 10 ** 19):
+        for amt in (True, 1.5, "100", 10 ** 19):
             try:
                 validate_structure({"episode_id": eid, "findings": [f_of(one, claimed_amount_minor=amt)]}, eid)
                 return False
             except StructureError:
                 pass
-        return True
-    _check(R, "R17", "invalid input (NaN, bool, float, string, negative, huge amounts) is a structure error", r17)
+        # A negative integer is a structurally valid JSON integer (organizers' convention 6/8): it is
+        # scored, and it can never match, so it is a false positive rather than a crash of the episode.
+        neg = sc([f_of(one, claimed_amount_minor=-5)], [one])
+        return neg["tp"] == 0 and neg["fp"] == 1
+    _check(R, "R17", "invalid input (NaN, bool, float, string, huge amounts) is a structure error; a negative amount is a FP", r17)
 
     def r18():
         svc = ServiceClient(in_process=True)

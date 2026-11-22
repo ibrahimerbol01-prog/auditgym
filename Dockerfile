@@ -4,7 +4,7 @@
 #   FROM python:3.11-slim-bookworm@sha256:<digest>
 FROM python:3.11-slim-bookworm@sha256:a83ba18aef0f865b1a4a611c2cf460fe446f2795673bbb9fe43be570439e3b39
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app/src
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app/src:/app
 WORKDIR /app
 COPY src/ /app/src/
 COPY configs/ /app/configs/

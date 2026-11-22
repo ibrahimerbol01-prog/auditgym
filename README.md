@@ -14,8 +14,10 @@ verified, **§3** the deliverables of brief §09, **§4** what the judges' own p
 
 ## 0. Judge adapter (organizers' check definitions, Nov 20)
 
-`judge_adapter.py` in the repository root (in the container: `/app/judge_adapter.py`, run with
-`PYTHONPATH=/app/src`, working directory `/app`) implements the published interface exactly:
+`judge_adapter.py` in the repository root (in the container: `/app/judge_adapter.py`; the image already sets
+`PYTHONPATH=/app/src:/app`, so `import judge_adapter` works from any working directory) implements the published
+interface exactly. Self-check inside the container:
+`docker run --rm --network none -w /app --entrypoint python auditgym -m unittest tests.test_judge_adapter -v`.
 
 ```python
 import judge_adapter as J
