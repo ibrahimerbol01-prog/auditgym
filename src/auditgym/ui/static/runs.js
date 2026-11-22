@@ -155,7 +155,7 @@ function drawChart(eps) {
   drawnFor = key;
   hideTip();
   const { s, Y } = axes(host, W, H, m);
-  s.setAttribute("aria-label", "Награда по эпизодам: " + eps.map((e, i) => `${i + 1}. ${e.label} ${e.score ? f2(e.score.reward) : "нет оценки"}`).join("; "));
+  s.setAttribute("aria-label", "Награда по эпизодам: " + eps.map((e, i) => `${i + 1}. ${(window.agT || String)(e.label)} ${e.score ? f2(e.score.reward) : "нет оценки"}`).join("; "));
   // reference lines: mean of the base policies (solid hairline, label inside the plot at the left, on a surface chip)
   for (const k of ["reconcile", "random"]) { const v = base[k]; if (v == null || k === run.agent) continue;
     svg("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), class: "ref" }, s);

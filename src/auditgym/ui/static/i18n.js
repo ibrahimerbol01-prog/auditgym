@@ -1053,6 +1053,8 @@
 "прерван": "interrupted",
 "прервано": "interrupted",
 "прервано на итерации {0} из {1}: приложение закрылось во время обучения": "interrupted at iteration {0} of {1}: the app closed during training",
+"целое число от {0} до {1}": "a whole number from {0} to {1}",
+"число от {0} до {1}": "a number from {0} to {1}",
 "≈ {0} на этом компьютере": "≈ {0} on this computer"
 };
   const CYR = /[А-Яа-яЁё]/;
