@@ -118,6 +118,16 @@ def _request(url: str, body: dict | None = None) -> tuple[int, bytes]:
 
 def smoke() -> int:
     """Headless self-check used by CI on the built app: static files, data files, one full episode."""
+    # Every module the app runs as a child process must be inside the build: a missing one only fails when the user
+    # clicks (judge mode shipped without auditgym.verify once). The check is cheap; the --help run proves the child path.
+    import importlib.util
+    import subprocess
+    for module in CHILD_MODULES:
+        assert importlib.util.find_spec(module) is not None, f"child module {module} is not in the build"
+    if FROZEN:
+        p = subprocess.run([sys.executable, "-m", "auditgym.verify", "--help"], capture_output=True, text=True, timeout=120)
+        assert p.returncode == 0 and "verif" in (p.stdout + p.stderr).lower(), \
+            f"judge mode child: exit {p.returncode} {(p.stderr or p.stdout)[-300:]}"
     srv, env, url = start_server()
     try:
         status, page = _request(url)
