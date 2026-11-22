@@ -6,8 +6,39 @@ for persuasive text. Genesis Hackathon 2026 · FinTech track · MIT licence.
 
 ![AuditGym](docs/banner.png)
 
-This page follows the brief: **§1** how to check everything with one command, **§2** where each of the 100 points is
-verified, **§3** the deliverables of brief §09, **§4** what the judges' own policies will see, **§5** the demo,
+## Install: desktop or terminal
+
+**Desktop app**: Windows, macOS, Linux. No Python, no admin rights, works offline. One line downloads the latest
+release, checks it against `SHA256SUMS.txt`, installs the app **and** the `auditgym` terminal command, then offers the
+ready-made trained models.
+
+```powershell
+irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex      # Windows (PowerShell)
+```
+```bash
+curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh  # macOS / Linux
+```
+
+Or download the zip for your system from the [latest release](https://github.com/ibrahimerbol01-prog/auditgym/releases/latest).
+Updates: Settings → Updates in the app, or `auditgym update`. Details: [desktop/README.md](desktop/README.md).
+
+**Terminal**: from source, any Python 3.11–3.13. The runtime is the standard library only, so nothing is downloaded.
+
+```bash
+git clone https://github.com/ibrahimerbol01-prog/auditgym && cd auditgym
+python -m pip install -e .
+auditgym            # terminal UI: train, watch the model at work, browse and replay runs
+auditgym ui         # the same app in your browser (http://127.0.0.1:8000)
+auditgym verify     # the judges' check: 100 / 100, about 20 s, offline
+```
+
+The official check, in a container with no network (§1 below): `docker build -t auditgym .` then
+`docker run --rm --network none auditgym`.
+
+---
+
+The rest of this page follows the brief: **§1** how to check everything with one command, **§2** where each of the
+100 points is verified, **§3** the deliverables of brief §09, **§4** what the judges' own policies will see, **§5** the demo,
 **§6** plugging in an agent, **§7** optional work that earns no points but is measured honestly, **§8** limitations.
 
 ---
