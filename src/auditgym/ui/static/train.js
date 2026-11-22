@@ -23,6 +23,7 @@ const thin = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " "
 const when = (t) => (t ? new Date(t * 1000).toLocaleString((window.AG_LANG === "en" ? "en-GB" : "ru-RU"), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
 const dur = (s) => (s == null || !Number.isFinite(s) ? "—" : s < 60 ? `${s.toFixed(s < 10 ? 1 : 0)} с` : `${Math.floor(s / 60)} мин ${String(Math.round(s % 60)).padStart(2, "0")} с`);
 
+let recentTimer = 0;
 let step = 1, scout = null, scoutState = "loading", base = { reconcile: 0.97, random: -1 }, recent = [];
 let runId = null, run = null, timer = null, wasRunning = false;
 
@@ -42,7 +43,12 @@ async function api(url, opts = {}) {
 const post = (url, body) => api(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
 const NO_SERVER = "Сервер не отвечает: откройте страницу через python -m auditgym.cli ui.";
 
-async function loadBaselines() {  // reference lines: the base policies' mean reward from report.json (fallback: the contract's figures)
+async function loadBaselines() {  // reference lines: the base policies on the same dev split (fallback: report.json, then the contract's figures)
+  const dev = await api("/api/baselines");
+  if (dev.status === 200 && dev.body && dev.body.ok) {
+    for (const k of ["reconcile", "random"]) if (typeof dev.body.baselines[k] === "number") base[k] = dev.body.baselines[k];
+    return;
+  }
   const { status, body } = await api("/data/report.json");
   if (status !== 200 || !body) return;
   for (const row of body.policy_summary || []) {
@@ -198,6 +204,8 @@ async function loadRecent() {
   const note = $("rec-note");
   if (status !== 200 || !body || !body.ok) { recent = []; note.textContent = "Список недоступен. " + NO_SERVER; note.classList.remove("hidden"); $("recent").replaceChildren(); return; }
   recent = (body.runs || []).filter((r) => r.kind === "training");
+  clearTimeout(recentTimer);  // a training started elsewhere (another tab, the terminal) keeps its row current
+  if (recent.some((r) => r.status === "running")) recentTimer = setTimeout(() => { if (!runId) loadRecent(); }, 2000);
   note.textContent = recent.length ? "" : "Пока нет обучений — первое появится здесь.";
   note.classList.toggle("hidden", !!recent.length);
   $("recent").replaceChildren(...recent.slice(0, 8).map((r) => {

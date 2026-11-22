@@ -158,3 +158,12 @@ class CliVerifyArguments(unittest.TestCase):
         finally:
             verify.main = real
         self.assertEqual(seen, [["--out", "/work/report.json", "--trajectories", "/work/t.jsonl"]])
+
+
+class DevBaselines(unittest.TestCase):
+    def test_training_charts_compare_with_the_reconciler_on_the_same_dev_split(self):
+        st, res = harness.Jobs(base=tempfile.mkdtemp()).get("/api/baselines", {})
+        self.assertEqual((st, res["split"]), (200, "dev"))
+        dev = learner.evaluate_dev(learner.ReconcilePolicy)
+        self.assertEqual(res["baselines"]["reconcile"], dev["reward"], "the same number the dev curve is measured with")
+        self.assertEqual(res["baselines"]["random"], -1.0)

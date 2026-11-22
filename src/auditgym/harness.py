@@ -399,6 +399,9 @@ def read_steps(run_id: str, episode: int, base: Optional[str] = None) -> Optiona
     return [r for r in rows if r.get("ep") == episode]
 
 
+_DEV_BASE: Dict[str, Dict[str, Any]] = {}   # deterministic, so computed once per process
+_BASE_LOCK = threading.Lock()
+
 class Jobs:
     """At most one run at a time, started from the app with a built-in policy (never an arbitrary command)."""
 
@@ -596,6 +599,13 @@ class Jobs:
             return 200, {"ok": True, "scout": _scout.scout(explain=query.get("explain") == "1")}
         if path == "/api/llm/models":  # installed local Ollama models (short timeout; available false without Ollama)
             return 200, {"ok": True, **_llm.list_models(timeout=1.0)}
+        if path == "/api/baselines":  # the Reconciler and the random policy on the same dev split the training charts use
+            key = configs_dir()
+            with _BASE_LOCK:
+                if key not in _DEV_BASE:
+                    from .learner import dev_baselines
+                    _DEV_BASE[key] = {k: v.get("reward") for k, v in dev_baselines(key).items()}
+            return 200, {"ok": True, "split": "dev", "baselines": _DEV_BASE[key]}
         if path == "/api/curve":  # the trainer's learning curve (T10), or null until it has run
             try:
                 with open(self.curve_path, encoding="utf-8") as fh:
