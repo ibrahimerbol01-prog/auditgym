@@ -240,3 +240,20 @@ class EnglishTranslationTests(unittest.TestCase):
             with open(os.path.join(STATIC_DIR, name), encoding="utf-8") as fh:
                 P().feed(fh.read())
         self.assertEqual(missing, [], "add these to EN in i18n.js")
+
+
+class HowItWorksTour(unittest.TestCase):
+    def test_every_tour_string_is_translated(self):
+        import re
+        static = STATIC_DIR
+        with open(os.path.join(static, "shell.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        block = js[js.index('// ---- "How it works"'):]
+        with open(os.path.join(static, "i18n.js"), encoding="utf-8") as fh:
+            i18n = fh.read()
+        strings = [s for s in re.findall(r'"([^"\n]*[А-Яа-яЁё][^"\n]*)"', block)]
+        self.assertGreater(len(strings), 15)
+        for s in strings:
+            self.assertIn(json.dumps(s, ensure_ascii=False) + ":", i18n, s)
+        self.assertIn("Как это работает · {0} из {1}", i18n)
+        self.assertIn("navigator.webdriver", block, "never opens by itself under automation")
