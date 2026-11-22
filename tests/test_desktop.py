@@ -136,6 +136,10 @@ class UpdaterTests(unittest.TestCase):
         newer = self.u.check("3/merge @ 1a2b3c4 · built 2026-11-22 11:00 UTC", force=True)
         self.assertEqual((newer["channel"], newer["available"], newer["latest"]["version"]), ("release", True, "v0.2.0"),
                          "without gh, a test build moves to a newer release")
+        self.u.latest_release = lambda: {"version": "v0.2.0", "url": "u", "notes": "", "published": "2026-11-22T12:00:00Z",
+                                         "commit": "1a2b3c4d5e6f"}
+        same = self.u.check("main @ 1a2b3c4 · built 2026-11-22 11:00 UTC", force=True)
+        self.assertFalse(same["available"], "a release of this very commit is not an update")
         cmd, env = self.u.installer_command(newer, detached=False)
         self.assertEqual(env["AUDITGYM_VERSION"], "v0.2.0")
         self.assertNotIn("AUDITGYM_BRANCH", env)
@@ -147,6 +151,8 @@ class UpdaterTests(unittest.TestCase):
         spec.loader.exec_module(b)
         with mock.patch.dict(os.environ, {"GITHUB_HEAD_REF": "task/x", "GITHUB_REF_NAME": "3/merge", "GITHUB_SHA": "abcdef1234"}):
             self.assertTrue(b.build_stamp().startswith("task/x @ abcdef1 · built "))
+        with mock.patch.dict(os.environ, {"AUDITGYM_REF": "v0.2.1", "GITHUB_REF_NAME": "main", "GITHUB_SHA": "abcdef1234"}):
+            self.assertTrue(b.build_stamp().startswith("v0.2.1 @ abcdef1 · built "), "a release started by hand from main")
 
     def test_offline_and_source_checkout_offer_nothing(self):
         def boom():

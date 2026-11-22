@@ -32,6 +32,8 @@ jobs:
       - name: Install the desktop build tools (pinned)
         run: python -m pip install -r desktop/requirements-desktop.txt
       - name: Build
+        env:  # stamped with the release tag, also when the workflow is started by hand from a branch
+          AUDITGYM_REF: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
         run: python desktop/build.py
       - name: Self-test the built app (Windows)
         if: runner.os == 'Windows'
