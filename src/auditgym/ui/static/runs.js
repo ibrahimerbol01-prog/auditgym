@@ -8,7 +8,7 @@ const SVGNS = "http://www.w3.org/2000/svg";
 const svg = (tag, attrs = {}, parent) => { const e = document.createElementNS(SVGNS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (parent) parent.append(e); return e; };
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const NAMES = { oracle: "Эталон", reconcile: "Сверщик", random: "Стажёр", flag_all: "Паникёр" };
-const STATUS = { running: ["идёт", "lime"], done: ["завершён", "dim"], stopped: ["остановлен", "gold"], error: ["ошибка", "pink"] };
+const STATUS = { running: ["идёт", "lime"], done: ["завершён", "dim"], stopped: ["остановлен", "gold"], error: ["ошибка", "pink"], interrupted: ["прерван", "gold"] };
 const TABLES = { fx: "курсы", invoices: "счета", payments: "платежи", ledger: "главная книга" };
 const f2 = (v) => (v == null || Number.isNaN(v) ? "—" : (Math.round(v * 100) / 100 + 0 < 0 ? "−" : "") + Math.abs(v).toFixed(2));
 const plural = (n, a, b, c) => { const k = n % 100, d = n % 10; return `${n} ${k >= 11 && k <= 14 ? c : d === 1 ? a : d >= 2 && d <= 4 ? b : c}`; };
