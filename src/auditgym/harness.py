@@ -171,7 +171,16 @@ def _write_json(path: str, obj: Any) -> None:
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(obj, fh, ensure_ascii=False, indent=1)
-    os.replace(tmp, path)
+    # Windows refuses to replace a file another thread is reading at that moment (the app polls run.json while the
+    # run writes it): retry briefly instead of failing the run.
+    for attempt in range(50):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == 49:
+                raise
+            time.sleep(0.02)
 
 
 class Analysis:
