@@ -380,11 +380,17 @@ def read_run(run_id: str, base: Optional[str] = None) -> Optional[Dict[str, Any]
     if not RUN_ID.match(run_id or ""):
         return None
     p = os.path.join(base or runs_dir(), run_id, "run.json")
-    try:
-        with open(p, encoding="utf-8") as fh:
-            return json.load(fh)
-    except (OSError, ValueError):
-        return None
+    for attempt in range(25):
+        try:
+            with open(p, encoding="utf-8") as fh:
+                return json.load(fh)
+        except PermissionError:  # Windows: the run is replacing run.json at this very moment; it takes milliseconds
+            if attempt == 24:
+                return None
+            time.sleep(0.02)
+        except (OSError, ValueError):
+            return None
+    return None
 
 
 def read_steps(run_id: str, episode: int, base: Optional[str] = None) -> Optional[List[Dict[str, Any]]]:
