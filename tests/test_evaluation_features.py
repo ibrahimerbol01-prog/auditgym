@@ -5,6 +5,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -187,3 +188,52 @@ class NoiseRewardControl(unittest.TestCase):
         self.assertGreaterEqual(real["test"]["auditor"]["reward"] - ctrl["test"]["auditor"]["reward"], 0.3)
         with self.assertRaises(ValueError):
             learner.train(cfg, base=tempfile.mkdtemp(), control="shuffle")
+
+
+class InstalledAppPaths(unittest.TestCase):
+    """The desktop app has no repository around it: training and the baselines must read the Jobs' own configs."""
+
+    def test_training_uses_the_configs_it_was_given(self):
+        cfg = tempfile.mkdtemp()
+        for split in ("train", "dev"):
+            shutil.copy(os.path.join(harness.ROOT, "configs", f"{split}.json"), cfg)
+        root, harness.ROOT = harness.ROOT, os.path.join(cfg, "no-repository-here")
+        base = tempfile.mkdtemp()
+        try:
+            with mock.patch.dict(os.environ, {"AUDITGYM_CONFIGS": ""}):
+                jobs = harness.Jobs(base=base, configs=cfg)
+                st, res = jobs.post("/api/train", {"iterations": 2, "population": 4, "episodes_per_candidate": 1})
+                self.assertEqual(st, 200, res)
+                for _ in range(1200):
+                    if not jobs.busy():
+                        break
+                    time.sleep(0.05)
+                run = harness.read_run(res["run"], base)
+                self.assertEqual(run["status"], "done", run.get("error"))
+                self.assertIn("auditor", run["test"])
+                self.assertEqual(jobs.get("/api/baselines", {})[0], 200)
+        finally:
+            harness.ROOT = root
+            harness._DEV_BASE.clear()
+            shutil.rmtree(base, ignore_errors=True)
+            shutil.rmtree(cfg, ignore_errors=True)
+
+
+class WindowsFileRace(unittest.TestCase):
+    def test_a_run_being_replaced_is_read_after_a_retry_not_reported_missing(self):
+        base = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(base, "r1"))
+            harness._write_json(os.path.join(base, "r1", "run.json"), {"id": "r1"})
+            real, calls = open, []
+
+            def flaky(path, *a, **k):
+                if str(path).endswith("run.json") and len(calls) < 3:
+                    calls.append(1)
+                    raise PermissionError(13, "being replaced")
+                return real(path, *a, **k)
+            with mock.patch("builtins.open", flaky):
+                self.assertEqual(harness.read_run("r1", base), {"id": "r1"})
+            self.assertEqual(len(calls), 3)
+        finally:
+            shutil.rmtree(base, ignore_errors=True)

@@ -21,6 +21,7 @@ import os
 import runpy
 import sys
 import threading
+import urllib.error
 import urllib.request
 
 APP_NAME = "AuditGym"
@@ -78,6 +79,9 @@ def data_files(base: str = BASE) -> dict:
 
 def start_server(port: int = 0):
     """Start the UI server in a background thread. Returns (server, env, url)."""
+    if FROZEN:  # the bundle has no repository around it: every part (training, red team, baselines) reads its copies
+        os.environ.setdefault("AUDITGYM_DATA", os.path.join(BASE, "data"))
+        os.environ.setdefault("AUDITGYM_CONFIGS", os.path.join(BASE, "data", "configs"))
     from auditgym.env.adapters import make_http_server
     from auditgym.harness import Jobs
     api = Jobs(configs=os.path.join(BASE, "data", "configs") if FROZEN else None,
@@ -146,6 +150,25 @@ def smoke() -> int:
         why = [(e.get("status"), e.get("error")) for e in run.get("episodes", [])]
         assert run.get("status") == "done" and run["summary"]["reward"] > 0.5, \
             f"run {run.get('status')}: error={run.get('error')!r} episodes={str(why)[:400]}"
+        # Training: a tiny job through the app's API, the same path as the Training page (dev checks and the
+        # final test measurement read the bundled configs, not a repository).
+        started = {}
+        for _ in range(100):  # the evaluation's thread may still be closing after its run reads "done": 409 busy
+            try:
+                started = json.loads(_request(url + "api/train", {"iterations": 2, "population": 4, "episodes_per_candidate": 1})[1])
+                break
+            except urllib.error.HTTPError as exc:
+                if exc.code != 409:
+                    raise
+                time.sleep(0.1)
+        assert started.get("ok"), f"start training: {started}"
+        for _ in range(1200):
+            run = json.loads(_request(url + "api/runs/" + started["run"])[1]).get("run") or {}
+            if run.get("status") not in (None, "running") and not run.get("status_note"):
+                break
+            time.sleep(0.1)
+        assert run.get("status") == "done" and "auditor" in (run.get("test") or {}), \
+            f"training {run.get('status')}: error={run.get('error')!r} test={str(run.get('test'))[:200]}"
     finally:
         stop_server(srv, env)
     return 0
