@@ -6,7 +6,6 @@ import os
 import subprocess
 import sys
 from collections import defaultdict
-from datetime import date
 from typing import Any, Dict, List
 
 from ..eval.scoring import score

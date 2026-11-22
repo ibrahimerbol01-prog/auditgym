@@ -28,12 +28,3 @@ def convert(amount_minor: int, src: str, dst: str, rate: str) -> int:
         ctx.rounding = ROUND_HALF_EVEN
         value = Decimal(amount_minor) * Decimal(rate) * (Decimal(10) ** (exponent(dst) - exponent(src)))
         return int(value.quantize(Decimal(1), rounding=ROUND_HALF_EVEN))
-
-
-def fmt_minor(amount_minor: int, ccy: str) -> str:
-    exp = exponent(ccy)
-    sign = "-" if amount_minor < 0 else ""
-    a = abs(amount_minor)
-    if exp == 0:
-        return f"{sign}{a}"
-    return f"{sign}{a // 10**exp}.{a % 10**exp:0{exp}d}"

@@ -51,15 +51,5 @@ class Rng:
         self.shuffle(pool)
         return pool[:k]
 
-    def weighted(self, options: Sequence[T], weights: Sequence[float]) -> T:
-        total = float(sum(weights))
-        x = self._r.random() * total
-        acc = 0.0
-        for opt, w in zip(options, weights):
-            acc += w
-            if x < acc:
-                return opt
-        return options[-1]
-
     def chance(self, p: float) -> bool:
         return self._r.random() < p

@@ -27,7 +27,6 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 from . import harness
 from .env.env import AuditEnv
 from .policies.baselines import TYPES, FlagAllPolicy, Policy, ReconcilePolicy, run_episode
-from .policies.rules import find_issues
 from .seeding import Rng
 from .version import ENV_VERSION
 

@@ -12,10 +12,9 @@ import platform
 import random
 import sys
 import time
-import traceback
 from typing import Any, Callable, Dict, List, Tuple
 
-from .config import ERROR_TYPES, ConfigError, make_config
+from .config import ERROR_TYPES, ConfigError
 from .env.env import AuditEnv
 from .eval.scoring import tolerance as scoring_tolerance
 from .eval.scoring import parse_submission, score, StructureError, validate_structure
@@ -521,7 +520,7 @@ def failure_analysis(svc: ServiceClient, eps: List[Dict[str, Any]]) -> Dict[str,
             "note": "Measured on the 20 hidden-style episodes with full information; rewards assume 20 inspection steps."}
 
 
-def engineering_checks(report_dir: str, traj_path: str) -> List[Dict[str, Any]]:
+def engineering_checks(traj_path: str) -> List[Dict[str, Any]]:
     R: List[Dict[str, Any]] = []
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     _check(R, "E1", "runs with one command (this one), offline, no paid API or GPU", lambda: True)
@@ -594,7 +593,7 @@ def main(argv: List[str] | None = None) -> int:
     table = policy_table(svc, groups, args.trajectories)
     fa = failure_analysis(svc, eps)
     fz = fuzz(args.fuzz)
-    areas["engineering"] = engineering_checks(os.path.dirname(os.path.abspath(args.out)), args.trajectories)
+    areas["engineering"] = engineering_checks(args.trajectories)
     print(_line("5 Engineering & explanation", areas["engineering"]))
     est = estimate(areas)
     svc.close()

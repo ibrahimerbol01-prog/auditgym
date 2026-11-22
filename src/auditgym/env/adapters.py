@@ -138,6 +138,13 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
 
         def do_POST(self):  # noqa: N802
             path = self.path.split("?", 1)[0]
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+            except ValueError:
+                n = -1
+            # Read the body before any answer, refusals included: a server that closes a socket with unread data makes
+            # Windows reset the connection, and the client can lose the response (a 403 arrived as WinError 10053).
+            raw = self.rfile.read(n) if 0 < n <= 1_000_000 else b""
             if not self._host_ok():
                 return self._json({"ok": False, "error": {"code": "forbidden", "message": "bad host"}}, 403)
             origin = self.headers.get("Origin")
@@ -146,16 +153,12 @@ def make_http_server(port: int = 8000, mode: str = "open", ui: bool = True, extr
                 return self._json({"ok": False, "error": {"code": "forbidden", "message": "cross-origin request"}}, 403)
             if not (self.headers.get("Content-Type") or "").lower().startswith("application/json"):
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "Content-Type must be application/json"}}, 415)
-            try:
-                n = int(self.headers.get("Content-Length") or 0)
-            except ValueError:
-                n = -1
             if n < 0:
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "bad Content-Length"}}, 400)
             if n > 1_000_000:
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "body too large"}}, 413)
             try:
-                body = _loads_strict(self.rfile.read(n).decode("utf-8") or "{}")
+                body = _loads_strict(raw.decode("utf-8") or "{}")
             except (ValueError, RecursionError, UnicodeDecodeError):
                 return self._json({"ok": False, "error": {"code": "bad_arguments", "message": "invalid JSON"}}, 400)
             if ui and api is not None and path.startswith("/api/"):

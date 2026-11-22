@@ -114,8 +114,18 @@ class SubprocessAgent(Policy):
         threading.Thread(target=self._drain, args=(self.proc,), daemon=True).start()
 
     def _drain(self, proc) -> None:
-        for line in proc.stderr:
-            self.stderr_tail = (self.stderr_tail + [line.rstrip()])[-5:]
+        try:
+            for line in proc.stderr:
+                self.stderr_tail = (self.stderr_tail + [line.rstrip()])[-5:]
+        except (OSError, ValueError):   # close() closed the pipe: the episode is over
+            pass
+
+    @staticmethod
+    def _read_line(stream, box: List[str]) -> None:
+        try:
+            box.append(stream.readline())
+        except (OSError, ValueError):   # closed under a reader that timed out
+            pass
 
     def act(self, obs):
         give_up = {"tool": "submit", "args": {"findings": None}}  # an invalid structure scores -1, honestly
@@ -128,7 +138,7 @@ class SubprocessAgent(Policy):
         except (BrokenPipeError, OSError):
             return give_up
         box: List[str] = []
-        t = threading.Thread(target=lambda: box.append(p.stdout.readline()), daemon=True)
+        t = threading.Thread(target=self._read_line, args=(p.stdout, box), daemon=True)
         t.start()
         t.join(self.timeout)
         if not box or not box[0].strip():
@@ -141,15 +151,24 @@ class SubprocessAgent(Policy):
 
     def close(self) -> None:
         if self.proc is not None:
+            p, self.proc = self.proc, None
             try:
-                self.proc.stdin.close()
+                p.stdin.close()
             except OSError:
                 pass
             try:
-                self.proc.wait(timeout=2)
+                p.wait(timeout=2)
             except subprocess.TimeoutExpired:
-                self.proc.kill()
-            self.proc = None
+                p.kill()
+                try:
+                    p.wait(timeout=2)      # reap it: no zombie on POSIX, no open process handle on Windows
+                except subprocess.TimeoutExpired:
+                    pass
+            for f in (p.stdout, p.stderr):  # every episode starts a new process: close its pipes, do not wait for GC
+                try:
+                    f.close()
+                except (OSError, ValueError):
+                    pass
 
 
 def make_agent(policy: Optional[str] = None, cmd: Optional[str] = None) -> Callable[[], Policy]:

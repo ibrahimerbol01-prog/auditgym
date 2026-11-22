@@ -202,3 +202,27 @@ class InterruptedRunTests(unittest.TestCase):
     def test_finished_runs_are_untouched(self):
         self.make("train-done", pid=999999999, **{"status": "done"})
         self.assertEqual(harness.read_run("train-done", self.base)["status"], "done")
+
+
+class SubprocessAgentCleanupTests(unittest.TestCase):
+    """Every episode of an external agent starts a process: close() must close its pipes and reap it, not leave them
+    to the garbage collector (open handles on Windows, zombies on POSIX)."""
+
+    def test_close_closes_the_pipes_and_reaps_the_process(self):
+        agent = harness.SubprocessAgent(f'"{sys.executable}" -c "import sys; sys.stdin.read()"' if os.name == "nt"
+                                        else f"{sys.executable} -c 'import sys; sys.stdin.read()'")
+        agent.reset({"ok": True, "result": {"manifest": {"episode_id": "ep_x"}}, "remaining_steps": 100})
+        p = agent.proc
+        agent.close()
+        self.assertIsNone(agent.proc)
+        self.assertTrue(p.stdout.closed and p.stderr.closed and p.stdin.closed)
+        self.assertIsNotNone(p.returncode)
+
+    def test_close_reaps_an_agent_that_ignores_end_of_input(self):
+        agent = harness.SubprocessAgent(f'"{sys.executable}" -c "import time; time.sleep(30)"' if os.name == "nt"
+                                        else f"{sys.executable} -c 'import time; time.sleep(30)'")
+        agent.reset({"ok": True, "result": {"manifest": {"episode_id": "ep_x"}}, "remaining_steps": 100})
+        p = agent.proc
+        agent.close()                    # waits 2 s, kills, then reaps
+        self.assertIsNotNone(p.returncode)
+        self.assertTrue(p.stdout.closed and p.stderr.closed)

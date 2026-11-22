@@ -63,9 +63,6 @@ class EpisodeConfig:
         d.pop("id_seed")
         return hashlib.sha256(json.dumps(d, sort_keys=True).encode()).hexdigest()
 
-    def canonical_hash(self) -> str:
-        return hashlib.sha256(json.dumps(self.canonical(), sort_keys=True).encode()).hexdigest()
-
 
 _FIELDS = {f for f in EpisodeConfig.__dataclass_fields__}
 

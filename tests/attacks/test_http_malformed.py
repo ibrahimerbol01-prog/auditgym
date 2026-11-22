@@ -14,7 +14,6 @@ isolation (minor).
 Fix (src/auditgym/env/adapters.py, do_POST): parse Content-Length in try/except, reject n < 0,
 and catch ``(ValueError, RecursionError, UnicodeDecodeError)`` around ``json.loads`` -> 400 JSON.
 """
-import http.client
 import socket
 import threading
 import unittest

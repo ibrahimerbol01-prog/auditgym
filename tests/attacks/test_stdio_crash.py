@@ -18,7 +18,6 @@ import sys
 import unittest
 
 import os
-import sys
 
 SRC = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 if SRC not in sys.path:
