@@ -12,7 +12,7 @@
     const v = r.kind === "arena" ? null : training ? r.summary && r.summary.dev_best : r.summary && r.summary.episodes_done ? r.summary.reward : null;
     const dot = document.createElement("i"); dot.className = "sr-dot " + (r.status === "running" ? "run" : v == null ? "" : v > 0 ? "pos" : "neg");
     const name = document.createElement("span"); name.className = "sr-n";
-    const who = NAMES[r.agent] || (/^auditor-/.test(r.agent || "") ? `Аудитор · ${r.agent.endsWith("reinforce") ? "REINFORCE" : "CEM"}` : /^llm-/.test(r.agent || "") ? "LLM · " + r.agent.slice(4) : r.agent);
+    const who = NAMES[r.agent] || (/^auditor-/.test(r.agent || "") ? `Аудитор · ${r.agent.endsWith("reinforce") ? "REINFORCE" : "CEM"}` : /^llm-/.test(r.agent || "") ? (/-assist$/.test(r.agent) ? "LLM + инструменты · " : "LLM · ") + r.agent.slice(4).replace(/-assist$/, "") : r.agent);
     name.textContent = r.kind === "arena" ? "Red team · атака на награду" : training ? `Обучение · ${r.method === "reinforce" ? "REINFORCE" : "CEM"}${r.group ? " · сид " + r.seed : ""}` : `Оценка · ${who}`;
     const val = document.createElement("span"); val.className = "sr-v"; val.textContent = v == null ? "" : f2(v);
     a.append(dot, name, val);

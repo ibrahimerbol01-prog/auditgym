@@ -13,7 +13,7 @@ const TABLES = { fx: "курсы", invoices: "счета", payments: "плате
 const f2 = (v) => (v == null || Number.isNaN(v) ? "—" : (Math.round(v * 100) / 100 + 0 < 0 ? "−" : "") + Math.abs(v).toFixed(2));
 const plural = (n, a, b, c) => { const k = n % 100, d = n % 10; return `${n} ${k >= 11 && k <= 14 ? c : d === 1 ? a : d >= 2 && d <= 4 ? b : c}`; };
 const agentName = (a, r) => (NAMES[a] ? `${NAMES[a]} · ${a}` : /^auditor-(cem|reinforce)$/.test(a || "") ? `Обученный аудитор · ${a.endsWith("cem") ? "CEM" : "REINFORCE"}`
-  : /^llm-/.test(a || "") ? `LLM · ${(r && r.llm_model) || a.slice(4)}` : a);
+  : /^llm-/.test(a || "") ? `${r && r.llm_assist || /-assist$/.test(a) ? "LLM + инструменты" : "LLM"} · ${(r && r.llm_model) || a.slice(4).replace(/-assist$/, "")}` : a);
 const when = (t) => (t ? new Date(t * 1000).toLocaleString((window.AG_LANG === "en" ? "en-GB" : "ru-RU"), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—");
 const dur = (s) => (s < 60 ? `${s.toFixed(1)} с` : `${Math.floor(s / 60)} мин ${Math.round(s % 60)} с`);
 
@@ -263,6 +263,7 @@ function cmdline() {
   if (kind() === "cmd") return `python -m auditgym.cli run-agent --name ${($("f-model").value.split(":")[0] || "llm").replace(/[^\w.-]/g, "")} --cmd "python examples/llm_agent.py --model ${$("f-model").value} --temperature ${$("f-temp").value} --max-tokens ${$("f-tok").value}" --split ${$("f-split2").value}`;
   const lim = $("f-limit").value; const pace = +$("f-pace").value;
   if ($("f-policy").value.startsWith("model:")) return `# ${$("f-policy").value.slice(6)}: обученный аудитор запускается из приложения`;
+  if ($("f-policy").value.startsWith("llmassist:")) return `# LLM + инструменты (${$("f-policy").value.slice(10)}): код читает книги и предлагает кандидатов, модель решает — запускается из приложения`;
   if ($("f-policy").value.startsWith("llm:")) return `python -m auditgym.cli run-agent --name llm --cmd "python examples/llm_agent.py --model ${$("f-policy").value.slice(4)}" --split ${$("f-split").value} --limit ${lim || 3}`;
   return `python -m auditgym.cli run-agent --policy ${$("f-policy").value} --split ${$("f-split").value}${lim ? " --limit " + lim : ""}${pace ? " --pace " + pace : ""}`;
 }
@@ -288,7 +289,10 @@ async function loadModels() {  // finished trainings can be evaluated like any a
     const llm = await getJSON("/api/llm/models");
     if (llm.available && (llm.models || []).length) {
       const g2 = el("optgroup", { label: "Локальные LLM (Ollama)", "data-model": "1" });
-      for (const m of llm.models.slice(0, 12)) g2.append(el("option", { value: "llm:" + m, "data-model": "1" }, `LLM · ${m} · первые 3 эпизода`));
+      for (const m of llm.models.slice(0, 12)) {
+        g2.append(el("option", { value: "llmassist:" + m, "data-model": "1" }, `LLM + инструменты · ${m} · модель судит кандидатов`));
+        g2.append(el("option", { value: "llm:" + m, "data-model": "1" }, `LLM · ${m} · сама выбирает каждое действие`));
+      }
       sel.append(g2);
     }
   } catch { /* no LLM route on this server */ }
@@ -299,7 +303,9 @@ async function loadModels() {  // finished trainings can be evaluated like any a
 }
 async function start(policy, split, limit, pace) {
   const p = String(policy), lim = limit ? +limit : null;
-  const body = p.startsWith("model:") ? { model: p.slice(6), split, limit: lim, pace } : p.startsWith("llm:") ? { policy: "llm", llm_model: p.slice(4), split, limit: lim, pace } : { policy, split, limit: lim, pace };
+  const body = p.startsWith("model:") ? { model: p.slice(6), split, limit: lim, pace }
+    : p.startsWith("llmassist:") ? { policy: "llm", llm_model: p.slice(10), assist: true, split, limit: lim, pace }
+    : p.startsWith("llm:") ? { policy: "llm", llm_model: p.slice(4), split, limit: lim, pace } : { policy, split, limit: lim, pace };
   const res = await postJSON("/api/runs", body);
   if (!res.ok) { $("f-err").textContent = res.error.code === "busy" ? "Уже идёт другой запуск. Дождитесь его или остановите." : res.error.code === "ollama_unavailable" ? "Ollama не запущена на этом компьютере: запустите её и попробуйте снова." : "Не удалось запустить: " + res.error.message; $("f-err").classList.remove("hidden"); return false; }
   current = res.run; location.hash = res.run; drawnFor = ""; setTab("ov"); refresh(); return true;

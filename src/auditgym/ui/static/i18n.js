@@ -24,6 +24,7 @@
 
   const EN = {
 " учится атаковать": " is learning to attack",
+"# LLM + инструменты ({0}): код читает книги и предлагает кандидатов, модель решает — запускается из приложения": "# LLM + tools ({0}): code reads the books and proposes candidates, the model decides — started from the app",
 "# {0}: обученный аудитор запускается из приложения": "# {0}: a trained auditor is started from the app",
 "(ollama pull qwen2.5:1.5b) — только оценка, без обучения весов.": "(ollama pull qwen2.5:1.5b) — evaluation only, no weight training.",
 "+ 1 отправка": "+ 1 submission",
@@ -60,8 +61,12 @@
 "F1 находок": "Finding F1",
 "F1 находок на dev": "Finding F1 on dev",
 "ID и порядок строк — после инъекций": "IDs and row order — after injections",
+"LLM + инструменты": "LLM + tools",
+"LLM + инструменты · ": "LLM + tools · ",
+"LLM + инструменты · {0} · модель судит кандидатов": "LLM + tools · {0} · the model judges candidates",
 "LLM «{0}» (самая маленькая из установленных) предлагаем только для оценки на dev,": "We offer the LLM “{0}” (the smallest installed) for dev evaluation only,",
 "LLM · {0} · первые 3 эпизода": "LLM · {0} · first 3 episodes",
+"LLM · {0} · сама выбирает каждое действие": "LLM · {0} · picks every action itself",
 "Ollama не запущена на этом компьютере: запустите её и попробуйте снова.": "Ollama is not running on this computer: start it and try again.",
 "Ollama не найдена на этом компьютере. Для обучения она не нужна; подключить её можно позже, чтобы оценить LLM-агента.": "Ollama not found on this computer. It is not needed for training; you can connect it later to evaluate an LLM agent.",
 "Ollama не найдена: для обучения она не нужна; LLM-агента можно оценить позже": "Ollama not found: not needed for training; an LLM agent can be evaluated later",

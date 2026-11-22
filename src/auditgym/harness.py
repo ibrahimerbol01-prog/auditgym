@@ -11,6 +11,7 @@ Record contents are not stored, only counts.
 Agents:
 - built-in policies: ``reconcile``, ``random``, ``flag_all`` (the oracle needs the answer, so it is not offered);
 - a local LLM through Ollama on 127.0.0.1 (``policy="llm"`` + an installed ``llm_model``; policies/llm.py), in-process;
+  with ``assist: true`` the model judges candidates that code reads and proposes (policies/llm_assist.py);
 - any program (``--cmd``): one process per episode, reads one observation (JSON) per line on stdin and writes
   one action (JSON) per line on stdout, exactly the AuditEnv action contract.
 """
@@ -404,7 +405,7 @@ class Jobs:
         return self.thread is not None and self.thread.is_alive()
 
     def start(self, policy: Any, split: Any, limit: Any = None, pace: Any = 0.0, model: Any = None,
-              llm_model: Any = None) -> Dict[str, Any]:
+              llm_model: Any = None, assist: Any = False) -> Dict[str, Any]:
         meta: Dict[str, Any] = {}
         if policy == "llm" and model is None:      # a local Ollama model: checked against what the server reports
             if not _llm.valid_model_name(llm_model):
@@ -418,8 +419,13 @@ class Jobs:
             if name is None:
                 return {"ok": False, "error": {"code": "bad_arguments", "message": "llm_model is not installed in Ollama",
                                                "models": tags["models"]}}
-            make = (lambda m: (lambda: _llm.OllamaPolicy(m)))(name)
-            policy, meta = _llm.agent_name(name), {"llm_model": name}
+            if assist is True:    # LLM + audit tools: code reads and proposes, the model judges (policies/llm_assist.py)
+                from .policies.llm_assist import OllamaAssistedPolicy
+                make = (lambda m: (lambda: OllamaAssistedPolicy(m)))(name)
+                policy, meta = _llm.agent_name(name) + "-assist", {"llm_model": name, "llm_assist": True}
+            else:
+                make = (lambda m: (lambda: _llm.OllamaPolicy(m)))(name)
+                policy, meta = _llm.agent_name(name), {"llm_model": name}
             limit = LLM_DEFAULT_LIMIT if limit is None else limit
         elif model is not None:                      # a trained auditor: the best parameters of a training run
             r = read_run(model, self.base) if isinstance(model, str) and RUN_ID.match(model) else None
@@ -605,7 +611,7 @@ class Jobs:
         b = body if isinstance(body, dict) else {}
         if path == "/api/runs":
             res = self.start(b.get("policy"), b.get("split", "dev"), b.get("limit"), b.get("pace", 0.0), b.get("model"),
-                             b.get("llm_model"))
+                             b.get("llm_model"), b.get("assist", False))
             return (200 if res["ok"] else (409 if res["error"]["code"] in ("busy", "ollama_unavailable") else 400)), res
         m = re.match(r"^/api/runs/([^/]+)/stop$", path)
         if m:
