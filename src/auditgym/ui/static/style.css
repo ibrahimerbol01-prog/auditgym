@@ -487,6 +487,11 @@ dl.kv dd.wide{grid-column:1/-1;padding-top:0}
 .rep-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end}
 .rep-head h1{font-size:48px;line-height:1.05;font-weight:300;letter-spacing:-.025em;margin-top:10px}
 .rep-head p{margin:12px 0 0;color:var(--txt2);max-width:600px}
+.vrun{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 24px;align-items:center;margin-top:24px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--s1)}
+.vrun h2{font-size:17px;font-weight:600}
+.vrun p{margin:4px 0 0;color:var(--txt2);font-size:14px;max-width:640px}
+.vrun-log{grid-column:1/-1;margin:0;max-height:260px;overflow:auto;white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--txt2);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+@media (max-width:640px){.vrun{grid-template-columns:1fr}}
 .seal{display:flex;align-items:center;gap:18px;padding:18px 24px}
 .seal #est{font-family:var(--serif);font-weight:300;font-size:64px;line-height:.9;color:var(--txt);letter-spacing:-.03em;font-variant-numeric:lining-nums}
 .seal .sl{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--txt2)}

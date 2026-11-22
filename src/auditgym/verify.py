@@ -538,6 +538,8 @@ def engineering_checks(report_dir: str, traj_path: str) -> List[Dict[str, Any]]:
 
     def e5():
         p = os.path.join(root, "DESIGN.md")
+        if not os.path.exists(p) and os.environ.get("AUDITGYM_DATA"):  # the desktop app bundles it next to its data
+            p = os.path.join(os.environ["AUDITGYM_DATA"], "DESIGN.md")
         return os.path.exists(p) and "Limitations" in open(p, encoding="utf-8").read()
     _check(R, "E5", "honest limitations are documented (DESIGN.md)", e5)
     return R
