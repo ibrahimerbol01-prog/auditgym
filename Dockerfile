@@ -10,7 +10,7 @@ COPY src/ /app/src/
 COPY configs/ /app/configs/
 COPY tests/ /app/tests/
 COPY episodes/ /app/episodes/
-COPY README.md DESIGN.md LICENSE requirements.txt /app/
+COPY judge_adapter.py README.md DESIGN.md LICENSE requirements.txt /app/
 RUN useradd --create-home --uid 10001 auditor && mkdir -p /work && chown auditor /work
 USER auditor
 WORKDIR /work

@@ -60,7 +60,8 @@ class EvaluatorCore:
         self._n += 1
         handle = f"h{self._n}"
         self._eps[handle] = {"private": ep["private"], "episode_id": ep["public"]["manifest"]["episode_id"],
-                             "mode": mode, "run_id": run_id, "scored": False, "ticks": 0}
+                             "mode": mode, "run_id": run_id, "scored": False, "ticks": 0,
+                             "known_ids": public_ids(ep["public"])}
         return {"ok": True, "handle": handle, "public": ep["public"]}
 
     def tick(self, handle: str) -> Dict[str, Any]:
@@ -87,7 +88,7 @@ class EvaluatorCore:
         else:
             try:
                 validate_structure(submission, ep["episode_id"])
-                res = score(submission["findings"], issues, inspection_steps)
+                res = score(submission["findings"], issues, inspection_steps, ep.get("known_ids"))
                 res["status"] = "scored"
             except StructureError as exc:
                 res = {"status": "invalid_structure", "reward": -1.0, "error": str(exc)[:200], "tp": 0,
@@ -134,6 +135,15 @@ class EvaluatorCore:
         except Exception:  # noqa: BLE001 - any failure is a bounded error; the evaluator must never die
             return {"ok": False, "error": {"code": "bad_arguments", "message": "bad request"}}
         return {"ok": False, "error": {"code": "unknown_tool", "message": "unknown command"}}
+
+
+def public_ids(public: Dict[str, Any]) -> set:
+    """Every id an agent can reach through the tools: record keys, FX keys and document ids."""
+    t = public["tables"]
+    ids = {r["row_id"] for r in t["ledger"]} | {r["invoice_id"] for r in t["invoices"]}
+    ids |= {r["payment_id"] for r in t["payments"]} | set(t["documents"])
+    ids |= {f'{r["date"]}|{r["source_currency"]}|{r["target_currency"]}' for r in t["fx"]}
+    return ids
 
 
 def _public_report(res: Dict[str, Any]) -> Dict[str, Any]:

@@ -2,9 +2,15 @@
 
 Published rules (also in policy.json, DESIGN.md):
 - Invalid structure -> episode ends, reward -1, evaluator-side log entry.
-- Normalization: NFKC + trim, IDs and currency upper-cased, ID lists sorted and de-duplicated.
-- A finding matches an issue iff: same type, same canonical affected_ids, same currency,
-  |claimed - expected| <= 1 + conversions, and evidence_ids contain one complete acceptable set.
+- Matching follows the organizers' published conventions (fintech-checks, Nov 20 2026):
+  IDs and currency are compared exactly (case and spaces matter, no NFKC, no trimming);
+  affected_ids and evidence_ids are sets (order and repeats do not matter; limits are checked
+  on the raw lists first).
+- A finding matches an issue iff: same type, the same set of affected_ids, the same currency,
+  |claimed - expected| <= tau, evidence_ids include one complete acceptable set, and every
+  evidence id exists in the episode's public data (an unknown evidence id makes the finding a FP).
+- tau: an explicit ``tolerance_minor`` in the issue if present (fixtures), else the rule published
+  in every policy.json (1 + conversions), else 0 (the organizers' default). See ``tolerance``.
 - One-to-one maximum matching; ties prefer the smaller amount error, then the lower finding index.
 - The explanation is never parsed or scored.
 """
@@ -75,7 +81,23 @@ def parse_submission(text: str) -> Any:
 
 
 def _norm_id(x: str) -> str:
-    return unicodedata.normalize("NFKC", x).strip().upper()
+    return x  # exact comparison (organizers' convention 1 and 5)
+
+
+def _nonneg_int(x: Any) -> Optional[int]:
+    return x if isinstance(x, int) and not isinstance(x, bool) and x >= 0 else None
+
+
+def tolerance(iss: Dict[str, Any]) -> int:
+    """tau for one issue, fixed by published rules and never by the agent's answer:
+    1. an explicit ``tolerance_minor`` in the issue (fixtures use this, e.g. 0);
+    2. else the rule published in every episode's policy.json: 1 + conversions;
+    3. else 0, the organizers' default."""
+    t = _nonneg_int(iss.get("tolerance_minor"))
+    if t is not None:
+        return t
+    c = _nonneg_int(iss.get("conversions"))
+    return 1 + c if c is not None else 0
 
 
 def normalize_finding(f: Dict[str, Any]) -> Dict[str, Any]:
@@ -96,12 +118,14 @@ def amount_error(f: Dict[str, Any], iss: Dict[str, Any]) -> int:
     return abs(f["claimed_amount_minor"] - iss["expected_amount_minor"])
 
 
-def is_compatible(f: Dict[str, Any], iss: Dict[str, Any]) -> bool:
+def is_compatible(f: Dict[str, Any], iss: Dict[str, Any], known_ids: Optional[set] = None) -> bool:
     if f["type"] != iss["type"] or f["affected_ids"] != iss["affected_ids"] or f["currency"] != iss["currency"]:
         return False
-    if amount_error(f, iss) > 1 + int(iss.get("conversions", 0)):
+    if amount_error(f, iss) > tolerance(iss):
         return False
     ev = set(f["evidence_ids"])
+    if known_ids is not None and not ev <= known_ids:
+        return False
     return any(set(s) <= ev for s in iss["acceptable_evidence_sets"])
 
 
@@ -110,18 +134,19 @@ def near_miss(f: Dict[str, Any], iss: Dict[str, Any]) -> Optional[str]:
         return None
     if f["currency"] != iss["currency"]:
         return "currency"
-    if amount_error(f, iss) > 1 + int(iss.get("conversions", 0)):
+    if amount_error(f, iss) > tolerance(iss):
         return "amount outside tolerance"
     return "evidence set incomplete"
 
 
-def match(findings: List[Dict[str, Any]], issues: List[Dict[str, Any]]) -> List[Tuple[int, int]]:
+def match(findings: List[Dict[str, Any]], issues: List[Dict[str, Any]],
+          known_ids: Optional[set] = None) -> List[Tuple[int, int]]:
     """Deterministic maximum one-to-one matching (Kuhn) with tie preferences."""
     nf = [normalize_finding(f) for f in findings]
     ni = [_norm_issue(i) for i in issues]
     adj: List[List[int]] = []
     for f in nf:
-        cands = [j for j, iss in enumerate(ni) if is_compatible(f, iss)]
+        cands = [j for j, iss in enumerate(ni) if is_compatible(f, iss, known_ids)]
         cands.sort(key=lambda j: (amount_error(f, ni[j]), j))
         adj.append(cands)
     owner: Dict[int, int] = {}
@@ -157,8 +182,9 @@ def terminal_reward(f1: float, inspection_steps: int) -> float:
     return max(-1.0, min(1.0, r))
 
 
-def score(findings: List[Dict[str, Any]], issues: List[Dict[str, Any]], inspection_steps: int) -> Dict[str, Any]:
-    pairs = match(findings, issues)
+def score(findings: List[Dict[str, Any]], issues: List[Dict[str, Any]], inspection_steps: int,
+          known_ids: Optional[set] = None) -> Dict[str, Any]:
+    pairs = match(findings, issues, known_ids)
     tp = len(pairs)
     fp = len(findings) - tp
     fn = len(issues) - tp

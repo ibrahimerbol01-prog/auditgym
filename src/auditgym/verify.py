@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 from .config import ERROR_TYPES, ConfigError, make_config
 from .env.env import AuditEnv
+from .eval.scoring import tolerance as scoring_tolerance
 from .eval.scoring import parse_submission, score, StructureError, validate_structure
 from .eval.service import EvaluatorCore, ServiceClient
 from .gen.build import generate
@@ -271,10 +272,11 @@ def reward_checks() -> List[Dict[str, Any]]:
                                                                    for t in ("date_or_fx", "period_classification")])["reward"] <= -0.5)
     _check(R, "R5", "saving steps only slightly separates equal answers", lambda: 0 < sc(full, steps=10)["reward"] - sc(full, steps=40)["reward"] <= 0.07)
     _check(R, "R6", "wrong type is not matched", lambda: sc([f_of(one, type="period_classification" if one["type"] != "period_classification" else "date_or_fx")], [one])["tp"] == 0)
-    _check(R, "R7", "wrong or partial affected ids are not matched; case and order are normalized",
+    _check(R, "R7", "wrong or partial affected ids are not matched; order and repeats do not matter, case does",
            lambda: sc([f_of(one, affected_ids=one["affected_ids"][:1] + ["EXTRA"])], [one])["tp"] == 0
-           and sc([f_of(one, affected_ids=[x.lower() for x in reversed(one["affected_ids"])])], [one])["tp"] == 1)
-    tol = 1 + fx["conversions"]
+           and sc([f_of(one, affected_ids=list(reversed(one["affected_ids"])) + one["affected_ids"][:1])], [one])["tp"] == 1
+           and sc([f_of(one, affected_ids=[x.lower() for x in one["affected_ids"]])], [one])["tp"] == 0)
+    tol = scoring_tolerance(fx)
     _check(R, "R8", "amount at the tolerance edge: inside matches, outside does not",
            lambda: sc([f_of(fx, claimed_amount_minor=fx["expected_amount_minor"] + tol)], [fx])["tp"] == 1
            and sc([f_of(fx, claimed_amount_minor=fx["expected_amount_minor"] + tol + 1)], [fx])["tp"] == 0)

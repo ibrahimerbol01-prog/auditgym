@@ -48,7 +48,9 @@ FINDING_RULES = {
                               "currency": "base currency",
                               "minimal_evidence": "invoice_id, its accounts-receivable ledger row and, for a foreign invoice, the fx row of the policy date"},
     "tolerance": "|claimed - expected| <= 1 + conversions (0 for duplicates, 1 when a conversion is involved)",
-    "matching": "one-to-one; duplicates and extra findings are false positives; the explanation is never scored",
+    "matching": "one-to-one; duplicates and extra findings are false positives; ids and currency are compared "
+                "exactly (case matters); an evidence id that does not exist makes the finding a false positive; "
+                "the explanation is never scored",
 }
 
 TOOLS = {

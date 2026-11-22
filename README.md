@@ -12,6 +12,43 @@ verified, **§3** the deliverables of brief §09, **§4** what the judges' own p
 
 ---
 
+## 0. Judge adapter (organizers' check definitions, Nov 20)
+
+`judge_adapter.py` in the repository root (in the container: `/app/judge_adapter.py`, run with
+`PYTHONPATH=/app/src`, working directory `/app`) implements the published interface exactly:
+
+```python
+import judge_adapter as J
+J.generate_episode(seed, config, output_dir)          # public/ + private/ (truth, provenance, clean) in output_dir
+env = J.make_env()
+obs, info = env.reset(seed, {"mode": "closed", "episode_dir": output_dir, "team_config": {}})
+obs, reward, terminated, truncated, info = env.step({"name": "list_records", "args": {"table": "ledger", "cursor": None, "limit": 50}})
+J.score_episode(output_dir, findings_json, inspection_steps)   # {"tp","fp","fn","precision","recall","f1","return"}
+```
+
+- **Tables**: `ledger`, `invoices`, `payments`, `fx` (canonical names, no translation). Documents: `get_document{doc_id}`.
+- **Record keys**: ledger `row_id`, invoices `invoice_id`, payments `payment_id`, fx `"<date>|<source>|<target>"`, documents `doc_id`.
+- **Results**: list_records `{"records": [...], "next_cursor": str|null}`; get_record / get_document the object;
+  calculator a decimal string (`"0.3"` for `0.1+0.2`); submit `{"accepted": true}` (train mode adds the report).
+- **Observations**: first `{"task", "manifest", "policy", "remaining_steps": 100}`, then
+  `{"result", "error", "remaining_steps"}`; errors are `{"code", "message"}` without paths, seeds or truth.
+- **Closed mode**: every reward returned to the policy is `0`, including the terminal one; the true reward is computed
+  and logged by the evaluator process. `mode: "train"` returns the terminal reward.
+- **Error types** (`type`): `duplicate_invoice`, `payment_allocation`, `date_or_fx`, `period_classification`.
+  Canonical `affected_ids`: the invoice(s) for duplicates (original + copy), FX and period errors; the payment and the
+  invoice for allocation errors.
+- **Matcher conventions** (as published): ids and currency compared exactly; `affected_ids`/`evidence_ids` are sets
+  after the raw-length limits; an unknown evidence id makes the finding a FP; one-to-one maximum matching;
+  **τ** per issue = `tolerance_minor` in truth if present (fixtures: set it, e.g. `0`), else the rule in every
+  `policy.json` (`1 + conversions`), else `0`.
+- **Scenarios for D01–D20** via `team_config`: `errors` (count per type, 0–4, each type independently),
+  `interactions` (`["A"]`: foreign invoice near period end with FX + period + partial payment; `["B"]`: duplicate whose
+  copy is also mis-periodized), `distractor_level` 0–2 (split / lump-sum payments, short pay with credit note,
+  advances in unapplied cash, recurring invoices, UTC timestamps at the period boundary), `foreign_share`,
+  `period_months`, `layout_seed`, `id_seed`. A clean company: all `errors` 0 and no interactions.
+- **Self-check of the published tests**: `PYTHONPATH=src python -m unittest tests.test_judge_adapter -v` runs C01–C17,
+  C19, matcher tests 1–20, examples M01–M12 and the paired checks (row permutation + ID renaming in a copy).
+
 ## 1. One command, offline (≈ 20 s)
 
 ```bash

@@ -64,7 +64,7 @@ def load_episode_dir(ep_dir: str, with_private: bool = False) -> Dict[str, Any]:
         out["private"] = {"episode_id": out["public"]["manifest"]["episode_id"],
                           "truth": _load(os.path.join(prv, "truth.json")),
                           "provenance": _load(os.path.join(prv, "provenance.json")),
-                          "clean": read_tables(os.path.join(prv, "clean"))}
+                          "clean": read_tables(os.path.join(prv, "clean")) if os.path.isdir(os.path.join(prv, "clean")) else {}}
     return out
 
 

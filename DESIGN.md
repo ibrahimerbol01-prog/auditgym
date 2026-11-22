@@ -44,8 +44,8 @@ No injection changes two of {amount, period, allocation rows, extra record}. Int
 ## 4. Matching and reward (published, code in `eval/scoring.py`)
 
 - Invalid structure (wrong keys or types, unknown type, NaN/Infinity, `bool`/float/negative/huge amounts, > 30 findings, > 10 evidence ids, explanation > 1000 chars, wrong episode_id) → episode ends, reward −1, evaluator log entry.
-- Normalization: NFKC + trim; ids and currency upper-cased; id lists sorted and de-duplicated.
-- A finding matches an issue iff type, canonical `affected_ids` and currency are equal, `|claimed − expected| ≤ 1 + conversions`, and the evidence contains one complete acceptable set.
+- Matching conventions follow the organizers' check definitions (Nov 20): ids and currency are compared exactly (case and spaces matter); `affected_ids` and `evidence_ids` are sets after the raw-length limits; an evidence id that does not exist in the episode makes the finding a FP.
+- A finding matches an issue iff type, canonical `affected_ids` and currency are equal, `|claimed − expected| ≤ τ` (τ = `tolerance_minor` in truth if present, else the published `1 + conversions`, else 0), and the evidence contains one complete acceptable set. The jury's entry point is `judge_adapter.py` (README §0).
 - One-to-one maximum matching (augmenting paths); ties prefer the smaller amount error, then the lower finding index. Unmatched and duplicate findings are false positives.
 - P, R = 0 on a zero denominator; F1 = 2TP/(2TP+FP+FN); both empty → F1 = 1; empty reference with findings → F1 = 0.
 - `reward = clip(2·F1 − 1 − 0.002·inspection_steps, −1, 1)`. The explanation is never parsed.
