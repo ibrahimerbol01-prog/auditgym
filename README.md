@@ -232,8 +232,8 @@ iteration, and a fixed **test** set of 20 fresh episodes (5 clean, 5 interacting
 
 | What | Result on the 20 test episodes |
 |---|---|
-| **Trained auditor** (a 20-parameter rule policy, CEM on CPU, about 20 s), seeds 1–3 | dev from −0.65 / −0.60 / +0.01 to **+0.961**; test **+0.961**, F1 1.00 — equal to the Reconciler, not better |
-| **Control: the same training with noise instead of the reward** (brief §01), seeds 1–3 | test −0.14 / −0.13 / +0.48 against +0.961 with the reward: the gain comes from the reward, not from the search or the policy space |
+| **Trained auditor** (a 20-parameter rule policy, CEM on CPU, about 20 s), seeds 1–3 | dev from −0.62 / −0.60 / +0.28 to **+0.961**; test **+0.961**, F1 1.00 — equal to the Reconciler, not better. Over seeds 1–12: every Standard run ends at +0.70 or more on test (mean +0.92), every Deep run at +0.961 |
+| **Control: the same training with noise instead of the reward** (brief §01), seeds 1–3 | test +0.21 / −0.07 / +0.02 against +0.961 with the reward: the gain comes from the reward, not from the search or the policy space |
 | **Red team** (§5) | 0 of 9 attacks beat silence; the RL attacker converges to silence |
 | **Local LLM, pure** (Qwen2.5 1.5B / 0.5B on CPU; the model picks every action) | −0.60 / −0.50: no error found before the 60 s limit |
 | **Local LLM + tools** (code reads and proposes, the strict rules re-check, the model decides) | −0.09 / −0.33 (1.5B: 22 of 79 errors, precision 0.88). Without the re-check the model alone scores −0.82: the gain comes mostly from the tools |
