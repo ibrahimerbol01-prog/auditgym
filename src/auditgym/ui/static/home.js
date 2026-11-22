@@ -54,7 +54,7 @@ function frame(t) {
 })();
 
 // ---- launch bar
-const SIZES = { fast: { iterations: 12, population: 8, episodes_per_candidate: 2 }, std: { iterations: 30, population: 16, episodes_per_candidate: 4 }, deep: { iterations: 40, population: 24, episodes_per_candidate: 4 } };
+const SIZES = { fast: { iterations: 16, population: 16, episodes_per_candidate: 2 }, std: { iterations: 30, population: 16, episodes_per_candidate: 4 }, deep: { iterations: 40, population: 24, episodes_per_candidate: 4 } };
 fetch("/api/scout", { cache: "no-store" }).then((r) => r.json()).then((d) => {
   const sc = d.scout || {}, m = sc.machine || {}, rec = (sc.recommendation || {}).config;
   if (rec) SIZES.std = { iterations: rec.iterations, population: rec.population, episodes_per_candidate: rec.episodes_per_candidate };

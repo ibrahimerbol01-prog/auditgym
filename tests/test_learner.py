@@ -43,6 +43,12 @@ class TestLearner(unittest.TestCase):
             self.assertIn(k, r["summary"])
         self.assertEqual([e["type"] for e in self.events], ["iteration"] * 3 + ["run_end"])
 
+    def test_cem_keeps_the_mean_of_theta_bounded(self):
+        """Unbounded, the CEM mean drifted to +-10: every candidate then behaved alike and the search was stuck (seed 5
+        of the Standard size ended with duplicates only). The bound keeps every setting able to flip."""
+        for p in self.trained["points"]:
+            self.assertTrue(all(abs(x) <= learner.MU_BOUND + 1e-9 for x in p["mu"]), p["mu"])
+
     def test_live_view_is_the_real_search(self):
         """The "model at work" panel shows the search itself: every candidate's score, the elite the update used,
         the mean of theta after the update, and a replay of the best candidate scored by the evaluator."""

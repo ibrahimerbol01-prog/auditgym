@@ -502,6 +502,12 @@ SIGMA0, SIGMA_FLOOR = 2.0, 0.1
 CEM_SMOOTH = 0.3
 EXTRA0, EXTRA_FRAC = 1.0, 1.0    # CEM extra noise (variance), decays to 0 at EXTRA_FRAC of the iterations
 RF_LR_MU, RF_LR_SIGMA = 1.5, 0.15
+# CEM's escape from local optima (measured over seeds 1-12 at the app's sizes; docs/TRAINING_API.md). All of them use
+# the training reward only: the held-out dev split is never fed back into the search.
+MU_BOUND = 3.0                   # |mean of theta| <= 3: sigma(3) = 0.95, so a setting can still flip; unbounded, the mean
+                                 # drifted to +-10 and every candidate behaved the same (no signal left to follow)
+PLATEAU, PLATEAU_GAIN = 4, 0.02  # 4 iterations without a better elite mean (+0.02) -> widen the search again ...
+RESTART_SIGMA = 1.5              # ... to at least this sigma; the mean stays, and the carried champion keeps the best
 
 
 def normalize_config(config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
@@ -592,6 +598,8 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
     forbidden = forbidden_seeds(configs)
     dev_cache: Dict[str, Any] = {}
     total_eps, total_sec = 0, 0.0
+    champ: Optional[List[float]] = None          # elitism: the best candidate of the previous iteration
+    stall_best, stall_n = -9.0, 0                # plateau: iterations without a better elite mean (training reward)
     try:
         for i in range(n_iter):
             if stop is not None and stop.is_set():
@@ -603,6 +611,8 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
             env = AuditEnv(mode="open", service=svc, run_id="learner-train")
             eps_noise = [[_gauss(rng) for _ in range(N_PARAMS)] for _ in range(pop)]
             cands = [[mu[d] + sig[d] * e[d] for d in range(N_PARAMS)] for e in eps_noise]
+            if champ is not None and method == "cem":   # elitism: the last sample is replaced by the champion
+                cands[-1] = list(champ)
             scores: List[float] = []
             aborted = False
             for th in cands:
@@ -624,14 +634,26 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
             except Exception as exc:  # noqa: BLE001 - the live view must never stop a training
                 live = {"error": str(exc)[:200]}
             env.close()
+            champ = list(cands[order[0]])
             if method == "cem":
                 extra = EXTRA0 * max(0.0, 1.0 - i / max(1.0, EXTRA_FRAC * n_iter))
+                raw = [math.log(n_elite + 0.5) - math.log(j + 1) for j in range(n_elite)]   # rank weights: the best
+                wts = [x / sum(raw) for x in raw]                                            # elite counts most
                 for d in range(N_PARAMS):
                     vals = [cands[k][d] for k in elite]
-                    m = _mean(vals)
-                    var = _mean([(v - m) ** 2 for v in vals])
+                    m = sum(wv * v for wv, v in zip(wts, vals))
+                    var = sum(wv * (v - m) ** 2 for wv, v in zip(wts, vals))
                     mu[d] = CEM_SMOOTH * m + (1 - CEM_SMOOTH) * mu[d]
                     sig[d] = max(SIGMA_FLOOR, math.sqrt(CEM_SMOOTH * var + (1 - CEM_SMOOTH) * sig[d] ** 2 + extra))
+                mu = [max(-MU_BOUND, min(MU_BOUND, x)) for x in mu]
+                em = _mean([scores[k] for k in elite])          # plateau: judged on the training reward only
+                if em > stall_best + PLATEAU_GAIN:
+                    stall_best, stall_n = em, 0
+                else:
+                    stall_n += 1
+                    if stall_n >= PLATEAU and i < n_iter - 3:      # widen the search again; mu stays where it is
+                        sig = [max(x, RESTART_SIGMA) for x in sig]
+                        stall_n, stall_best = 0, em
             else:  # REINFORCE with a Gaussian policy over theta and the population mean as baseline
                 b = _mean(scores)
                 sd = math.sqrt(_mean([(r - b) ** 2 for r in scores])) or 1.0

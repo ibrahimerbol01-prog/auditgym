@@ -49,6 +49,12 @@ no paid API, no network), and an improvement may only be shown as a **controlled
     company. Older runs have none of these fields.
   - `on_event(e)`: `{"type": "iteration", "point": {...}}`, `{"type": "run_end", "run": {...}}`.
   - Deterministic for a given config (same seed → same curve).
+  - CEM escapes local optima with the training reward only (dev is never fed back into the search): the mean of
+    theta is bounded to ±3 (σ(3) = 0.95, so a setting can still flip; unbounded, it drifted to ±10 and every
+    candidate behaved alike), the best candidate of an iteration is carried into the next one (elitism), the elite
+    is rank-weighted, and after 4 iterations without a better elite mean (+0.02) the search widens again
+    (σ ≥ 1.5). Over seeds 1–12, Standard (30 × 16 × 4) went from 3 runs stuck at −0.13 on test (duplicates only)
+    to none (mean +0.92), and Deep (40 × 24 × 4) to +0.961 on every seed. REINFORCE is unchanged.
 - `train/learn_rules.py --seed 1 [--iterations N] [--method cem]`: CLI wrapper; prints progress, writes
   `train/curve.json` = `{"points": [{"iteration": i, "train_reward": train_mean, "dev_reward": dev.reward, "steps": ...}], "config": ..., "baselines": ...}`
   (only points with a dev evaluation carry `dev_reward`).
