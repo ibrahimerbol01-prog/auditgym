@@ -1,7 +1,7 @@
 """Updates for the packaged app: find out whether a newer build exists and install it with the same one-line installer.
 
 Two channels, chosen from the build stamp (BUILD.txt, "<ref> @ <sha> · built ..."):
-  * release builds (ref like v0.2.0): the newest release of the public releases repo, plain HTTPS, no login;
+  * release builds (ref like v0.2.0): the newest release of the public repository, plain HTTPS, no login;
   * team branch builds (any other ref): the newest successful "Desktop app" CI build of that branch, through the
     GitHub CLI (`gh`, logged in), compared by commit.
 
@@ -22,8 +22,8 @@ import sys
 import time
 import urllib.request
 
-PUBLIC = "ibrahimerbol01-prog/auditgym-releases"   # public: release builds and their installers
-PRIVATE = "ibrahimerbol01-prog/auditgym"           # private source: CI builds of branches (needs gh)
+PRIVATE = "ibrahimerbol01-prog/auditgym"           # the repository: CI builds of branches (artifacts need gh)
+PUBLIC = PRIVATE                                   # its releases: release builds and their installers, no login
 HOME = os.path.join(os.path.expanduser("~"), ".auditgym")
 CACHE = os.path.join(HOME, "update.json")
 LOG = os.path.join(HOME, "update.log")
@@ -35,6 +35,12 @@ def parse_stamp(stamp: str) -> tuple[str, str]:
     """'v0.2.0 @ 1a2b3c4 · built ...' -> ('v0.2.0', '1a2b3c4'); ('', '') for a source checkout."""
     m = re.match(r"^(\S+) @ ([0-9a-f]{7,40})", stamp or "")
     return (m.group(1), m.group(2)) if m else ("", "")
+
+
+def built_at(stamp: str) -> str:
+    """'... · built 2026-11-21 10:00 UTC' -> '2026-11-21T10:00Z' (comparable with GitHub's published_at); '' if absent."""
+    m = re.search(r"built (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) UTC", stamp or "")
+    return f"{m.group(1)}T{m.group(2)}Z" if m else ""
 
 
 def version_key(tag: str) -> tuple | None:
@@ -64,7 +70,8 @@ def _gh(*args: str) -> str | None:
 def latest_release() -> dict | None:
     d = _get_json(f"https://api.github.com/repos/{PUBLIC}/releases/latest")
     tag = d.get("tag_name") or ""
-    return {"version": tag, "url": d.get("html_url"), "notes": (d.get("body") or "")[:2000]} if version_key(tag) else None
+    return {"version": tag, "url": d.get("html_url"), "notes": (d.get("body") or "")[:2000],
+            "published": d.get("published_at") or ""} if version_key(tag) else None
 
 
 def latest_branch_build(branch: str) -> dict | None:
@@ -104,7 +111,14 @@ def check(stamp: str, force: bool = False) -> dict:
         else:
             build = latest_branch_build(ref)
             if build is None:
-                res["error"] = "branch builds update through the GitHub CLI: install gh and run gh auth login"
+                # No GitHub CLI (or no newer CI build): a test build moves to the public releases as soon as one is
+                # newer than itself, so nobody is stuck on a pre-release build; never offers an older release.
+                rel, when = latest_release(), built_at(stamp)
+                if rel and when and rel["published"][:16] > when[:16]:
+                    res.update(channel="release", latest=rel, available=True)
+                else:
+                    res["error"] = ("test build: it updates to the next release once one is published "
+                                    "(or to newer test builds through the GitHub CLI: gh auth login)")
             else:
                 res["latest"] = build
                 res["available"] = not build["sha"].startswith(sha)

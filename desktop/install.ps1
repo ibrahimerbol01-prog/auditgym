@@ -2,8 +2,8 @@
 #
 #   irm is.gd/auditgym | iex
 #
-# (the short link points at https://github.com/ibrahimerbol01-prog/auditgym-releases/releases/latest/download/install.ps1;
-#  the source repo is private, builds are published to that public releases-only repo by the Release workflow)
+# Without the short link:  irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex
+# (the short link points there; the Release workflow publishes every tagged build to this public repository)
 #   Team, newest CI build of a branch (GitHub CLI logged in):
 #     $env:AUDITGYM_BRANCH='main'; gh api "repos/ibrahimerbol01-prog/auditgym/contents/desktop/install.ps1?ref=main" -H "Accept: application/vnd.github.raw" | Out-String | iex
 #
@@ -16,8 +16,8 @@
     # Scoped to this block, so running the one-liner does not change the caller's session settings.
     $ErrorActionPreference = 'Stop'
     $ProgressPreference = 'SilentlyContinue'   # Invoke-WebRequest is much faster without the progress bar
-    $Repo = 'ibrahimerbol01-prog/auditgym'                 # private source: CI branch builds (AUDITGYM_BRANCH, needs gh)
-    $Public = 'ibrahimerbol01-prog/auditgym-releases'      # public releases: the default, plain HTTPS, no login
+    $Repo = 'ibrahimerbol01-prog/auditgym'                 # CI branch builds (AUDITGYM_BRANCH; artifacts need gh)
+    $Public = $Repo                                        # releases: the default, plain HTTPS, no login
     $Version = if ($env:AUDITGYM_VERSION) { $env:AUDITGYM_VERSION } else { 'latest' }
     function Say([string]$Message) { Write-Host "AuditGym installer: $Message" }
     function Fail([string]$Message) { throw "AuditGym installer: error: $Message" }

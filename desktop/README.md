@@ -15,9 +15,16 @@ irm is.gd/auditgym | iex                 # Windows (PowerShell)
 curl -fsSL is.gd/auditgym_sh | sh        # macOS / Linux
 ```
 
-The source repository is private. The **Release** workflow publishes every tagged build (zips, installers,
-`SHA256SUMS.txt`) to the public, releases-only repository `ibrahimerbol01-prog/auditgym-releases`, and the two
-short links point at its `releases/latest/download/install.ps1` and `install.sh`. No GitHub login is needed.
+The **Release** workflow publishes every tagged build (zips, installers, `SHA256SUMS.txt`) as a release of this
+public repository, and the two short links point at its `releases/latest/download/install.ps1` and `install.sh`.
+No GitHub login is needed. The same without the short links:
+
+```powershell
+irm https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.ps1 | iex
+```
+```bash
+curl -fsSL https://github.com/ibrahimerbol01-prog/auditgym/releases/latest/download/install.sh | sh
+```
 
 ### Team: the newest CI build of a branch (before a release)
 
@@ -64,7 +71,7 @@ minute; the log is `~/.auditgym/update.log`). It is refused while a training or 
 auditgym update
 ```
 
-Release builds follow the newest release of `auditgym-releases` (no login). Team branch builds follow the newest CI
+Release builds follow the newest release of this repository (no login). Team branch builds follow the newest CI
 build of their branch, which needs the GitHub CLI logged in (`gh auth login`). Offline, nothing is offered and the
 app works as before.
 

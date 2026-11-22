@@ -5,6 +5,7 @@ Standard library only: pywebview and PyInstaller are not needed for these tests.
 import importlib.util
 import os
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -128,7 +129,24 @@ class UpdaterTests(unittest.TestCase):
         self.assertTrue(self.u.check("main @ 1a2b3c4 · built x")["available"])
         self.assertFalse(self.u.check("main @ abcdef1 · built x", force=True)["available"])
         self.u.latest_branch_build = lambda b: None
-        self.assertIn("gh", self.u.check("main @ 1a2b3c4 · built x", force=True)["error"])
+        self.u.latest_release = lambda: {"version": "v0.2.0", "url": "u", "notes": "", "published": "2026-11-22T12:00:00Z"}
+        older = self.u.check("main @ 1a2b3c4 · built 2026-11-22 13:00 UTC", force=True)
+        self.assertFalse(older["available"], "never offers a release older than the build")
+        self.assertIn("gh auth login", older["error"])
+        newer = self.u.check("3/merge @ 1a2b3c4 · built 2026-11-22 11:00 UTC", force=True)
+        self.assertEqual((newer["channel"], newer["available"], newer["latest"]["version"]), ("release", True, "v0.2.0"),
+                         "without gh, a test build moves to a newer release")
+        cmd, env = self.u.installer_command(newer, detached=False)
+        self.assertEqual(env["AUDITGYM_VERSION"], "v0.2.0")
+        self.assertNotIn("AUDITGYM_BRANCH", env)
+
+    def test_pull_request_builds_are_named_after_their_branch(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("build", os.path.join(ROOT, "desktop", "build.py"))
+        b = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(b)
+        with mock.patch.dict(os.environ, {"GITHUB_HEAD_REF": "task/x", "GITHUB_REF_NAME": "3/merge", "GITHUB_SHA": "abcdef1234"}):
+            self.assertTrue(b.build_stamp().startswith("task/x @ abcdef1 · built "))
 
     def test_offline_and_source_checkout_offer_nothing(self):
         def boom():
