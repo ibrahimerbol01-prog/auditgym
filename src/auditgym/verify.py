@@ -547,13 +547,18 @@ def estimate(areas: Dict[str, List[Dict[str, Any]]]) -> Dict[str, float]:
     return est
 
 
-def main(argv: List[str] | None = None) -> int:
-    for stream in (sys.stdout, sys.stderr):  # the ✓ marks on any console code page (Windows defaults to cp1252)
+def utf8_output() -> None:
+    """Print ✓ marks, rules and Cyrillic on any console code page (Windows CI pipes default to cp1252)."""
+    for stream in (sys.stdout, sys.stderr):
         if stream is not None and (getattr(stream, "encoding", "") or "").lower().replace("-", "") != "utf8":
             try:
                 stream.reconfigure(encoding="utf-8", errors="replace")
             except (AttributeError, ValueError):
                 pass
+
+
+def main(argv: List[str] | None = None) -> int:
+    utf8_output()
     ap = argparse.ArgumentParser(description="AuditGym verification")
     ap.add_argument("--out", default="report.json")
     ap.add_argument("--trajectories", default="trajectories.jsonl")
