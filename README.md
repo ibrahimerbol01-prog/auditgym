@@ -19,12 +19,24 @@ docker build -t auditgym .
 docker run --rm --network none auditgym            # = python -m auditgym.verify, inside 2 CPU / 4 GB
 ```
 
-Without Docker — Python 3.11, nothing to install (the runtime is the standard library only):
+**Without Docker** — any Python 3.11, 3.12 or 3.13; no dependencies (the runtime is the standard library only), so
+nothing is downloaded:
+
+```bash
+git clone https://github.com/ibrahimerbol01-prog/auditgym && cd auditgym
+python -m pip install -e .        # adds the `auditgym` command; no packages are fetched
+auditgym verify                   # the same check as the Docker image
+```
+
+Or with no install step at all, from the checkout:
 
 ```bash
 PYTHONPATH=src python -m auditgym.verify                      # Linux / macOS
 $env:PYTHONPATH="src"; python -m auditgym.verify              # Windows PowerShell
 ```
+
+After `pip install -e .`, every command below also works as `auditgym <command>` (`auditgym ui`, `auditgym tui`,
+`auditgym demo`, `auditgym run-agent ...`).
 
 Expected output (abridged):
 
