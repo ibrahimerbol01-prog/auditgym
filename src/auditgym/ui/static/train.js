@@ -9,7 +9,7 @@ const svg = (tag, attrs = {}, parent) => { const e = document.createElementNS(SV
 const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const PRESETS = { mixed: "смешанные", simple: "простые", interacting: "с взаимодействиями" };
 const METHODS = { cem: "CEM", reinforce: "REINFORCE" };
-const STATUS = { running: ["идёт", "lime"], done: ["завершено", "dim"], stopped: ["остановлено", "gold"], error: ["ошибка", "pink"] };
+const STATUS = { running: ["идёт", "lime"], done: ["завершено", "dim"], stopped: ["остановлено", "gold"], error: ["ошибка", "pink"], interrupted: ["прервано", "gold"] };
 const LIMITS = { iterations: [2, 200, 1], population: [4, 64, 1], episodes_per_candidate: [1, 10, 1], seed: [0, 1000000, 1], elite_frac: [0.05, 0.5, 0], eval_every: [1, 20, 1], pace: [0, 0.5, 0] };
 const FIELDS = { iterations: "f-iter", population: "f-pop", episodes_per_candidate: "f-epc", seed: "f-seed", elite_frac: "f-elite", eval_every: "f-every", pace: "f-pace" };
 const FIELD_NAMES = { iterations: "Итераций", population: "Популяция", episodes_per_candidate: "Эпизодов на кандидата", seed: "Сид", elite_frac: "Доля элиты", eval_every: "Проверка на dev", pace: "Темп показа" };
@@ -446,8 +446,9 @@ function renderDash() {
   const every = c.eval_every || 2, nextDev = Math.min(n - 1, (Math.floor(at / every) + 1) * every);
   $("k-prog").textContent = r.status === "running" ? `итерация ${at + 2 > n ? n : at + 2} из ${n} · следующая проверка на dev — итерация ${nextDev + 1}`
     : r.status === "done" ? `завершено · ${plural(n, "итерация", "итерации", "итераций")} · ${plural(devs.length, "проверка", "проверки", "проверок")} на dev`
-    : r.status === "stopped" ? `остановлено на итерации ${at + 1} из ${n}` : `ошибка на итерации ${at + 1} из ${n}`;
+    : r.status === "stopped" ? `остановлено на итерации ${at + 1} из ${n}` : r.status === "interrupted" ? `прервано на итерации ${at + 1} из ${n}: приложение закрылось во время обучения` : `ошибка на итерации ${at + 1} из ${n}`;
   for (const ch of Object.values(charts)) ch.update(pts, n);
+  renderLive();
   renderPolicy();
   renderTable(pts);
   renderTest();
@@ -542,6 +543,137 @@ function renderTable(pts) {
   }
 }
 
+// ---- "Model at work": what the best candidate of the last iteration actually did (replayed by the trainer on a
+// training episode and scored by the evaluator), every candidate of every iteration, and the 20 weights over time.
+const PARAM_LABELS = ["Читать курсы валют", "Читать счета", "Читать платежи", "Читать главную книгу", "Страниц курсов",
+  "Страниц счетов", "Страниц платежей", "Страниц главной книги", "Проверка дублей счетов", "Проверка разноски платежей",
+  "Проверка курсов", "Проверка периода", "Критерий дубля", "Допуск по курсу", "Дата курса", "Дата для периода",
+  "Строгость разноски", "Доказательства", "Порог суммы", "Предел находок"];  // order of theta (learner.PARAMS)
+const TABLES = [["fx", "Курсы"], ["invoices", "Счета"], ["payments", "Платежи"], ["ledger", "Главная книга"]];
+const sigm = (x) => 1 / (1 + Math.exp(-Math.max(-60, Math.min(60, x))));
+const money = (minor, cur) => (minor == null ? "" : `${thin(Math.floor(minor / 100))}.${String(Math.abs(minor) % 100).padStart(2, "0")} ${cur || ""}`.trim());
+let liveKey = "";
+
+class PopChart {  // one column of dots per iteration: every candidate's training reward, the kept elite filled
+  constructor(host) { this.host = host; this.key = ""; this.drawn = 0; }
+  update(pts, n) {
+    const P = pts.filter((p) => Array.isArray(p.scores)), W = Math.max(240, Math.round(this.host.clientWidth || 600));
+    const key = [run.id, W, n].join("|");
+    if (key !== this.key || P.length < this.drawn) { this.build(W, Math.max(2, n)); this.key = key; this.drawn = 0; }
+    const fresh = P.slice(this.drawn);
+    for (const p of fresh) this.column(p, fresh.length === 1 && this.drawn > 0);
+    this.drawn = P.length;
+    const lp = P[P.length - 1];
+    if (lp) { const x = this.X(lp.i); this.now.setAttribute("x", x - this.cw / 2); this.now.setAttribute("width", this.cw); this.now.removeAttribute("hidden"); }
+    const best = lp ? Math.max(...lp.scores) : null, worst = lp ? Math.min(...lp.scores) : null;
+    this.svg.setAttribute("aria-label", lp ? `Популяция: итерация ${lp.i + 1}, кандидатов ${lp.scores.length}, лучший ${f2(best)}, худший ${f2(worst)}` : "Популяция: пока нет итераций");
+  }
+  build(W, n) {
+    const H = 200, m = { l: 34, r: 10, t: 8, b: 22 };
+    this.W = W; this.n = n; this.m = m;
+    this.cw = Math.max(3, (W - m.l - m.r) / n);
+    this.X = (i) => m.l + this.cw * (i + 0.5);
+    this.Y = (v) => m.t + ((1 - Math.max(-1, Math.min(1, v))) / 2) * (H - m.t - m.b);
+    this.host.replaceChildren();
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: H, class: "ch tr-ch pop-ch", role: "img", "aria-roledescription": "график" }, this.host);
+    this.svg = s;
+    this.now = svg("rect", { y: m.t, height: H - m.t - m.b, class: "pop-now", hidden: "" }, s);
+    for (const t of [-1, -0.5, 0, 0.5, 1]) {
+      svg("line", { x1: m.l, x2: W - m.r, y1: this.Y(t), y2: this.Y(t), class: t === 0 ? "zero" : "grid" }, s);
+      svg("text", { x: m.l - 6, y: this.Y(t) + 3.5, "text-anchor": "end", class: "tick" }, s).textContent = tickTxt(t);
+    }
+    for (const t of xTicks(n)) svg("text", { x: this.X(t - 1), y: H - 6, "text-anchor": "middle", class: "tick" }, s).textContent = t;
+    this.g = svg("g", {}, s);
+  }
+  column(p, animate) {
+    const k = p.scores.length, el_ = new Set(p.elite || []), spread = Math.min(this.cw * 0.7, 10), r = this.cw < 6 ? 1.6 : 2.4;
+    const g = svg("g", { class: "pop-col" + (animate && !RM ? " new" : "") }, this.g);
+    p.scores.forEach((v, j) => svg("circle", { cx: (this.X(p.i) + (k > 1 ? (j / (k - 1) - 0.5) * spread : 0)).toFixed(1), cy: this.Y(v).toFixed(1), r, class: el_.has(j) ? "pd el" : "pd" }, g));
+  }
+}
+
+class WeightMap {  // rows = the 20 parameters, columns = iterations; shade = sigmoid(theta mean), as the policy reads it
+  constructor(host) { this.host = host; this.key = ""; this.drawn = 0; }
+  update(pts, n) {
+    const P = pts.filter((p) => Array.isArray(p.mu)), W = Math.max(280, Math.round(this.host.clientWidth || 600));
+    const key = [run.id, W, n].join("|");
+    if (key !== this.key || P.length < this.drawn) { this.build(W, Math.max(1, n)); this.key = key; this.drawn = 0; }
+    for (const p of P.slice(this.drawn)) this.column(p);
+    this.drawn = P.length;
+    const lp = P[P.length - 1];
+    if (lp) lp.mu.forEach((v, d) => { this.vals[d].textContent = sigm(v).toFixed(2); });
+    const on = lp ? lp.mu.map((v, d) => (sigm(v) > 0.5 ? PARAM_LABELS[d] : null)).filter(Boolean).length : 0;
+    this.svg.setAttribute("aria-label", lp ? `Веса модели: ${plural(P.length, "итерация", "итерации", "итераций")}, сейчас выше половины ${on} из 20` : "Веса модели: пока нет итераций");
+  }
+  build(W, n) {
+    const narrow = W < 560, lw = narrow ? 118 : 168, vw = 34, rh = narrow ? 11 : 13, m = { t: 2, b: 18 };
+    const H = m.t + rh * PARAM_LABELS.length + m.b;
+    this.cw = (W - lw - vw) / n; this.lw = lw; this.rh = rh; this.m = m;
+    this.host.replaceChildren();
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%", height: H, class: "ch wm-ch" + (narrow ? " narrow" : ""), role: "img", "aria-roledescription": "тепловая карта" }, this.host);
+    this.svg = s; this.vals = [];
+    PARAM_LABELS.forEach((l, d) => {
+      svg("text", { x: lw - 8, y: m.t + rh * d + rh - 3, "text-anchor": "end", class: "tick wm-l" }, s).textContent = l;
+      const v = svg("text", { x: W - vw + 6, y: m.t + rh * d + rh - 3, class: "tick mono wm-v" }, s); v.textContent = ""; this.vals.push(v);
+    });
+    for (const t of xTicks(n)) svg("text", { x: lw + this.cw * (t - 0.5), y: H - 5, "text-anchor": "middle", class: "tick" }, s).textContent = t;
+    this.g = svg("g", {}, s);
+  }
+  column(p) {
+    const g = svg("g", { class: "wm-col" }, this.g), x = this.lw + this.cw * p.i, w = Math.max(0.6, this.cw - (this.cw > 4 ? 1 : 0));
+    p.mu.forEach((v, d) => svg("rect", { x: x.toFixed(2), y: this.m.t + this.rh * d + 0.5, width: w.toFixed(2), height: this.rh - 1, rx: this.cw > 6 ? 1.5 : 0, class: "wc", "fill-opacity": (0.06 + 0.94 * sigm(v)).toFixed(3) }, g));
+  }
+}
+const pop = new PopChart($("ch-pop")), wmap = new WeightMap($("lw"));
+
+function renderLive() {
+  const r = run, pts = r.points || [], L = r.live, c = r.config || {}, n = r.iterations || c.iterations || pts.length || 1;
+  const running = r.status === "running", has = pts.some((p) => Array.isArray(p.scores)) || !!L;
+  $("live-card").classList.toggle("hidden", !has && !running);  // older runs recorded none of this
+  if (!has && !running) return;
+  const last = pts[pts.length - 1];
+  const cpu = last && Number.isFinite(last.cpu_seconds) && last.seconds ? Math.min(100, Math.round(100 * last.cpu_seconds / last.seconds)) : null;
+  $("live-beat").classList.toggle("on", running);
+  $("live-proc").replaceChildren(...[running ? "модель считает" : r.status === "done" ? "обучение закончено" : "модель остановлена",
+    r.pid ? `процесс ${r.pid}` : null, cpu != null ? `загрузка CPU ${cpu}%` : null,
+    last && Number.isFinite(last.eps_per_sec) ? `${num(last.eps_per_sec, 0)} эпизодов/с` : null]
+    .filter(Boolean).flatMap((t, i) => (i ? [el("span", { class: "sep", "aria-hidden": "true" }, " · "), el("span", {}, t)] : [el("span", {}, t)])));
+  pop.update(pts, n);
+  wmap.update(pts, n);
+  if (!L) {
+    if (liveKey) { liveKey = ""; for (const id of ["la-tape", "la-finds", "la-out"]) $(id).replaceChildren(); }
+    $("la-sub").textContent = running ? "идёт первая итерация: кандидаты играют учебные эпизоды…" : "появится после первой итерации";
+    return;
+  }
+  const key = `${r.id}:${L.i}`;
+  if (key === liveKey) return;
+  const animate = liveKey.startsWith(r.id + ":") && !RM;  // replay the newest audit as it arrives, not on first open
+  liveKey = key;
+  if (L.error) { $("la-sub").textContent = "не удалось записать аудит этой итерации: " + L.error; for (const id of ["la-tape", "la-finds", "la-out"]) $(id).replaceChildren(); return; }
+  const nPl = L.issues ?? (L.tp ?? 0) + (L.fn ?? 0);  // the evaluator's count: a clean company has none
+  $("la-sub").textContent = `итерация ${L.i + 1} · кандидат №${(L.candidate ?? 0) + 1} из ${c.population ?? (last && last.scores ? last.scores.length : "—")} · ${nPl ? plural(nPl, "заложенная ошибка", "заложенные ошибки", "заложенных ошибок") : "чистая компания, ошибок нет"}`;
+  const maxPages = Math.max(1, ...TABLES.map(([t]) => (L.pages || {})[t] || 0));
+  let d = 0; const delay = () => (animate ? { style: `--d:${(d++) * 70}ms` } : {});
+  $("la-tape").replaceChildren(...TABLES.map(([t, name]) => {
+    const pg = (L.pages || {})[t] || 0, rows = (L.rows || {})[t] || 0;
+    return el("li", { class: "la-t" + (pg ? "" : " off") + (animate ? " in" : ""), ...delay() }, el("span", { class: "la-tn" }, name),
+      el("span", { class: "la-bar", "aria-hidden": "true" }, el("i", { style: `width:${(100 * pg / maxPages).toFixed(0)}%` })),
+      el("span", { class: "la-tv mono" }, ...(pg ? [el("span", {}, `страниц: ${pg}`), " · ", el("span", {}, `строк: ${rows}`)] : ["не читал"])));
+  }));
+  const fs = L.findings || [];
+  $("la-finds").replaceChildren(...(fs.length ? fs.map((f) => el("li", { class: "la-f " + (f.matched ? "ok" : "bad") + (animate ? " in" : ""), ...delay() },
+    el("span", { class: "la-m", "aria-hidden": "true" }, f.matched ? "✓" : "✗"),
+    el("span", { class: "la-ty" }, TYPES[f.type] || f.type || "—"),
+    el("span", { class: "la-id mono" }, (f.ids || []).join(", ")),
+    el("span", { class: "la-am mono" }, money(f.amount_minor, f.currency)),
+    el("span", { class: "sr-only" }, f.matched ? "оценщик засчитал" : "ложная находка")))
+    : [el("li", { class: "la-f none" + (nPl ? "" : " ok") + (animate ? " in" : ""), ...delay() }, nPl ? "Модель ничего не отправила: засчитаны только пропуски" : "Компания чистая, и модель верно не отправила ни одной находки")]));
+  const out = [el("b", {}, "Оценщик:"), el("span", { class: "pos" }, `${L.tp ?? 0} верно`), el("span", { class: L.fp ? "neg" : "" }, `${L.fp ?? 0} ложных`),
+    el("span", {}, `пропущено ${L.fn ?? 0} из ${nPl}`), el("span", {}, `${L.steps} шагов`), el("b", { class: "mono" }, `награда ${sgn(L.reward)}`)];
+  $("la-out").replaceChildren(...out.flatMap((x, i) => (i > 1 ? [el("span", { class: "sep", "aria-hidden": "true" }, " · "), x] : i ? [" ", x] : [x])));
+  $("la-out").classList.toggle("in", animate); if (animate) $("la-out").style.setProperty("--d", `${d * 70}ms`);
+}
+
 function loaded(ok) {  // the run's numbers are shown only once they are read: never a stale or half-empty frame
   for (const e of [$("dash-body"), $("d-status").parentNode, $("d-save")]) e.classList.toggle("hidden", !ok);
   if (!ok) for (const id of ["d-stop", "d-eval", "d-export", "grp-card"]) $(id).classList.add("hidden");
@@ -630,7 +762,7 @@ function route() {
 }
 addEventListener("hashchange", route);
 let rz = 0;
-addEventListener("resize", () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { if (run && !$("dash").classList.contains("hidden")) { for (const ch of Object.values(charts)) ch.fresh = false; renderDash(); } }); });
+addEventListener("resize", () => { cancelAnimationFrame(rz); rz = requestAnimationFrame(() => { if (run && !$("dash").classList.contains("hidden")) { for (const ch of Object.values(charts)) ch.fresh = false; pop.key = wmap.key = ""; renderDash(); } }); });
 addEventListener("scroll", hideTip, { passive: true });
 
 setStep(1);
