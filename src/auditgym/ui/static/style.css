@@ -1202,3 +1202,36 @@ main.arena{display:flex;flex-direction:column;gap:16px;padding-top:32px;padding-
 
 /* decorative ASCII never widens the page: symbols such as ✦ ◂ fall back to system fonts whose widths vary by machine */
 pre.ascii,pre.ascii-art,pre.ascii-beat,.ar-shield{max-width:100%;overflow:hidden}
+
+/* custom option lists (shell.js): the native <select> stays in the page as the value, hidden behind .ags-b / .ags-l,
+   so the open list follows the app's theme instead of the operating system's */
+.ags{position:relative;display:block;width:100%;min-width:0}
+.ags-native{position:absolute!important;inset:0;width:100%!important;height:100%!important;opacity:0;pointer-events:none;z-index:-1}
+.ags-b{display:flex;align-items:center;width:100%;min-width:0;font:inherit;font-size:14px;color:var(--txt);background-color:var(--deep);border:1px solid var(--line2);border-radius:var(--r);padding:8px 32px 8px 11px;min-height:40px;text-align:left;cursor:pointer;
+  transition:border-color var(--t-fast),box-shadow var(--t-fast);
+  background-image:linear-gradient(45deg,transparent 50%,var(--txt2) 50%),linear-gradient(135deg,var(--txt2) 50%,transparent 50%);background-position:calc(100% - 16px) 52%,calc(100% - 11px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.ags-b:hover{border-color:var(--rule)}
+.ags-b:focus-visible{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.ags-b:disabled{opacity:.55;cursor:not-allowed}
+.ags.open .ags-b{border-color:var(--gold);background-image:linear-gradient(135deg,transparent 50%,var(--txt2) 50%),linear-gradient(45deg,var(--txt2) 50%,transparent 50%)}
+.ags-v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ags-l{position:fixed;left:0;top:0;z-index:60;width:max-content;max-width:min(420px,calc(100vw - 16px));max-height:300px;overflow:auto;margin:0;padding:4px;list-style:none;
+  background:var(--s1);color:var(--txt);border:1px solid var(--line2);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:13.5px;outline:none}
+.ags-o{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 28px;border-radius:6px;cursor:pointer;white-space:nowrap;position:relative}
+.ags-o.on{background:var(--s3)}
+.ags-o[aria-selected="true"]{font-weight:600}
+.ags-o[aria-selected="true"]::before{content:"";position:absolute;left:10px;top:50%;width:9px;height:5px;margin-top:-4px;border-left:2px solid var(--txt);border-bottom:2px solid var(--txt);transform:rotate(-45deg)}
+.ags-o[aria-disabled="true"]{color:var(--txt3);cursor:default}
+.ags-g{padding:8px 10px 4px;font-size:11.5px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em}
+/* the page contexts that restyled their selects */
+.log-h .ags{width:auto}.log-h .ags-b{font-size:13px;background-color:var(--s2);padding:6px 30px 6px 8px;min-height:36px}
+.fgrid .ags-b{font-size:13.5px;background-color:var(--s2);padding:8px 32px 8px 10px}
+.pill .ags{width:auto}
+.pill .ags-b{border:0;background-color:transparent;min-height:34px;padding:4px 26px 4px 2px;font-weight:500;box-shadow:none;background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%}
+.pill .ags-b:focus-visible{box-shadow:none;outline:2px solid var(--gold);outline-offset:2px;border-radius:999px}
+.pill .ags.open .ags-b{border:0}
+@media (prefers-reduced-motion:no-preference){.ags-l{animation:ags-in var(--t-fast) var(--ease-std)}}
+@keyframes ags-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+/* a select that is never enhanced (no script) still shows a readable native list in the dark theme */
+:root[data-theme="dark"]{color-scheme:dark}
+option,optgroup{background-color:var(--s1);color:var(--txt)}
