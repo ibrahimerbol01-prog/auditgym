@@ -533,11 +533,12 @@ class Jobs:
                             break
                         self.current = rid
                         learner.train(config={**config, "seed": x}, run_id=rid, base=self.base, stop=self.stop_ev,
-                                      meta={"group": group, "group_seeds": seeds})
+                                      configs=self.configs, meta={"group": group, "group_seeds": seeds})
                 self.thread = threading.Thread(target=series, daemon=True)
             else:
                 self.thread = threading.Thread(target=learner.train, daemon=True,
-                                               kwargs=dict(config=config, run_id=run_id, base=self.base, stop=self.stop_ev))
+                                               kwargs=dict(config=config, run_id=run_id, base=self.base, stop=self.stop_ev,
+                                                           configs=self.configs))
             self.thread.start()
             path = os.path.join(self.base or runs_dir(), run_id, "run.json")
             for _ in range(200):
@@ -600,7 +601,7 @@ class Jobs:
         if path == "/api/llm/models":  # installed local Ollama models (short timeout; available false without Ollama)
             return 200, {"ok": True, **_llm.list_models(timeout=1.0)}
         if path == "/api/baselines":  # the Reconciler and the random policy on the same dev split the training charts use
-            key = configs_dir()
+            key = self.configs or configs_dir()
             with _BASE_LOCK:
                 if key not in _DEV_BASE:
                     from .learner import dev_baselines

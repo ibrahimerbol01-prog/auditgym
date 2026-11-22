@@ -5,6 +5,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src"))
 
@@ -187,3 +188,32 @@ class NoiseRewardControl(unittest.TestCase):
         self.assertGreaterEqual(real["test"]["auditor"]["reward"] - ctrl["test"]["auditor"]["reward"], 0.3)
         with self.assertRaises(ValueError):
             learner.train(cfg, base=tempfile.mkdtemp(), control="shuffle")
+
+
+class InstalledAppPaths(unittest.TestCase):
+    """The desktop app has no repository around it: training and the baselines must read the Jobs' own configs."""
+
+    def test_training_uses_the_configs_it_was_given(self):
+        cfg = tempfile.mkdtemp()
+        for split in ("train", "dev"):
+            shutil.copy(os.path.join(harness.ROOT, "configs", f"{split}.json"), cfg)
+        root, harness.ROOT = harness.ROOT, os.path.join(cfg, "no-repository-here")
+        base = tempfile.mkdtemp()
+        try:
+            with mock.patch.dict(os.environ, {"AUDITGYM_CONFIGS": ""}):
+                jobs = harness.Jobs(base=base, configs=cfg)
+                st, res = jobs.post("/api/train", {"iterations": 2, "population": 4, "episodes_per_candidate": 1})
+                self.assertEqual(st, 200, res)
+                for _ in range(1200):
+                    if not jobs.busy():
+                        break
+                    time.sleep(0.05)
+                run = harness.read_run(res["run"], base)
+                self.assertEqual(run["status"], "done", run.get("error"))
+                self.assertIn("auditor", run["test"])
+                self.assertEqual(jobs.get("/api/baselines", {})[0], 200)
+        finally:
+            harness.ROOT = root
+            harness._DEV_BASE.clear()
+            shutil.rmtree(base, ignore_errors=True)
+            shutil.rmtree(cfg, ignore_errors=True)

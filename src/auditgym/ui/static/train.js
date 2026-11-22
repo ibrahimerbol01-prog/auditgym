@@ -559,7 +559,9 @@ async function poll() {
     renderDash();
     const running = run.status === "running";
     if (wasRunning && !running && !run.status_note) notifyEnd();
-    if (wasRunning && !running) { loadRecent(); msg(run.status === "done" ? "Обучение завершено. Сохраните кривую, чтобы она появилась на странице «Запуски»." : run.status === "stopped" ? "Обучение остановлено; лучшая найденная политика сохранена." : "Обучение прервалось с ошибкой.", run.status === "error" ? "bad" : ""); }
+    const failed = `Обучение прервалось с ошибкой: ${run.error || "причина не записана"}`;  // the reason, so it can be reported
+    if (wasRunning && !running) { loadRecent(); msg(run.status === "done" ? "Обучение завершено. Сохраните кривую, чтобы она появилась на странице «Запуски»." : run.status === "stopped" ? "Обучение остановлено; лучшая найденная политика сохранена." : failed, run.status === "error" ? "bad" : ""); }
+    else if (run.status === "error" && !$("d-msg").textContent) msg(failed, "bad");  // an earlier failed run, opened later
     wasRunning = running || !!run.status_note;
     if (running || run.status_note) timer = setTimeout(poll, 700);
     else if (run.group && grpRunning) timer = setTimeout(poll, 1500);  // the other seeds of the group are still training
