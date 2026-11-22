@@ -43,6 +43,24 @@ class TestLearner(unittest.TestCase):
             self.assertIn(k, r["summary"])
         self.assertEqual([e["type"] for e in self.events], ["iteration"] * 3 + ["run_end"])
 
+    def test_switch_on_variants_turn_a_whole_check_on(self):
+        """On a plateau the trainer tries the champion with one check that cannot work turned fully on. A check works
+        only with all its settings on: the payment check without the payments table finds nothing (seeds 4 and 14)."""
+        on = list(learner.CAREFUL_THETA)
+        self.assertEqual(learner.switch_on_variants(on), [], "every check already works: nothing to try")
+        champ = list(on)
+        champ[learner._IDX["read_payments"]] = -3.0              # the check is on, but it never reads the payments
+        vs = learner.switch_on_variants(champ)
+        self.assertEqual(len(vs), 2)                              # the mode setting both ways
+        for v in vs:
+            for n in ("read_payments", "pages_payments", "check_payment"):
+                self.assertGreater(v[learner._IDX[n]], 0, n)
+            for n in learner.PARAM_NAMES:                         # nothing outside the payment group changes
+                if n not in ("read_payments", "pages_payments", "read_invoices", "read_ledger", "pages_ledger",
+                             "check_payment", "payment_strict"):
+                    self.assertEqual(v[learner._IDX[n]], champ[learner._IDX[n]], n)
+        self.assertEqual(sorted(v[learner._IDX["payment_strict"]] > 0 for v in vs), [False, True])
+
     def test_cem_keeps_the_mean_of_theta_bounded(self):
         """Unbounded, the CEM mean drifted to +-10: every candidate then behaved alike and the search was stuck (seed 5
         of the Standard size ended with duplicates only). The bound keeps every setting able to flip."""

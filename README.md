@@ -88,8 +88,9 @@ docker run --rm --network none auditgym            # = python -m auditgym.verify
 
 Небольшой аудитор (политика из 20 параметров, CEM на CPU, около 30 с) на seed 1/2/3 доходит на dev от −0.62 / −0.60 /
 +0.28 до **+0.961**, на 20 свежих тестовых эпизодах — **+0.961**, как ручной Сверщик, не лучше. На seed 1–12 каждый
-стандартный прогон заканчивает на тесте не ниже +0.70 (в среднем +0.92). Контрольное сравнение: тот же поиск с шумом
-вместо награды даёт на тесте +0.21 / −0.07 / +0.02 — прирост даёт именно награда. Подробности и честные
+стандартный прогон заканчивает на тесте не ниже +0.81 (в среднем +0.95, 11 из 12 — максимум +0.961). Контрольное
+сравнение: тот же поиск с шумом вместо награды даёт на тесте −0.13 / +0.48 / +0.02 — прирост даёт именно награда.
+Независимая проверка на 25 сидах — [docs/reports/training_25_seeds.md](docs/reports/training_25_seeds.md). Подробности и честные
 ограничения — в [DESIGN.md](DESIGN.md).
 
 ---
@@ -359,8 +360,8 @@ iteration, and a fixed **test** set of 20 fresh episodes (5 clean, 5 interacting
 
 | What | Result on the 20 test episodes |
 |---|---|
-| **Trained auditor** (a 20-parameter rule policy, CEM on CPU, about 20 s), seeds 1–3 | dev from −0.62 / −0.60 / +0.28 to **+0.961**; test **+0.961**, F1 1.00 — equal to the Reconciler, not better. Over seeds 1–12: every Standard run ends at +0.70 or more on test (mean +0.92), every Deep run at +0.961 |
-| **Control: the same training with noise instead of the reward** (brief §01), seeds 1–3 | test +0.21 / −0.07 / +0.02 against +0.961 with the reward: the gain comes from the reward, not from the search or the policy space |
+| **Trained auditor** (a 20-parameter rule policy, CEM on CPU, about 20 s), seeds 1–3 | dev from −0.62 / −0.60 / +0.28 to **+0.961**; test **+0.961**, F1 1.00 — equal to the Reconciler, not better. Over seeds 1–12: every Standard run ends at +0.81 or more on test (mean +0.95; 11 of 12 at +0.961). A teammate's 25-seed check: [docs/reports/training_25_seeds.md](docs/reports/training_25_seeds.md) |
+| **Control: the same training with noise instead of the reward** (brief §01), seeds 1–3 | test −0.13 / +0.48 / +0.02 against +0.961 with the reward: the gain comes from the reward, not from the search or the policy space |
 | **Red team** (§5) | 0 of 9 attacks beat silence; the RL attacker converges to silence |
 | **Local LLM, pure** (Qwen2.5 1.5B / 0.5B on CPU; the model picks every action) | −0.60 / −0.50: no error found before the 60 s limit |
 | **Local LLM + tools** (code reads and proposes, the strict rules re-check, the model decides) | −0.09 / −0.33 (1.5B: 22 of 79 errors, precision 0.88). Without the re-check the model alone scores −0.82: the gain comes mostly from the tools |
