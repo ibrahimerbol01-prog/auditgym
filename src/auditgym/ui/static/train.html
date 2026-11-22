@@ -116,6 +116,7 @@
             <div class="go-see">
               <h3>Что будет на экране</h3>
               <ul>
+                <li><b>Модель в работе</b> — реальный аудит лучшего кандидата на каждой итерации, все кандидаты популяции и веса модели</li>
                 <li><b>Награда на dev</b> — главный график, рядом линии Сверщика и Стажёра</li>
                 <li><b>Обучение</b> — награда популяции, F1, точность и полнота, ложные находки, шаги, разброс σ</li>
                 <li><b>Выученная политика</b> — какие таблицы читает аудитор и какие проверки включил</li>
@@ -176,6 +177,32 @@
       <div class="kpi"><span class="k">Эпизодов в секунду</span><span class="v" id="k-rate">—</span><span class="d">последняя итерация</span></div>
       <div class="kpi"><span class="k">Время</span><span class="v" id="k-time">—</span><span class="d" id="k-time-d"></span></div>
       <div class="kpi-prog"><div class="segs" id="d-segs" aria-hidden="true"></div><span class="d" id="k-prog"></span></div>
+    </section>
+
+    <section class="card live-card" id="live-card" aria-labelledby="live-h">
+      <div class="chart-h"><div><h3 id="live-h">Модель в работе</h3><p id="live-sub">каждую итерацию: что сделал лучший кандидат, все кандидаты популяции и веса модели</p></div>
+        <p class="live-beat" id="live-beat" role="status"><i aria-hidden="true"></i><span id="live-proc">—</span></p></div>
+      <div class="live-grid">
+        <section class="live-audit" aria-labelledby="la-h">
+          <h4 id="la-h">Аудит, который модель только что провела</h4>
+          <p class="muted small" id="la-sub">появится после первой итерации</p>
+          <ul class="la-tape" id="la-tape" aria-label="Прочитанные таблицы"></ul>
+          <ol class="la-finds" id="la-finds" aria-label="Находки и решение оценщика"></ol>
+          <p class="la-out" id="la-out"></p>
+        </section>
+        <section class="live-pop" aria-labelledby="lp-h">
+          <div class="lp-head"><h4 id="lp-h">Популяция: все кандидаты</h4>
+            <ul class="lgd" aria-label="Легенда"><li><i class="dot el"></i>оставлены (элита)</li><li><i class="dot"></i>отброшены</li></ul></div>
+          <div class="chart" id="ch-pop"></div>
+          <p class="muted small" id="lp-sub">каждая точка — отдельная версия модели, сыгранная на учебных эпизодах; следующая итерация строится из элиты</p>
+        </section>
+      </div>
+      <section class="live-w" aria-labelledby="lw-h">
+        <div class="lp-head"><h4 id="lw-h">Веса модели по итерациям</h4>
+          <ul class="lgd" aria-label="Легенда"><li><i class="sw w-off"></i>выкл / мало</li><li><i class="sw w-on"></i>вкл / много</li></ul></div>
+        <div class="lw-body" id="lw"></div>
+        <p class="muted small">20 чисел θ — вся модель. Строка — параметр, столбец — итерация; цвет — σ(θ), как модель их читает</p>
+      </section>
     </section>
 
     <section class="card test-card" id="test-card" aria-labelledby="test-h">

@@ -33,8 +33,20 @@ no paid API, no network), and an improvement may only be shown as a **controlled
                  "episodes": 64, "seconds": 1.3, "eps_per_sec": 49.0,
                  "dev": {"reward": -0.7, "f1": 0.1, "precision": 0.2, "recall": 0.1, "fp": 3.1, "steps": 22.0} | null}],
      "best": {"theta": [...], "describe": [...], "dev": {...} | null, "i": 6},
-     "summary": {"dev_start": -0.9, "dev_best": 0.6, "dev_last": 0.6, "episodes": 448, "seconds": 9.1}}
+     "summary": {"dev_start": -0.9, "dev_best": 0.6, "dev_last": 0.6, "episodes": 448, "seconds": 9.1},
+     "pid": 1234,
+     "live": {"i": 6, "candidate": 3, "episode_id": "ep_...", "seed": "123...", "steps": 18, "reward": 0.97,
+              "pages": {"fx": 4, "invoices": 2, "payments": 2, "ledger": 9}, "rows": {...}, "issues": 7, "clean": false,
+              "tp": 7, "fp": 0, "fn": 0, "precision": 1.0, "recall": 1.0, "f1": 1.0,
+              "findings": [{"type": "date_or_fx", "ids": ["IN-..."], "amount_minor": 2596944, "currency": "KZT",
+                            "evidence": 3, "matched": true}]}}
     ```
+    Each point also carries the search itself (shown in the "Model at work" panel of the training page):
+    `scores` (every candidate's mean training reward), `elite` (the indices the update used), `mu` (the mean of
+    theta after the update) and `cpu_seconds` (process CPU time of the iteration). `live` is the best candidate of
+    the latest iteration replayed on that iteration's first training episode (open mode, scored by the evaluator;
+    one extra episode, not counted in `episodes`); `issues` is the evaluator's count (`tp + fn`), 0 for a clean
+    company. Older runs have none of these fields.
   - `on_event(e)`: `{"type": "iteration", "point": {...}}`, `{"type": "run_end", "run": {...}}`.
   - Deterministic for a given config (same seed → same curve).
 - `train/learn_rules.py --seed 1 [--iterations N] [--method cem]`: CLI wrapper; prints progress, writes

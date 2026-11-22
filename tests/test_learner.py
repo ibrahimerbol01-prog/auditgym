@@ -12,7 +12,7 @@ from auditgym.gen.build import generate
 from auditgym.policies.rules import find_issues
 
 TINY = {"iterations": 3, "population": 4, "episodes_per_candidate": 1, "eval_every": 1, "seed": 3}
-STRIP = ("seconds", "eps_per_sec")
+STRIP = ("seconds", "eps_per_sec", "cpu_seconds")
 
 
 def _points(run):
@@ -42,6 +42,53 @@ class TestLearner(unittest.TestCase):
         for k in ("dev_start", "dev_best", "dev_last", "episodes", "seconds"):
             self.assertIn(k, r["summary"])
         self.assertEqual([e["type"] for e in self.events], ["iteration"] * 3 + ["run_end"])
+
+    def test_live_view_is_the_real_search(self):
+        """The "model at work" panel shows the search itself: every candidate's score, the elite the update used,
+        the mean of theta after the update, and a replay of the best candidate scored by the evaluator."""
+        r, cfg = self.trained, learner.normalize_config(TINY)
+        for p in r["points"]:
+            self.assertEqual(len(p["scores"]), cfg["population"])
+            self.assertEqual(len(p["mu"]), learner.N_PARAMS)
+            self.assertEqual(len(p["elite"]), max(1, round(cfg["population"] * cfg["elite_frac"])))
+            self.assertAlmostEqual(max(p["scores"]), p["train_best"], places=3)
+            self.assertAlmostEqual(sum(p["scores"]) / len(p["scores"]), p["train_mean"], places=3)
+            self.assertGreaterEqual(p["cpu_seconds"], 0)
+        L = r["live"]
+        self.assertEqual(L["i"], len(r["points"]) - 1)
+        self.assertNotIn("error", L)
+        self.assertIsInstance(L["seed"], str)          # 64-bit seeds do not survive JSON numbers in a browser
+        for k in ("candidate", "episode_id", "steps", "reward", "pages", "rows", "issues", "clean", "tp", "fp", "fn", "findings"):
+            self.assertIn(k, L)
+        self.assertEqual(set(L["pages"]), set(learner.TABLE_ORDER))
+        self.assertEqual(sum(1 for f in L["findings"] if f["matched"]), L["tp"])
+        self.assertEqual(sum(1 for f in L["findings"] if not f["matched"]), L["fp"])
+        self.assertEqual(L["tp"] + L["fn"], L["issues"])
+        self.assertEqual(r["pid"], os.getpid())
+
+    def test_live_audit_replays_the_scored_episode(self):
+        """The replay is the same episode the trainer scored: the careful theta gets the reward run_episode gives it."""
+        from auditgym.env.env import AuditEnv
+        from auditgym.policies.baselines import run_episode
+        spec = learner.episode_specs(5, 0, 1, "mixed", learner.forbidden_seeds())[0]
+        env = AuditEnv(mode="open", service=learner._Service(), run_id="t-live")
+        want = run_episode(env, learner.AuditorPolicy(learner.CAREFUL_THETA), seed=spec[0], config=spec[1])["return"]
+        got = learner.live_audit(env, learner.CAREFUL_THETA, spec, 0)
+        env.close()
+        self.assertAlmostEqual(got["reward"], round(want, 4), places=4)
+        self.assertEqual(got["fp"], 0)
+        self.assertTrue(all(f["matched"] for f in got["findings"]))
+
+    def test_live_audit_of_a_clean_company(self):
+        """A clean company ignores the error counts of its config: the live view must say 0 issues, as the evaluator does."""
+        from auditgym.env.env import AuditEnv
+        specs = [sp for i in range(40) for sp in learner.episode_specs(9, i, 4, "mixed", learner.forbidden_seeds())]
+        spec = next(sp for sp in specs if sp[1].get("clean"))
+        env = AuditEnv(mode="open", service=learner._Service(), run_id="t-live-clean")
+        got = learner.live_audit(env, learner.CAREFUL_THETA, spec, 0)
+        env.close()
+        self.assertEqual((got["issues"], got["clean"], got["tp"], got["fn"], got["findings"]), (0, True, 0, 0, []))
+        self.assertGreater(got["reward"], 0.9)
 
     def test_dev_points_and_closed_mode(self):
         pts = self.trained["points"]

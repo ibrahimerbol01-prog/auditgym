@@ -273,6 +273,42 @@ def describe(theta: Sequence[float]) -> List[Dict[str, Any]]:
     return out
 
 
+def live_audit(env, theta: Sequence[float], spec: Tuple[int, Dict[str, Any]], candidate: Optional[int] = None) -> Dict[str, Any]:
+    """Replay one training episode with ``theta`` and keep what the auditor actually did, for the live view.
+
+    Plays the first episode of the iteration again (same seed and config, open mode), so the trace is exactly what the
+    trainer scored: the pages it read per table, every finding it submitted and whether the evaluator matched it, and
+    how many planted issues it missed. Rows themselves are not kept; the trace stays a few kilobytes."""
+    seed, cfg = spec
+    traj: List[dict] = []
+    r = run_episode(env, AuditorPolicy(theta), seed=seed, config=cfg, trajectory=traj)
+    pages = {t: 0 for t in TABLE_ORDER}
+    rows = {t: 0 for t in TABLE_ORDER}
+    sub: List[dict] = []
+    for t in traj:
+        a, obs = t["action"], t["observation"]
+        if a.get("tool") == "list_records":
+            tb = a["args"]["table"]
+            pages[tb] += 1
+            if obs.get("ok"):
+                rows[tb] += len(obs["result"].get("rows") or [])
+        elif a.get("tool") == "submit":
+            sub = list(a["args"]["findings"]["findings"])
+    rep = ((r["final_observation"] or {}).get("result") or {}).get("report") or {}
+    matched = {p["index"]: bool(p["matched"]) for p in rep.get("per_finding", [])}
+    # how many issues the company really has comes from the evaluator (matched + missed), not from the config: a
+    # clean company ignores its error counts
+    issues = (rep.get("tp") or 0) + (rep.get("fn") or 0)
+    return {"candidate": candidate, "episode_id": r["episode_id"], "seed": str(seed), "steps": r["steps"],
+            "reward": round(r["return"], 4), "pages": pages, "rows": rows, "issues": issues,
+            "clean": issues == 0, "interactions": list(cfg.get("interactions") or []),
+            **{k: rep.get(k) for k in ("tp", "fp", "fn", "precision", "recall", "f1")},
+            "findings": [{"type": f.get("type"), "ids": list(f.get("affected_ids") or [])[:4],
+                          "amount_minor": f.get("claimed_amount_minor"), "currency": f.get("currency"),
+                          "evidence": len(f.get("evidence_ids") or []), "matched": matched.get(i)}
+                         for i, f in enumerate(sub[:MAX_CAP])]}
+
+
 # ------------------------------------------------------------------------------------------ evaluator plumbing
 class _CachingCore(EvaluatorCore):
     """Evaluator core that generates each (seed, config) once: every candidate of an iteration plays the same
@@ -547,7 +583,7 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
                            "iterations": n_iter, "at": 0, "points": [],
                            "best": {"theta": None, "describe": None, "dev": None, "i": None},
                            "summary": {"dev_start": None, "dev_best": None, "dev_last": None, "episodes": 0, "seconds": 0.0},
-                           "seed": seed, **({"control": "noise_reward"} if control else {}), **(meta or {})}
+                           "seed": seed, "pid": os.getpid(), **({"control": "noise_reward"} if control else {}), **(meta or {})}
     harness._write_json(path, run)
 
     rng = Rng("auditgym-learner-search", seed, method)
@@ -561,7 +597,7 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
             if stop is not None and stop.is_set():
                 run["status"] = "stopped"
                 break
-            t0 = time.perf_counter()
+            t0, c0 = time.perf_counter(), time.process_time()
             specs = episode_specs(seed, i, n_eps, preset, forbidden)
             svc = _Service()
             env = AuditEnv(mode="open", service=svc, run_id="learner-train")
@@ -575,14 +611,19 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
                     break
                 rs = [run_episode(env, AuditorPolicy(th), seed=s, config=c)["return"] for s, c in specs]
                 scores.append(_mean(rs))
-            env.close()
             if control == "noise" and not aborted:   # the control: the search never sees the reward
                 scores = [Rng("auditgym-learner-control", seed, i, k).random() * 2 - 1 for k in range(pop)]
             if aborted:
+                env.close()
                 run["status"] = "stopped"
                 break
             order = sorted(range(pop), key=lambda k: (-scores[k], k))
             elite = order[:n_elite]
+            try:  # what the best candidate of this iteration actually did, replayed on its first episode
+                live = live_audit(env, cands[order[0]], specs[0], order[0])
+            except Exception as exc:  # noqa: BLE001 - the live view must never stop a training
+                live = {"error": str(exc)[:200]}
+            env.close()
             if method == "cem":
                 extra = EXTRA0 * max(0.0, 1.0 - i / max(1.0, EXTRA_FRAC * n_iter))
                 for d in range(N_PARAMS):
@@ -615,9 +656,14 @@ def train(config: Optional[Dict[str, Any]] = None, run_id: Optional[str] = None,
             point = {"i": i, "train_mean": round(_mean(scores), 4), "train_best": round(scores[order[0]], 4),
                      "train_elite": round(_mean([scores[k] for k in elite]), 4), "sigma": round(_mean(sig), 4),
                      "episodes": n_played, "seconds": round(seconds, 3),
-                     "eps_per_sec": round(n_played / train_sec, 1) if train_sec > 0 else None, "dev": dev}
+                     "eps_per_sec": round(n_played / train_sec, 1) if train_sec > 0 else None,
+                     "cpu_seconds": round(time.process_time() - c0, 3), "dev": dev,
+                     # the search itself: every candidate's training reward, the ones kept, and the mean of theta
+                     "scores": [round(x, 4) for x in scores], "elite": sorted(elite),
+                     "mu": [round(x, 3) for x in mu]}
             run["points"].append(point)
             run["at"] = i + 1
+            run["live"] = {"i": i, **live}
             devs = [p["dev"]["reward"] for p in run["points"] if p["dev"]]
             run["summary"] = {"dev_start": devs[0] if devs else None, "dev_best": max(devs) if devs else None,
                               "dev_last": devs[-1] if devs else None, "episodes": total_eps, "seconds": round(total_sec, 2)}
