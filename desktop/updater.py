@@ -71,7 +71,7 @@ def latest_release() -> dict | None:
     d = _get_json(f"https://api.github.com/repos/{PUBLIC}/releases/latest")
     tag = d.get("tag_name") or ""
     return {"version": tag, "url": d.get("html_url"), "notes": (d.get("body") or "")[:2000],
-            "published": d.get("published_at") or ""} if version_key(tag) else None
+            "published": d.get("published_at") or "", "commit": d.get("target_commitish") or ""} if version_key(tag) else None
 
 
 def latest_branch_build(branch: str) -> dict | None:
@@ -114,7 +114,8 @@ def check(stamp: str, force: bool = False) -> dict:
                 # No GitHub CLI (or no newer CI build): a test build moves to the public releases as soon as one is
                 # newer than itself, so nobody is stuck on a pre-release build; never offers an older release.
                 rel, when = latest_release(), built_at(stamp)
-                if rel and when and rel["published"][:16] > when[:16]:
+                same = bool(sha) and str(rel.get("commit", "") if rel else "").startswith(sha)  # this very build
+                if rel and when and rel["published"][:16] > when[:16] and not same:
                     res.update(channel="release", latest=rel, available=True)
                 else:
                     res["error"] = ("test build: it updates to the next release once one is published "
