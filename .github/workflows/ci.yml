@@ -85,6 +85,8 @@ jobs:
         run: docker run --rm --network none --cpus=2 --memory=4g auditgym
       - name: Demo
         run: docker run --rm --network none auditgym demo
+      - name: Organizers' checks through judge_adapter.py inside the container
+        run: docker run --rm --network none -w /app --entrypoint python auditgym -m unittest tests.test_judge_adapter -v
   gymnasium-adapter:
     name: Gymnasium adapter (check_env)
     runs-on: ubuntu-latest
