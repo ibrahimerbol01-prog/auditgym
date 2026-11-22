@@ -257,3 +257,26 @@ class HowItWorksTour(unittest.TestCase):
             self.assertIn(json.dumps(s, ensure_ascii=False) + ":", i18n, s)
         self.assertIn("Как это работает · {0} из {1}", i18n)
         self.assertIn("navigator.webdriver", block, "never opens by itself under automation")
+
+
+class CustomSelectTests(unittest.TestCase):
+    """Every <select> gets the themed option list from shell.js (the native list is drawn in the OS theme and was
+    unreadable with the app's dark theme), and the native select stays in the page as the value pages read."""
+
+    def test_every_page_with_a_select_loads_the_option_list(self):
+        for name in sorted(os.listdir(STATIC_DIR)):
+            if not name.endswith(".html"):
+                continue
+            html = open(os.path.join(STATIC_DIR, name), encoding="utf-8").read()
+            if "<select" in html:
+                self.assertIn('src="/shell.js"', html, name)
+
+    def test_option_list_contract(self):
+        js = open(os.path.join(STATIC_DIR, "shell.js"), encoding="utf-8").read()
+        css = open(os.path.join(STATIC_DIR, "style.css"), encoding="utf-8").read()
+        for needle in ('setAttribute("role", "listbox")', 'setAttribute("role", "option")', '"aria-activedescendant"',
+                       '"aria-expanded"', 'new Event("change", { bubbles: true })', 'Object.defineProperty(sel, "value"',
+                       '"Escape"', "window.agSelect"):
+            self.assertIn(needle, js)
+        for needle in (".ags-native{", ".ags-b{", ".ags-l{", ".pill .ags-b{", ":root[data-theme=\"dark\"]{color-scheme:dark}"):
+            self.assertIn(needle, css)
